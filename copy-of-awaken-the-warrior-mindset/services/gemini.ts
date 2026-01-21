@@ -1,0 +1,112 @@
+
+import { GoogleGenAI, Type } from "@google/genai";
+import { COACH_SYSTEM_PROMPT } from "../constants";
+import { MealAnalysis } from "../types";
+
+export const getCoachMarcusResponse = async (message: string) => {
+  try {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-pro-preview',
+      contents: message,
+      config: {
+        systemInstruction: COACH_SYSTEM_PROMPT,
+      },
+    });
+    return response.text;
+  } catch (error) {
+    console.error("Coach Marcus error:", error);
+    return "I hit a tactical roadblock, warrior. Ensure your API Key is valid and try again.";
+  }
+};
+
+export const getLegacyCoachResponse = async (
+  userMessage: string, 
+  principle: string, 
+  vision: string, 
+  history: {role: string, text: string}[]
+) => {
+  try {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    
+    const contextPrompt = `
+    CONTEXT:
+    The user is in the "Legacy Path" module and has activated the Warrior Principle: "${principle}".
+    Their defined Long-Term Vision is: "${vision || "Undefined"}".
+    
+    YOUR MISSION (Coach Marcus):
+    Conduct a "Legacy Alignment Audit" to ensure this principle actually serves their vision.
+    
+    STRICT BEHAVIORAL PROTOCOLS:
+    1. **NEVER DISAGREE**: Do not argue or tell the user they are wrong. Allow them to express their belief.
+    2. **SOCRATIC METHOD**: Ask *one* open-ended question that prompts the user to evaluate *why* this principle is necessary for their specific vision.
+    3. **CLARITY CHECK**: 
+       - If the user's answer is vague, ask them to go deeper (gently).
+       - If the user's answer demonstrates clarity and alignment, DO NOT ask another question. Instead, validate them and leave them with a profound, philosophical thought or "Warrior Koan" related to that principle for them to process in their own time.
+    4. **TONE**: Stoic, supportive, deep, and brief. You are a mentor, not a debater.
+    
+    HISTORY:
+    ${history.map(h => `${h.role}: ${h.text}`).join('\n')}
+    
+    CURRENT USER INPUT:
+    ${userMessage}
+    `;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-pro-preview',
+      contents: contextPrompt,
+      config: {
+        systemInstruction: COACH_SYSTEM_PROMPT, 
+      },
+    });
+    return response.text;
+  } catch (error) {
+    console.error("Legacy Coach error:", error);
+    return "The connection is weak. Re-engage.";
+  }
+};
+
+export const analyzeMealImage = async (base64Data: string): Promise<Partial<MealAnalysis> | null> => {
+  try {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const imagePart = {
+      inlineData: {
+        mimeType: 'image/jpeg',
+        data: base64Data,
+      },
+    };
+    
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: [
+        { 
+          parts: [
+            imagePart, 
+            { text: "Analyze this meal photo. Provide estimated calories, protein (g), carbs (g), and fats (g). Respond in JSON format only." }
+          ] 
+        }
+      ],
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            calories: { type: Type.NUMBER },
+            protein: { type: Type.NUMBER },
+            carbs: { type: Type.NUMBER },
+            fats: { type: Type.NUMBER },
+            description: { type: Type.STRING }
+          },
+          required: ["calories", "protein", "carbs", "fats", "description"]
+        }
+      }
+    });
+
+    const text = response.text;
+    if (!text) return null;
+    return JSON.parse(text);
+  } catch (error) {
+    console.error("Meal Analysis error:", error);
+    return null;
+  }
+};

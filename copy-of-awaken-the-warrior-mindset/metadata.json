@@ -1,0 +1,8 @@
+{
+  "name": "Copy of Awaken the Warrior Mindset",
+  "description": "A high-fidelity transformation app based on the book by Dato' Marcus R Mehta. Features interactive tools for vision, habits, growth, and a dedicated AI accountability partner, Coach Marcus.",
+  "requestFramePermissions": [
+    "microphone",
+    "camera"
+  ]
+}

@@ -1,0 +1,142 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Awaken the Warrior Mindset</title>
+    
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+
+    <style>
+      :root {
+        /* VISUAL CONTROLLER - TACTICAL GREY OVERHAUL */
+        --global-bg: #0A3762;       /* Dark Azure */
+        --nav-bg: #001b3d;          /* Deep Ocean */
+        --card-bg: #595b61;         /* Medium Grey (The Lighten Fix - Strict) */
+        
+        --input-bg: #eef1f1;        /* Light Grey Input */
+        --input-text: #595b61;      /* Dark Grey Text inside Input */
+        
+        --text-primary: #ffffff;    /* White text on Medium Grey Cards */
+        --heading: #f78121;         /* Orange */
+        --sub-heading: #45d0d0;     /* Cyan */
+        --placeholder: #595b61;     /* Dark Grey Placeholder */
+      }
+
+      body {
+        background-color: var(--global-bg) !important;
+        color: var(--text-primary);
+        font-family: 'Inter', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      /* Typography Sharpness - No Shadows */
+      h1, h2, h3, h4, h5, h6 {
+        text-shadow: none !important;
+        color: var(--heading);
+        letter-spacing: 0.05em !important; /* Tracking Wide enforced */
+      }
+
+      .text-cyan { color: var(--sub-heading) !important; }
+      .text-orange { color: var(--heading) !important; }
+
+      /* Global Font Classes */
+      .font-brand-header { font-family: 'Anton', sans-serif; letter-spacing: 0.05em; }
+      .font-brand-body { font-family: 'Inter', sans-serif; }
+      .font-brand-quote { font-family: 'Playfair Display', serif; }
+
+      /* Scrollbar Styling */
+      ::-webkit-scrollbar { width: 6px; }
+      ::-webkit-scrollbar-track { background: var(--nav-bg); }
+      ::-webkit-scrollbar-thumb { background: var(--heading); border-radius: 3px; }
+      
+      /* Range Slider Inputs */
+      input[type=range] { -webkit-appearance: none; background: transparent; }
+      input[type=range]::-webkit-slider-thumb { 
+        -webkit-appearance: none; height: 16px; width: 16px; 
+        border-radius: 50%; background: var(--heading); margin-top: -6px; cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      }
+      input[type=range]::-webkit-slider-runnable-track { 
+        width: 100%; height: 4px; background: #334155; border-radius: 2px;
+      }
+
+      /* Utility classes */
+      .no-scrollbar::-webkit-scrollbar {
+          display: none;
+      }
+      .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+      }
+      
+      /* CARD STYLE - STRICT MEDIUM GREY - LIGHTLY THICK ORANGE BORDER (2px), NO GLOW */
+      .glass-card {
+        background-color: var(--card-bg) !important;
+        border: 2px solid rgba(247, 129, 33, 0.5) !important;
+        border-radius: 1rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); /* Keep standard depth shadow only */
+        color: var(--text-primary); 
+      }
+      
+      /* CRITICAL: LIGHT INPUTS ON MEDIUM GREY CARDS */
+      .glass-card input:not([type="range"]), 
+      .glass-card textarea, 
+      .glass-card select,
+      .warrior-input {
+        background-color: var(--input-bg) !important;
+        color: var(--input-text) !important;
+        border: 1px solid #cbd5e1;
+        font-weight: 600;
+      }
+      
+      .glass-card input::placeholder, 
+      .glass-card textarea::placeholder {
+        color: var(--placeholder);
+        font-weight: 600; /* Bolder placeholder for readability */
+        opacity: 0.7;
+      }
+      
+      /* Ensure text contrast */
+      .glass-card p, .glass-card li, .glass-card span:not(.text-cyan):not(.text-orange) {
+        color: #f1f5f9; /* White/Off-white for readability on Medium Grey */
+      }
+      
+      /* Specific override for header/label text */
+      .glass-card label {
+        color: var(--sub-heading); /* Cyan labels */
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 0.75rem;
+      }
+
+    </style>
+
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@^19.2.3",
+        "react-dom": "https://esm.sh/react-dom@^19.2.3",
+        "@google/genai": "https://esm.sh/@google/genai@^1.37.0",
+        "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+        "recharts": "https://esm.sh/recharts@^3.6.0",
+        "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+        "react/": "https://esm.sh/react@^19.2.3/"
+      }
+    }
+    </script>
+  <link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
