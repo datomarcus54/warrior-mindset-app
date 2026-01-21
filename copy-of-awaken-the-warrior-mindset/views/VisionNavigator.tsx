@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState, useEffect } from 'react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts';
 import { UserData } from '../types';
@@ -77,8 +76,12 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
   const displayData = useMemo(() => {
     return data.lifeWheel.map(item => {
         let displayName = item.name;
+        
+        // RENAME: Change "Environment" to "Home" globally for display
+        if (item.name === 'Environment') displayName = 'Home'; 
+
+        // Mobile specific shorteners
         if (isMobile) {
-            if (item.name === 'Environment') displayName = 'Env';
             if (item.name === 'Health') displayName = 'Body';
             if (item.name === 'Spirit') displayName = 'Soul';
             if (item.name === 'Career') displayName = 'Work';
@@ -147,7 +150,8 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
         <div className="w-full h-[350px] min-h-[350px] relative">
           {isMounted ? (
             <ResponsiveContainer width="100%" height="100%">
-              <RadarChart cx="50%" cy="50%" outerRadius="75%" data={displayData}>
+              {/* FIX: Reduced outerRadius on mobile from 75% to 60% to prevent label clipping */}
+              <RadarChart cx="50%" cy="50%" outerRadius={isMobile ? "60%" : "75%"} data={displayData}>
                 <PolarGrid stroke="#e5e7eb" strokeWidth={2} strokeOpacity={0.4} />
                 <PolarAngleAxis 
                   dataKey="displayName" 
@@ -171,11 +175,11 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 mt-8 md:mt-12">
-          {data.lifeWheel.map((domain, idx) => (
+          {displayData.map((domain, idx) => (
             <div key={domain.name} className="bg-white/10 border border-white/20 rounded-xl flex flex-col space-y-3 p-4 md:p-6 shadow-sm">
-              <div className="flex justify-between items-center">
-                <span className="text-[10px] md:text-xs text-white uppercase font-black tracking-widest">{domain.name}</span>
-                <span className={`text-sm md:text-base font-black ${domain.value <= 3 ? 'text-red-400' : 'text-[#f78121]'}`}>
+              <div className="flex justify-between items-center w-full whitespace-nowrap">
+                <span className="text-[10px] md:text-xs text-white uppercase font-black tracking-widest truncate mr-2">{domain.displayName}</span>
+                <span className={`text-sm md:text-base font-black shrink-0 ${domain.value <= 3 ? 'text-red-400' : 'text-[#f78121]'}`}>
                   {domain.value}/10
                 </span>
               </div>
