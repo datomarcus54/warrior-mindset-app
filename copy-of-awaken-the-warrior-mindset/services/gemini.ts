@@ -1,13 +1,25 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
 import { COACH_SYSTEM_PROMPT } from "../constants";
 import { MealAnalysis } from "../types";
 
+// HELPERS: Get the key safely from the browser environment
+const getApiKey = () => {
+  // 1. Try the Vite standard (Netlify/Local)
+  const key = import.meta.env.VITE_GOOGLE_API_KEY;
+  
+  // 2. Fallback check
+  if (!key) {
+    console.error("API KEY MISSING: Check Netlify Environment Variables for 'VITE_GOOGLE_API_KEY'");
+    throw new Error("API Key not found");
+  }
+  return key;
+};
+
 export const getCoachMarcusResponse = async (message: string) => {
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: getApiKey() });
     const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
+      model: 'gemini-2.0-flash-exp', // Updated to the latest stable model
       contents: message,
       config: {
         systemInstruction: COACH_SYSTEM_PROMPT,
@@ -16,7 +28,7 @@ export const getCoachMarcusResponse = async (message: string) => {
     return response.text;
   } catch (error) {
     console.error("Coach Marcus error:", error);
-    return "I hit a tactical roadblock, warrior. Ensure your API Key is valid and try again.";
+    return "I hit a tactical roadblock, warrior. Ensure your API Key is set correctly in Netlify and try again.";
   }
 };
 
@@ -27,7 +39,7 @@ export const getLegacyCoachResponse = async (
   history: {role: string, text: string}[]
 ) => {
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: getApiKey() });
     
     const contextPrompt = `
     CONTEXT:
@@ -53,7 +65,7 @@ export const getLegacyCoachResponse = async (
     `;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
+      model: 'gemini-2.0-flash-exp',
       contents: contextPrompt,
       config: {
         systemInstruction: COACH_SYSTEM_PROMPT, 
@@ -68,7 +80,7 @@ export const getLegacyCoachResponse = async (
 
 export const analyzeMealImage = async (base64Data: string): Promise<Partial<MealAnalysis> | null> => {
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: getApiKey() });
     const imagePart = {
       inlineData: {
         mimeType: 'image/jpeg',
@@ -77,7 +89,7 @@ export const analyzeMealImage = async (base64Data: string): Promise<Partial<Meal
     };
     
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.0-flash-exp',
       contents: [
         { 
           parts: [
