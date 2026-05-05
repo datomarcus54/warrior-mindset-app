@@ -19,7 +19,7 @@ export const getCoachMarcusResponse = async (message: string) => {
   try {
     const ai = new GoogleGenAI({ apiKey: getApiKey() });
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash', // Updated to the latest stable model
+      model: 'gemini-2.5-flash', // Updated to the latest stable model
       contents: message,
       config: {
         systemInstruction: COACH_SYSTEM_PROMPT,
@@ -65,7 +65,7 @@ export const getLegacyCoachResponse = async (
     `;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-2.5-flash',
       contents: contextPrompt,
       config: {
         systemInstruction: COACH_SYSTEM_PROMPT, 
@@ -89,7 +89,7 @@ export const analyzeMealImage = async (base64Data: string): Promise<Partial<Meal
     };
     
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-2.5-flash',
       contents: [
         { 
           parts: [
