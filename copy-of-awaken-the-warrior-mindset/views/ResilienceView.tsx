@@ -100,7 +100,7 @@ const ResilienceView: React.FC<{ data: UserData; update: (u: Partial<UserData>) 
               <input value={lesson} onChange={e => setLesson(e.target.value)} placeholder="Extract Intel..." className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-4 text-sm text-[#595b61] font-bold focus:border-[#45d0d0] outline-none placeholder:text-[#595b61]/70" />
               <input value={action} onChange={e => setAction(e.target.value)} placeholder="Adjust Protocol..." className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-4 text-sm text-[#595b61] font-bold focus:border-[#f78121] outline-none placeholder:text-[#595b61]/70" />
            </div>
-           <button onClick={addFailure} disabled={!event || !lesson || !action} className="w-full py-4 bg-[#f78121] text-white rounded-warrior font-black uppercase tracking-[0.2em] shadow-lg hover:bg-orange-600 transition-all disabled:opacity-50 flex items-center justify-center space-x-2"><Zap size={18} /> <span>Log Growth (+50 XP)</span></button>
+           <button onClick={addFailure} disabled={!event || !lesson || !action} className="w-full py-4 bg-[#f78121] text-white rounded-warrior font-black uppercase tracking-[0.2em] shadow-lg hover:bg-orange-600 transition-all disabled:opacity-50 flex items-center justify-center space-x-2"><Zap size={18} /> <span>Log Growth (+50 Steps)</span></button>
         </div>
 
         <div className="space-y-4">

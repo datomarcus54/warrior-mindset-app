@@ -135,12 +135,12 @@ const GoalMaster: React.FC<Props> = ({ data, update }) => {
 
       <header className="mb-8">
         <div className="flex items-center gap-3">
-          <h2 className="text-4xl md:text-6xl font-black font-brand-header uppercase text-[#f78121] tracking-wider whitespace-nowrap">Mission Control</h2>
+          <h2 className="text-4xl md:text-6xl font-black font-brand-header uppercase text-[#f78121] tracking-wider whitespace-nowrap">Your Goals</h2>
           <button onClick={() => setShowLesson(true)} className="text-[#f78121] hover:text-white cursor-pointer transition-colors" aria-label="Warrior Lesson">
             <Info size={24} />
           </button>
         </div>
-        <p className="text-xs md:text-sm text-[#45d0d0] font-black uppercase tracking-[0.2em] mt-2">Objective Management</p>
+        <p className="text-xs md:text-sm text-[#45d0d0] font-black uppercase tracking-[0.2em] mt-2">Goal Tracking</p>
       </header>
 
       {/* Timeline Visualizer */}

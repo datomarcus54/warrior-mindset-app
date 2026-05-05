@@ -113,12 +113,12 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
       {/* Header */}
       <header className="mb-8">
         <div className="flex items-center gap-3">
-           <h2 className="text-4xl md:text-6xl font-black font-brand-header uppercase text-[#f78121] tracking-wider whitespace-nowrap">Foundation Protocol</h2>
+           <h2 className="text-4xl md:text-6xl font-black font-brand-header uppercase text-[#f78121] tracking-wider whitespace-nowrap">Foundation</h2>
            <button onClick={() => setActiveLesson('FOUNDATION')} className="text-[#f78121] hover:text-white cursor-pointer transition-colors" aria-label="Warrior Lesson">
               <Info size={24} />
            </button>
         </div>
-        <p className="text-xs md:text-sm text-[#45d0d0] font-black uppercase tracking-[0.2em] mt-2">Operational Baseline</p>
+        <p className="text-xs md:text-sm text-[#45d0d0] font-black uppercase tracking-[0.2em] mt-2">Where You Stand Today</p>
       </header>
 
       {/* Daily Creed */}
@@ -129,7 +129,7 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
         <div className="relative z-10 flex items-start space-x-3 md:space-x-5">
           <Sparkles size={24} className="text-[#f78121] mt-1" />
           <div>
-            <h2 className="text-xs md:text-sm font-black uppercase tracking-[0.2em] text-white/60 mb-2 md:mb-4">Daily Doctrine</h2>
+            <h2 className="text-xs md:text-sm font-black uppercase tracking-[0.2em] text-white/60 mb-2 md:mb-4">Today's Reflection</h2>
             <p className="text-xl md:text-3xl font-brand-quote italic font-bold leading-tight text-white">"{affirmation}"</p>
           </div>
         </div>
@@ -139,12 +139,12 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
       <section className="glass-card p-6 md:p-10 transition-all duration-300 ease-in-out hover:-translate-y-1">
         <div className="mb-6 md:mb-8">
           <div className="flex items-center gap-[10px] mb-1">
-            <h2 className="text-xl md:text-2xl font-black font-brand-header uppercase tracking-widest text-[#f78121]">Radar Sweep</h2>
+            <h2 className="text-xl md:text-2xl font-black font-brand-header uppercase tracking-widest text-[#f78121]">Your Life Circle</h2>
             <button onClick={() => setActiveLesson('RADAR')} className="text-[#f78121] hover:text-[#001b3d] cursor-pointer transition-colors" aria-label="Warrior Lesson">
                 <Info size={20} />
             </button>
           </div>
-          <p className="text-xs md:text-sm text-white/70 font-black uppercase tracking-widest">Sector Status Report (1-10)</p>
+          <p className="text-xs md:text-sm text-white/70 font-black uppercase tracking-widest">How You're Scoring Each Area (1-10)</p>
         </div>
         
         <div className="w-full h-[350px] min-h-[350px] relative">
@@ -203,7 +203,7 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
       {/* VIVID Vision Statement */}
       <section className="glass-card p-6 md:p-10 transition-all duration-300 ease-in-out hover:-translate-y-1">
         <div className="flex items-center gap-[10px] mb-6 md:mb-8">
-            <h2 className="text-xl md:text-2xl font-black font-brand-header uppercase tracking-widest text-[#f78121]">Target Acquisition</h2>
+            <h2 className="text-xl md:text-2xl font-black font-brand-header uppercase tracking-widest text-[#f78121]">Your Vision</h2>
             <button onClick={() => setActiveLesson('VISION')} className="text-[#f78121] hover:text-[#001b3d] cursor-pointer transition-colors" aria-label="Warrior Lesson">
                 <Info size={20} />
             </button>
@@ -218,8 +218,8 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
             />
         </div>
         <div className="mt-4 md:mt-6 flex justify-between items-center opacity-80">
-           <span className="text-[10px] md:text-xs text-white/60 uppercase font-black tracking-widest">36 Month Horizon</span>
-           <span className="text-[10px] md:text-xs text-[#f78121] uppercase font-black">Sync Active</span>
+           <span className="text-[10px] md:text-xs text-white/60 uppercase font-black tracking-widest">3-Year Vision</span>
+           <span className="text-[10px] md:text-xs text-[#f78121] uppercase font-black">Saved</span>
         </div>
       </section>
     </div>

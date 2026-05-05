@@ -89,7 +89,7 @@ const TribeView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => vo
             onClick={addRelationship} 
             className="w-full py-6 md:py-8 bg-[#f78121] text-white rounded-warrior font-black uppercase tracking-[0.2em] shadow-lg flex items-center justify-center space-x-3 md:space-x-4 active:scale-[0.98] transition-all hover:bg-orange-600 text-sm md:text-lg"
           >
-            <UserPlus size={20} className="md:w-6 md:h-6" /> <span>RECRUIT ASSET (+10 XP)</span>
+            <UserPlus size={20} className="md:w-6 md:h-6" /> <span>RECRUIT ASSET (+10 Steps)</span>
           </button>
         </div>
 

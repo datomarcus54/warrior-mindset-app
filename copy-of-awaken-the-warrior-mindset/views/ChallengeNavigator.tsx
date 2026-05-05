@@ -150,7 +150,7 @@ const ChallengeNavigator: React.FC<Props> = ({ data, update }) => {
             disabled={activeChallenge.stage === 'Adapt'}
             className="w-full mt-12 md:mt-20 py-6 md:py-8 bg-[#f78121] text-white disabled:opacity-50 disabled:grayscale rounded-3xl font-black uppercase tracking-[0.2em] flex items-center justify-center space-x-3 md:space-x-4 transition-all active:scale-[0.98] shadow-2xl hover:bg-orange-600"
           >
-            <span className="text-sm md:text-lg">{activeChallenge.stage === 'Adapt' ? 'Crisis Fully Integrated' : 'Achieve Breakthrough (+20 XP)'}</span>
+            <span className="text-sm md:text-lg">{activeChallenge.stage === 'Adapt' ? 'Crisis Fully Integrated' : 'Achieve Breakthrough (+20 Steps)'}</span>
             <ChevronRight size={20} className="md:w-7 md:h-7" />
           </button>
         </section>

@@ -181,7 +181,7 @@ const MasteryView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => 
       <header className="mb-8">
         <div>
           <div className="flex items-center gap-4 mb-2">
-            <h2 className="text-4xl md:text-6xl font-black font-brand-header uppercase text-[#f78121] tracking-wider whitespace-nowrap">Resource Command</h2>
+            <h2 className="text-4xl md:text-6xl font-black font-brand-header uppercase text-[#f78121] tracking-wider whitespace-nowrap">Your Finances</h2>
             <button onClick={() => setShowLesson(true)} className="p-2 bg-gradient-to-br from-white/10 to-white/5 border border-[#f78121]/30 rounded-full hover:text-white text-[#f78121] transition-colors">
               <Info size={20} />
             </button>
@@ -197,7 +197,7 @@ const MasteryView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => 
       <section className="bg-[#595b61] border-2 border-[#f78121]/50 p-6 md:p-10 relative overflow-hidden rounded-xl transition-all duration-300 ease-in-out hover:-translate-y-1">
         <div className="absolute top-0 right-0 p-8 md:p-12 opacity-20 pointer-events-none"><Landmark size={150} /></div>
         <div className="relative z-10">
-            <span className="text-xs md:text-sm font-black uppercase tracking-[0.25em] text-[#f78121] block mb-3 md:mb-4">War Chest Status</span>
+            <span className="text-xs md:text-sm font-black uppercase tracking-[0.25em] text-[#f78121] block mb-3 md:mb-4">Net Worth</span>
             <div className="flex flex-col sm:flex-row sm:items-end space-y-2 sm:space-y-0 sm:space-x-6">
                 <h4 className={`text-4xl sm:text-7xl font-black font-brand-header tracking-tighter text-white`}>
                     {stats.netWorth < 0 ? '-' : ''}RM {Math.abs(stats.netWorth).toLocaleString()}
@@ -223,7 +223,7 @@ const MasteryView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => 
       <section className="space-y-4 md:space-y-5">
         <div className="flex items-center space-x-2 md:space-x-3 px-2">
             <TrendingUp size={16} className="text-[#f78121] md:w-5 md:h-5" />
-            <h3 className="text-xs md:text-sm font-black uppercase tracking-[0.2em] text-[#45d0d0]">Capital Vector</h3>
+            <h3 className="text-xs md:text-sm font-black uppercase tracking-[0.2em] text-[#45d0d0]">Cash Flow Trend</h3>
         </div>
         
         {/* SAFETY WRAPPER */}

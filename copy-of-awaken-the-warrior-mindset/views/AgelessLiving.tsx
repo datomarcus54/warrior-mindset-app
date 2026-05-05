@@ -17,7 +17,7 @@ interface Props {
 }
 
 const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted }) => {
-  const [activeTab, setActiveTab] = useState<'Kinetic' | 'Fuel' | 'Fasting' | 'Sleep' | 'Settings'>('Kinetic');
+  const [activeTab, setActiveTab] = useState<'Movement' | 'Nutrition' | 'Fasting' | 'Sleep' | 'Settings'>('Movement');
   const [showLesson, setShowLesson] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [timeLeft, setTimeLeft] = useState<string>('');
@@ -123,7 +123,7 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
 
   const hasData = (log: DailyHealthLog | undefined) => {
     if (!log) return false;
-    if (activeTab === 'Kinetic') return log.workouts.length > 0;
+    if (activeTab === 'Movement') return log.workouts.length > 0;
     if (activeTab === 'Fasting') return log.fastingCompleted;
     if (activeTab === 'Sleep') return (log.sleepScore || 0) > 0;
     return false;
@@ -213,7 +213,7 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
       <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8">
         <div className="w-full md:w-auto">
             <div className="flex items-center gap-3 mb-2">
-              <h2 className="text-4xl md:text-6xl font-black font-brand-header uppercase text-[#f78121] tracking-wider whitespace-nowrap">Bio-Hardware</h2>
+              <h2 className="text-4xl md:text-6xl font-black font-brand-header uppercase text-[#f78121] tracking-wider whitespace-nowrap">Body & Energy</h2>
               <button onClick={() => setShowLesson(true)} className="text-[#f78121] hover:text-white transition-colors" aria-label="Warrior Lesson">
                 <Info size={24} />
               </button>
@@ -222,30 +222,30 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
                <CalendarIcon size={12} className="md:w-4 md:h-4" />
                <p className="text-[10px] md:text-xs font-black uppercase tracking-widest">Last Updated: {lastUpdatedFormatted}</p>
             </div>
-            <p className="text-xs md:text-sm text-[#45d0d0] font-black uppercase tracking-[0.2em] mt-2">System Maintenance</p>
+            <p className="text-xs md:text-sm text-[#45d0d0] font-black uppercase tracking-[0.2em] mt-2">Daily Care</p>
         </div>
       </header>
 
       {/* Sub-Nav Tabs */}
       <div className="flex bg-[#eef1f1] rounded-2xl p-1 gap-1 w-full overflow-x-auto no-scrollbar border border-white shadow-sm">
-           {['Kinetic', 'Fuel', 'Fasting', 'Sleep', 'Settings'].map((t) => (
+           {['Movement', 'Nutrition', 'Fasting', 'Sleep', 'Settings'].map((t) => (
              <button key={t} onClick={() => setActiveTab(t as any)} className={`px-4 py-3 md:px-6 md:py-4 rounded-xl text-[10px] md:text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap flex-1 ${activeTab === t ? 'bg-[#f78121] text-white shadow-md' : 'text-[#595b61] hover:text-[#001b3d] hover:bg-white/50'}`}>
                {t}
              </button>
            ))}
       </div>
 
-      {/* --- KINETIC TAB --- */}
-      {activeTab === 'Kinetic' && (
+      {/* --- MOVEMENT TAB --- */}
+      {activeTab === 'Movement' && (
         <div className="space-y-8 animate-in fade-in slide-in-from-right-4">
           <section className="glass-card p-6 md:p-8 flex justify-between items-center relative overflow-hidden transition-all duration-300 ease-in-out hover:-translate-y-1">
              <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none"><Activity size={120} /></div>
              <div className="relative z-10 flex-1 text-center border-r border-white/20">
-                <div className="text-xs md:text-sm text-white font-black uppercase tracking-widest mb-1">Time In Motion</div>
+                <div className="text-xs md:text-sm text-white font-black uppercase tracking-widest mb-1">Active Time</div>
                 <div className="text-4xl md:text-6xl font-black text-[#0A3762] font-brand-header">{todayTotalMins}<span className="text-sm md:text-xl text-white/50 ml-1">min</span></div>
              </div>
              <div className="relative z-10 flex-1 text-center">
-                <div className="text-xs md:text-sm text-white font-black uppercase tracking-widest mb-1">Energy Output</div>
+                <div className="text-xs md:text-sm text-white font-black uppercase tracking-widest mb-1">Calories Burned</div>
                 <div className="text-4xl md:text-6xl font-black text-[#f78121] font-brand-header">{todayTotalBurned}<span className="text-sm md:text-xl text-white/50 ml-1">kcal</span></div>
              </div>
           </section>
@@ -295,8 +295,8 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
         </div>
       )}
 
-      {/* --- FUEL TAB --- */}
-      {activeTab === 'Fuel' && (
+      {/* --- NUTRITION TAB --- */}
+      {activeTab === 'Nutrition' && (
         <div className="space-y-8 animate-in fade-in slide-in-from-right-4">
            <section className="glass-card p-6 md:p-8 transition-all duration-300 ease-in-out hover:-translate-y-1">
               <header className="flex items-center space-x-3 mb-6">
