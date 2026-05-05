@@ -19,7 +19,7 @@ export const getCoachMarcusResponse = async (message: string) => {
   try {
     const ai = new GoogleGenAI({ apiKey: getApiKey() });
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash-exp', // Updated to the latest stable model
+      model: 'gemini-2.0-flash', // Updated to the latest stable model
       contents: message,
       config: {
         systemInstruction: COACH_SYSTEM_PROMPT,
@@ -28,7 +28,7 @@ export const getCoachMarcusResponse = async (message: string) => {
     return response.text;
   } catch (error) {
     console.error("Coach Marcus error:", error);
-    return "I hit a tactical roadblock, warrior. Ensure your API Key is set correctly in Netlify and try again.";
+    return "I'm having trouble connecting right now. Please try again in a moment.";
   }
 };
 
@@ -65,7 +65,7 @@ export const getLegacyCoachResponse = async (
     `;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash-exp',
+      model: 'gemini-2.0-flash',
       contents: contextPrompt,
       config: {
         systemInstruction: COACH_SYSTEM_PROMPT, 
@@ -89,7 +89,7 @@ export const analyzeMealImage = async (base64Data: string): Promise<Partial<Meal
     };
     
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash-exp',
+      model: 'gemini-2.0-flash',
       contents: [
         { 
           parts: [
