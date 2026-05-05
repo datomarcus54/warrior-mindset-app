@@ -192,9 +192,9 @@ const App: React.FC = () => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#001b3d]/95 backdrop-blur-xl animate-in fade-in duration-500">
           <div className="relative w-full max-w-md bg-[#595b61] p-8 md:p-10 text-center border-4 border-[#001b3d] rounded-3xl shadow-2xl">
             <div className="p-4 bg-[#f78121]/20 rounded-full inline-block mb-6"><Sparkles size={32} className="text-[#f78121]" /></div>
-            <h2 className="text-xs md:text-sm font-black uppercase tracking-[0.3em] text-[#45d0d0] mb-6">Daily Warrior Creed</h2>
+            <h2 className="text-xs md:text-sm font-black uppercase tracking-[0.3em] text-[#45d0d0] mb-6">Today's Reflection</h2>
             <div className="mb-10 relative px-4"><p className="text-xl md:text-3xl font-brand-quote italic font-bold leading-relaxed text-white">"I am relentless in the pursuit of my best self."</p></div>
-            <button onClick={handleAcceptMission} className="w-full py-5 bg-[#f78121] text-white font-black uppercase tracking-widest rounded-xl hover:bg-orange-600 transition-all active:scale-95 text-sm md:text-base flex items-center justify-center space-x-2 shadow-lg"><span>ACCEPT MISSION</span><span className="bg-[#001b3d]/20 px-2 py-0.5 rounded text-[10px] text-white">+15 XP</span></button>
+            <button onClick={handleAcceptMission} className="w-full py-5 bg-[#f78121] text-white font-black uppercase tracking-widest rounded-xl hover:bg-orange-600 transition-all active:scale-95 text-sm md:text-base flex items-center justify-center space-x-2 shadow-lg"><span>Begin Today's Step</span><span className="bg-[#001b3d]/20 px-2 py-0.5 rounded text-[10px] text-white">+15 Steps</span></button>
             {isGuest && (
               <div className="flex flex-col items-center mt-6 space-y-4">
                 <div className="flex justify-center space-x-6">
