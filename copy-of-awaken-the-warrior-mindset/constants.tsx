@@ -2,24 +2,27 @@
 import { UserData, LifeDomain, WarriorCodePrinciple, FinancialData, CommunityPost } from './types';
 
 export const INITIAL_LIFE_DOMAINS: LifeDomain[] = [
-  { name: 'Career', value: 5 },
-  { name: 'Finance', value: 5 },
+  { name: 'Vision', value: 5 },
+  { name: 'Goals', value: 5 },
+  { name: 'Habits', value: 5 },
+  { name: 'Challenges', value: 5 },
+  { name: 'Mindset', value: 5 },
   { name: 'Health', value: 5 },
-  { name: 'Family', value: 5 },
-  { name: 'Growth', value: 5 },
-  { name: 'Fun', value: 5 },
-  { name: 'Environment', value: 5 },
-  { name: 'Spirit', value: 5 },
+  { name: 'Relationships', value: 5 },
+  { name: 'Finance', value: 5 },
+  { name: 'Community', value: 5 },
+  { name: 'Resilience', value: 5 },
+  { name: 'The Way', value: 5 },
 ];
 
 export const WARRIOR_CODE_PRINCIPLES: WarriorCodePrinciple[] = [
-  { id: 1, label: 'Growth Over Comfort', aligned: false },
-  { id: 2, label: 'Service Over Self', aligned: false },
-  { id: 3, label: 'Truth Over Convenience', aligned: false },
-  { id: 4, label: 'Action Over Intention', aligned: false },
-  { id: 5, label: 'Responsibility Over Blame', aligned: false },
-  { id: 6, label: 'Connection Over Competition', aligned: false },
-  { id: 7, label: 'Legacy Over Achievement', aligned: false },
+  { id: 1, label: 'Growth before comfort', aligned: false },
+  { id: 2, label: 'Serve those who depend on you', aligned: false },
+  { id: 3, label: 'Truth before convenience', aligned: false },
+  { id: 4, label: 'Action before intention', aligned: false },
+  { id: 5, label: 'Take responsibility', aligned: false },
+  { id: 6, label: 'Connection before competition', aligned: false },
+  { id: 7, label: 'Build for those after you', aligned: false },
 ];
 
 const INITIAL_FINANCIAL_DATA: FinancialData = {
@@ -71,18 +74,18 @@ const INITIAL_FINANCIAL_DATA: FinancialData = {
 const MOCK_POSTS: CommunityPost[] = [
   {
     id: 'system-1',
-    author: 'Cmdr. Jaxon',
-    rank: 'Legend',
-    content: 'Hit a new PB on the deadlift. 5am club is not a suggestion, it is a requirement. Stay hard.',
+    author: 'Ahmad Reza',
+    rank: 'Master',
+    content: 'Three months consistent on morning workouts. Not because of motivation — because of the practice itself.',
     timestamp: new Date(Date.now() - 3600000).toISOString(),
     reactions: { fire: 42, muscle: 15, trophy: 3, salute: 28 },
     userReacted: 'salute'
   },
   {
     id: 'system-2',
-    author: 'Warrior Sarah',
-    rank: 'Adept',
-    content: 'Cleared my short-term debt goal today. The system works if you work the system. Financial freedom inbound.',
+    author: 'Sarah Lim',
+    rank: 'Warrior',
+    content: 'Cleared my short-term debt today. Slow, steady, boring. That\'s what works.',
     timestamp: new Date(Date.now() - 86400000).toISOString(),
     reactions: { fire: 12, muscle: 5, trophy: 20, salute: 8 }
   }
@@ -388,36 +391,36 @@ End of system prompt.
 `;
 
 export const STARTER_PROMPTS = [
-  "I'm feeling stuck in my career.",
-  "How do I build better habits?",
-  "I keep procrastinating on my goals.",
-  "I'm overwhelmed by stress."
+  "I feel stuck in my career.",
+  "How do I build a habit that actually sticks?",
+  "I keep procrastinating on what matters.",
+  "I feel overwhelmed and can't focus."
 ];
 
 export const WARRIOR_RANKS = [
-  { name: 'Novice', minPoints: 0, color: 'text-slate-400', bg: 'bg-slate-800' },
-  { name: 'Initiate', minPoints: 100, color: 'text-mindset-teal', bg: 'bg-mindset-teal/10' },
-  { name: 'Adept', minPoints: 500, color: 'text-mindset-teal', bg: 'bg-mindset-teal/20' },
-  { name: 'Master', minPoints: 1500, color: 'text-warrior-gold', bg: 'bg-warrior-gold/10' },
-  { name: 'Legend', minPoints: 5000, color: 'text-warrior-gold', bg: 'bg-authority-navy' },
+  { name: 'Apprentice', minPoints: 0, color: 'text-slate-400', bg: 'bg-slate-800' },
+  { name: 'Walker', minPoints: 100, color: 'text-mindset-teal', bg: 'bg-mindset-teal/10' },
+  { name: 'Warrior', minPoints: 500, color: 'text-mindset-teal', bg: 'bg-mindset-teal/20' },
+  { name: 'Elder', minPoints: 1500, color: 'text-warrior-gold', bg: 'bg-warrior-gold/10' },
+  { name: 'Master', minPoints: 5000, color: 'text-warrior-gold', bg: 'bg-authority-navy' },
 ];
 
 export const DAILY_AFFIRMATIONS = [
   "I am the architect of my own resilience; I build strength in the silence.",
   "Every obstacle is raw fuel for my inner fire.",
-  "My vision is a command to my future self, not a suggestion.",
+  "My vision is a promise I make to myself.",
   "The warrior mindset is a system, not a mood. I follow the system.",
   "I seek growth over comfort, purpose over pleasure.",
   "I am the master of my focus and the captain of my habits.",
   "Success without meaning is hollow; I lead with heart and steel.",
-  "I do not retreat; I pivot to find a more lethal path to victory.",
+  "I do not retreat. I find another way.",
   "My discipline is my freedom. My tribe is my fortress.",
   "I am antifragile. What breaks others makes me stronger.",
-  "Pain is information. It tells me where I need to upgrade my armor.",
+  "Pain is information. It shows me where I need to grow.",
   "I do not negotiate with my potential. I demand it.",
   "Today I will do what others won't, so tomorrow I can do what others can't.",
   "My word is my bond. My action is my proof.",
-  "Chaos is the forge where my character is hammered into steel.",
+  "The hard chapter is the forge. That is where character is made.",
   "I am not defined by my past, but by the mission I accept today.",
   "Comfort is the enemy of progress. I embrace the friction.",
   "A warrior does not complain about the storm; he adjusts his sails.",
@@ -426,14 +429,14 @@ export const DAILY_AFFIRMATIONS = [
   "Failure is not fatal; it is the tuition fee for mastery.",
   "I lead by example, for my shadow influences those behind me.",
   "The world owes me nothing. I earn my keep every single sunrise.",
-  "Focus is a weapon. Distraction is a weakness. I aim true.",
+  "Focus is everything. I protect it.",
   "I build systems that sustain me when motivation fades.",
   "My legacy is built on the small choices I make in the dark.",
   "I am relentless in the pursuit of my best self.",
   "Fear is a signal to move forward, not a wall to stop.",
   "I replace 'I have to' with 'I get to'. Gratitude is my fuel.",
   "Strength is not given; it is rented, and rent is due every day.",
-  "I am the storm."
+  "I am still standing. That is enough."
 ];
 
 export const getRank = (points: number) => {
