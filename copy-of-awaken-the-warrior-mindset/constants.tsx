@@ -92,7 +92,7 @@ const MOCK_POSTS: CommunityPost[] = [
 ];
 
 export const INITIAL_USER_DATA: UserData = {
-  tier: 'Warrior',
+  tier: 'Legend',
   dailyWorkflows: [],
   lifeWheel: INITIAL_LIFE_DOMAINS,
   visionText: '',
