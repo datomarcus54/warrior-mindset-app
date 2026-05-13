@@ -138,7 +138,7 @@ const App: React.FC = () => {
   const renderView = () => {
     const props = { data: userData, update: updateData, isGuest, onRestricted: onRestrictedAction, isMobileMode };
     const views = {
-      'Foundation': <FoundationView {...props} />,
+      'Foundation': <FoundationView {...props} onNavigateToCoach={() => setCurrentView('Coach')} />,
       'Journal': <JournalView {...props} />,
       'Resilience': <ResilienceView {...props} />,
       'Ageless': <AgelessLiving {...props} />,
