@@ -184,7 +184,7 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
                   min="1"
                   max="10"
                   value={domain.value}
-                  onChange={(e) => { const v = parseInt(e.target.value); if (!isNaN(v)) handleDomainChange(idx, v); }}
+                  onChange={(e) => handleDomainChange(idx, parseInt(e.target.value) || 0)}
                   disabled={isGuest}
                   className="w-14 bg-[#0A3762] border border-[#f78121]/40 rounded-lg px-2 py-1.5 text-center font-black text-[#f78121] text-base outline-none focus:border-[#f78121] disabled:opacity-50"
                 />

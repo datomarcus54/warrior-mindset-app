@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useCallback, useMemo, useRef } from 'react';
 import { 
   Trophy, Sparkles, Bot, X, Menu, LifeBuoy, BookOpen, LogOut, User, BarChart3, Lock, Shield
 } from 'lucide-react';
@@ -66,6 +66,9 @@ const App: React.FC = () => {
   const [showScoringRules, setShowScoringRules] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const mainRef = useRef<HTMLElement>(null);
+  const scrollTopRef = useRef(0);
   
   const isMobileMode = useMemo(() => {
     const ua = navigator.userAgent || '';
@@ -119,7 +122,12 @@ const App: React.FC = () => {
 
   useEffect(() => { localStorage.setItem(STORAGE_KEY, JSON.stringify(userData)); }, [userData]);
 
+  useLayoutEffect(() => {
+    if (mainRef.current) mainRef.current.scrollTop = scrollTopRef.current;
+  }, [userData]);
+
   const updateData = useCallback((updates: Partial<UserData>) => {
+    scrollTopRef.current = mainRef.current?.scrollTop ?? 0;
     setUserData(prev => ({ ...prev, ...updates }));
   }, []);
 
@@ -283,7 +291,7 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto px-6 md:px-12 pt-28 pb-[80px] custom-scrollbar bg-[#0A3762]">
+      <main ref={mainRef} className="flex-1 overflow-y-auto px-6 md:px-12 pt-28 pb-[80px] custom-scrollbar bg-[#0A3762]">
         <div className="max-w-3xl mx-auto w-full">{renderView()}</div>
       </main>
 
