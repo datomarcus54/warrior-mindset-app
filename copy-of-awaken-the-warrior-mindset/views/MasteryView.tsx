@@ -52,11 +52,11 @@ const FinancialTable = memo(({ title, entries, path, showTarget = true, canAdd =
                 <td className="py-4 md:py-5 px-3 md:px-5 text-xs md:text-sm font-bold text-white">{entry.label}</td>
                 {showTarget && (
                   <td className="py-2 md:py-3 px-3 md:px-5 text-right">
-                    <input type="number" defaultValue={entry.target || ''} onBlur={(e) => onChangeWrapper([...path, idx.toString()], 'target', e.target.value)} className="w-20 md:w-28 bg-[#eef1f1] border border-[#45d0d0]/20 rounded-lg px-2 md:px-3 py-1.5 md:py-2 text-xs md:text-sm text-right outline-none focus:border-[#f78121] text-[#595b61] font-bold" />
+                    <input type="number" value={entry.target || ''} onChange={(e) => onChangeWrapper([...path, idx.toString()], 'target', e.target.value)} className="w-20 md:w-28 bg-[#eef1f1] border border-[#45d0d0]/20 rounded-lg px-2 md:px-3 py-1.5 md:py-2 text-xs md:text-sm text-right outline-none focus:border-[#f78121] text-[#595b61] font-bold" />
                   </td>
                 )}
                 <td className="py-2 md:py-3 px-3 md:px-5 text-right">
-                  <input type="number" defaultValue={entry.actual ?? entry.value ?? ''} onBlur={(e) => onChangeWrapper([...path, idx.toString()], entry.value !== undefined ? 'value' : 'actual', e.target.value)} className="w-20 md:w-28 bg-[#eef1f1] border border-[#45d0d0]/20 rounded-lg px-2 md:px-3 py-1.5 md:py-2 text-xs md:text-sm text-right outline-none focus:border-[#f78121] text-[#595b61] font-bold" />
+                  <input type="number" value={entry.actual ?? entry.value ?? ''} onChange={(e) => onChangeWrapper([...path, idx.toString()], entry.value !== undefined ? 'value' : 'actual', e.target.value)} className="w-20 md:w-28 bg-[#eef1f1] border border-[#45d0d0]/20 rounded-lg px-2 md:px-3 py-1.5 md:py-2 text-xs md:text-sm text-right outline-none focus:border-[#f78121] text-[#595b61] font-bold" />
                 </td>
                 <td className="py-2 md:py-3 px-3 md:px-5 text-right">
                   <button onClick={() => { if(isGuest) onRestricted(); else removeItem(path, idx); }} className="text-white/50 hover:text-[#f78121] opacity-0 group-hover:opacity-100 transition-all p-1"><Trash2 size={14} /></button>
