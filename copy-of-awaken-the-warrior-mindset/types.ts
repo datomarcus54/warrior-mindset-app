@@ -118,6 +118,7 @@ export interface HealthMetrics {
   remSleepHours: number;
   remSleepMinutes: number;
   sleepScore: number;
+  medicines: string[];
 }
 
 export interface Relationship {

@@ -28,7 +28,6 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
   const [isMounted, setIsMounted] = useState(false);
   
   const [newMedicine, setNewMedicine] = useState('');
-  const [medicines, setMedicines] = useState<string[]>([]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -190,7 +189,7 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
   }, [data.health.dailyLogs]);
 
   return (
-    <div className="space-y-8 md:space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700 pb-32">
+    <div className="space-y-8 md:space-y-12 pb-32">
       
       {showLesson && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-[#001b3d]/90 backdrop-blur-sm animate-in fade-in duration-300">
@@ -569,16 +568,16 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
               <button onClick={() => {
                 if (isGuest) { onRestricted(); return; }
                 if(newMedicine) {
-                  setMedicines([...medicines, newMedicine]);
+                  updateMetric({ medicines: [...(data.health.medicines || []), newMedicine] });
                   setNewMedicine('');
                 }
               }} className="p-4 md:p-6 bg-[#45d0d0] text-white rounded-2xl shadow-lg"><Plus size={24} className="md:w-7 md:h-7" /></button>
             </div>
             <div className="grid grid-cols-1 gap-4">
-              {medicines.map((med, idx) => (
+              {(data.health.medicines || []).map((med, idx) => (
                 <div key={idx} className="flex items-center justify-between p-4 md:p-6 bg-black/20 border border-white/10 rounded-2xl shadow-sm">
                   <span className="text-sm md:text-base font-bold text-white">{med}</span>
-                  <button onClick={() => setMedicines(medicines.filter((_, i) => i !== idx))} className="text-white/50 hover:text-[#f78121] transition-colors"><Trash2 size={20} /></button>
+                  <button onClick={() => updateMetric({ medicines: (data.health.medicines || []).filter((_, i) => i !== idx) })} className="text-white/50 hover:text-[#f78121] transition-colors"><Trash2 size={20} /></button>
                 </div>
               ))}
             </div>

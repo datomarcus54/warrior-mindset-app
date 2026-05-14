@@ -131,6 +131,7 @@ export const INITIAL_USER_DATA: UserData = {
     remSleepHours: 0,
     remSleepMinutes: 0,
     sleepScore: 0,
+    medicines: [],
   },
   relationships: [],
   financialPillars: [
