@@ -166,7 +166,7 @@ const MasteryView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => 
       )}
       
       {showLesson && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-[#001b3d]/90 backdrop-blur-sm animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-[#001b3d]/90 backdrop-blur-sm">
            <div className="relative w-full max-w-md bg-[#595b61] p-8 md:p-10 border border-white/20 rounded-2xl shadow-2xl">
               <button onClick={() => setShowLesson(false)} className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors"><X size={24}/></button>
               <h3 className="text-xl font-black font-brand-header uppercase tracking-tight text-white mb-4">Resource Protocols</h3>
