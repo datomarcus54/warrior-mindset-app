@@ -228,7 +228,7 @@ const MasteryView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => 
       <section className="space-y-4 md:space-y-5">
         <div className="flex items-center space-x-2 md:space-x-3 px-2">
             <TrendingUp size={16} className="text-[#f78121] md:w-5 md:h-5" />
-            <h3 className="text-xs md:text-sm font-black uppercase tracking-[0.2em] text-[#45d0d0]">Cash Flow Trend</h3>
+            <h3 className="text-xs md:text-sm font-black uppercase tracking-[0.2em] text-[#45d0d0]">Net Worth Trend</h3>
         </div>
         
         {/* SAFETY WRAPPER */}
@@ -268,6 +268,34 @@ const MasteryView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => 
             <FinancialTable title="Fixed Expenses" entries={data.financialData.expenses.fixed} path={['expenses', 'fixed']} canAdd handleEntryChange={handleEntryChange} removeItem={handleRemoveItem} addNewItem={handleAddNewItem} {...props} />
             <FinancialTable title="Mandatory Expenses" entries={data.financialData.expenses.mandatory} path={['expenses', 'mandatory']} canAdd handleEntryChange={handleEntryChange} removeItem={handleRemoveItem} addNewItem={handleAddNewItem} {...props} />
             <FinancialTable title="Resource Outflow" entries={data.financialData.expenses.variable} path={['expenses', 'variable']} canAdd handleEntryChange={handleEntryChange} removeItem={handleRemoveItem} addNewItem={handleAddNewItem} {...props} />
+        </div>
+      </section>
+
+      {/* Assets Section */}
+      <section className="space-y-6 md:space-y-8">
+        <div className="flex items-center justify-between px-2 pb-2 md:pb-3 border-b border-[#f78121]/30">
+            <h3 className="text-xl md:text-2xl font-black font-brand-header uppercase text-[#f78121] drop-shadow-md">Assets</h3>
+            <div className="text-xs md:text-base font-black px-3 py-1 md:px-4 md:py-1.5 rounded-lg bg-[#45d0d0]/10 text-[#45d0d0]">
+                RM {stats.totalAssets.toLocaleString()}
+            </div>
+        </div>
+        <div className="space-y-4">
+            <FinancialTable title="Liquid Assets" entries={data.financialData.assets.liquid} path={['assets', 'liquid']} showTarget={false} canAdd handleEntryChange={handleEntryChange} removeItem={handleRemoveItem} addNewItem={handleAddNewItem} {...props} />
+            <FinancialTable title="Fixed Assets" entries={data.financialData.assets.fixed} path={['assets', 'fixed']} showTarget={false} canAdd handleEntryChange={handleEntryChange} removeItem={handleRemoveItem} addNewItem={handleAddNewItem} {...props} />
+        </div>
+      </section>
+
+      {/* Liabilities Section */}
+      <section className="space-y-6 md:space-y-8">
+        <div className="flex items-center justify-between px-2 pb-2 md:pb-3 border-b border-[#f78121]/30">
+            <h3 className="text-xl md:text-2xl font-black font-brand-header uppercase text-[#f78121] drop-shadow-md">Liabilities</h3>
+            <div className="text-xs md:text-base font-black px-3 py-1 md:px-4 md:py-1.5 rounded-lg bg-[#f78121]/10 text-[#f78121]">
+                RM {stats.totalLiabilities.toLocaleString()}
+            </div>
+        </div>
+        <div className="space-y-4">
+            <FinancialTable title="Short-Term Debt" entries={data.financialData.liabilities.shortTerm} path={['liabilities', 'shortTerm']} showTarget={false} canAdd handleEntryChange={handleEntryChange} removeItem={handleRemoveItem} addNewItem={handleAddNewItem} {...props} />
+            <FinancialTable title="Long-Term Debt" entries={data.financialData.liabilities.longTerm} path={['liabilities', 'longTerm']} showTarget={false} canAdd handleEntryChange={handleEntryChange} removeItem={handleRemoveItem} addNewItem={handleAddNewItem} {...props} />
         </div>
       </section>
     </div>

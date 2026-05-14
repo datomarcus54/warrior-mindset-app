@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { UserData, DailyWorkflow } from '../types';
 import { Check, Lock, Info, X } from 'lucide-react';
 
@@ -61,6 +61,32 @@ const JournalView: React.FC<Props> = ({ data, update, isGuest, onRestricted, isM
       brainDumpText: currentWorkflow.brainDumpText || '',
     });
   }, [today]);
+
+  // Flush all local state to persistence on unmount — covers navigation without blur
+  const flushRef = useRef<() => void>(() => {});
+  flushRef.current = () => {
+    if (isGuest) return;
+    const lw = localWorkflow;
+    const newWorkflow = {
+      ...currentWorkflow,
+      mindsetLog: lw.mindsetLog,
+      priorities: currentWorkflow.priorities.map((p, i) => ({ ...p, text: lw.priorityTexts[i] ?? p.text })),
+      definitionOfDone: lw.definitionOfDone,
+      afternoonMomentum: lw.afternoonMomentum,
+      afternoonPriority: lw.afternoonPriority,
+      eveningReflection: {
+        ...currentWorkflow.eveningReflection,
+        win: lw.eveningWin,
+        drain: lw.eveningDrain,
+        adjustment: lw.eveningAdjustment,
+        gratitude: lw.eveningGratitude,
+      },
+      brainDumpText: lw.brainDumpText,
+    };
+    const otherWorkflows = data.dailyWorkflows?.filter(w => w.date !== today) || [];
+    update({ dailyWorkflows: [newWorkflow, ...otherWorkflows] });
+  };
+  useEffect(() => () => { flushRef.current(); }, []);
 
   const updateWorkflow = (updates: Partial<DailyWorkflow>) => {
     if (isGuest) return;
