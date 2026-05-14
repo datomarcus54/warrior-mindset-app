@@ -91,7 +91,7 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
   }, [data.lifeWheel, isMobile]);
 
   return (
-    <div className="space-y-8 md:space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500 relative">
+    <div className="space-y-8 md:space-y-10 relative">
       
       {activeLesson && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-[#001b3d]/90 backdrop-blur-sm animate-in fade-in duration-300">

@@ -18,7 +18,7 @@ const FoundationView: React.FC<Props> = ({ data, update, isGuest, onRestricted, 
   const lifeCircleRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
+    <div className="space-y-12 pb-20">
 
       <section className="rounded-2xl bg-white/5 border border-white/10 p-6 text-center space-y-5">
         <h2 className="text-xl font-bold text-white tracking-wide">Where would you like to start?</h2>
@@ -49,13 +49,13 @@ const FoundationView: React.FC<Props> = ({ data, update, isGuest, onRestricted, 
       
       <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mx-10" />
       
-      <section className="animate-in fade-in slide-in-from-bottom-6 duration-700 delay-200">
+      <section>
         <GoalMaster data={data} update={update} />
       </section>
-      
+
       <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mx-10" />
-      
-      <section className="animate-in fade-in slide-in-from-bottom-6 duration-700 delay-300">
+
+      <section>
         <HabitLaboratory data={data} update={update} />
       </section>
     </div>
