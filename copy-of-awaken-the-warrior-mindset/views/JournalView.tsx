@@ -63,7 +63,7 @@ const JournalView: React.FC<Props> = ({ data, update, isGuest, onRestricted, isM
   }, [today]);
 
   const updateWorkflow = (updates: Partial<DailyWorkflow>) => {
-    if (isGuest) { onRestricted(); return; }
+    if (isGuest) return;
     const newWorkflow = { ...currentWorkflow, ...updates };
     const otherWorkflows = data.dailyWorkflows?.filter(w => w.date !== today) || [];
     update({ dailyWorkflows: [newWorkflow, ...otherWorkflows] });

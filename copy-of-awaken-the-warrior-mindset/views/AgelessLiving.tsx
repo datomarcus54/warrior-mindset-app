@@ -36,7 +36,7 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
   }, []);
 
   const updateMetric = (updates: Partial<HealthMetrics>) => {
-    if (isGuest) { onRestricted(); return; }
+    if (isGuest) return;
     const newHealth = { ...data.health, ...updates };
     newHealth.lastUpdated = new Date().toISOString(); 
     if (updates.sleepScore !== undefined) {

@@ -32,7 +32,7 @@ const FinancialTable = memo(({ title, entries, path, showTarget = true, canAdd =
     if (trimmed) { addNewItem(path, trimmed); setLocalLabel(''); }
   }, [localLabel, addNewItem, path, isGuest, onRestricted]);
   const onChangeWrapper = (path: string[], field: 'target' | 'actual' | 'value', value: string) => {
-    if (isGuest) { onRestricted(); return; }
+    if (isGuest) return;
     handleEntryChange(path, field, value);
   };
 

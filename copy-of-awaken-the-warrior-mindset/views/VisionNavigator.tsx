@@ -48,10 +48,7 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
   }, []);
 
   const handleDomainChange = (index: number, val: number) => {
-    if (isGuest) {
-      onRestricted();
-      return;
-    }
+    if (isGuest) return;
     const newWheel = data.lifeWheel.map((item, i) => {
       if (i === index) {
         return { ...item, value: Math.min(10, Math.max(1, val)) };
