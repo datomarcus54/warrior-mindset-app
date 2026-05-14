@@ -176,24 +176,19 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 mt-8 md:mt-12">
           {displayData.map((domain, idx) => (
-            <div key={domain.name} className="bg-white/10 border border-white/20 rounded-xl flex flex-col space-y-3 p-4 md:p-6 shadow-sm">
-              <div className="flex justify-between items-center w-full whitespace-nowrap">
-                <span className="text-[10px] md:text-xs text-white uppercase font-black tracking-widest truncate mr-2">{domain.displayName}</span>
-                <span className={`text-sm md:text-base font-black shrink-0 ${domain.value <= 3 ? 'text-red-400' : 'text-[#f78121]'}`}>
-                  {domain.value}/10
-                </span>
-              </div>
-              <div onClick={isGuest ? onRestricted : undefined}>
-                <input 
-                  type="range" 
-                  min="1" 
-                  max="10" 
-                  value={domain.value} 
-                  onChange={(e) => handleDomainChange(idx, parseInt(e.target.value))}
-                  className="warrior-slider"
+            <div key={domain.name} className="bg-white/10 border border-white/20 rounded-xl flex items-center justify-between p-4 md:p-6 shadow-sm">
+              <span className="text-[10px] md:text-xs text-white uppercase font-black tracking-widest truncate mr-3">{domain.displayName}</span>
+              <div className="flex items-center gap-2 shrink-0" onClick={isGuest ? onRestricted : undefined}>
+                <input
+                  type="number"
+                  min="1"
+                  max="10"
+                  value={domain.value}
+                  onChange={(e) => { const v = parseInt(e.target.value); if (!isNaN(v)) handleDomainChange(idx, v); }}
                   disabled={isGuest}
-                  style={{ opacity: isGuest ? 0.5 : 1, pointerEvents: isGuest ? 'none' : 'auto' }}
+                  className="w-14 bg-[#0A3762] border border-[#f78121]/40 rounded-lg px-2 py-1.5 text-center font-black text-[#f78121] text-base outline-none focus:border-[#f78121] disabled:opacity-50"
                 />
+                <span className="text-white/50 text-xs font-black">/10</span>
               </div>
             </div>
           ))}
