@@ -30,6 +30,7 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
   const [activeLesson, setActiveLesson] = useState<keyof typeof LESSONS | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [localVisionText, setLocalVisionText] = useState(data.visionText || '');
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -60,13 +61,6 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
     update({ lifeWheel: newWheel });
   };
   
-  const handleVisionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (isGuest) {
-      onRestricted();
-      return;
-    }
-    update({ visionText: e.target.value });
-  };
 
   const affirmation = useMemo(() => {
     const day = new Date().getDate();
@@ -205,8 +199,9 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
         </div>
         <div onClick={isGuest ? onRestricted : undefined}>
             <textarea
-              value={data.visionText}
-              onChange={handleVisionChange}
+              value={localVisionText}
+              onChange={(e) => { if (isGuest) { onRestricted(); return; } setLocalVisionText(e.target.value); }}
+              onBlur={() => { if (!isGuest) update({ visionText: localVisionText }); }}
               placeholder="Dictate the future state. Be precise. Be lethal. What does the victory look like?"
               className="w-full h-64 md:h-80 warrior-input rounded-xl p-6 md:p-8 text-base md:text-lg text-[#595b61] font-bold focus:outline-none focus:border-[#f78121] transition-all placeholder:text-[#595b61]/70 leading-relaxed disabled:opacity-50"
               disabled={isGuest}

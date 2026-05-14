@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { UserData, DailyWorkflow } from '../types';
 import { Check, Lock, Info, X } from 'lucide-react';
 
@@ -34,6 +34,34 @@ const JournalView: React.FC<Props> = ({ data, update, isGuest, onRestricted, isM
     };
   }, [data.dailyWorkflows, today]);
 
+  const [localWorkflow, setLocalWorkflow] = useState(() => ({
+    mindsetLog: currentWorkflow.mindsetLog || '',
+    priorityTexts: currentWorkflow.priorities.map(p => p.text),
+    definitionOfDone: currentWorkflow.definitionOfDone || '',
+    afternoonMomentum: currentWorkflow.afternoonMomentum || '',
+    afternoonPriority: currentWorkflow.afternoonPriority || '',
+    eveningWin: currentWorkflow.eveningReflection.win || '',
+    eveningDrain: currentWorkflow.eveningReflection.drain || '',
+    eveningAdjustment: currentWorkflow.eveningReflection.adjustment || '',
+    eveningGratitude: currentWorkflow.eveningReflection.gratitude || '',
+    brainDumpText: currentWorkflow.brainDumpText || '',
+  }));
+
+  useEffect(() => {
+    setLocalWorkflow({
+      mindsetLog: currentWorkflow.mindsetLog || '',
+      priorityTexts: currentWorkflow.priorities.map(p => p.text),
+      definitionOfDone: currentWorkflow.definitionOfDone || '',
+      afternoonMomentum: currentWorkflow.afternoonMomentum || '',
+      afternoonPriority: currentWorkflow.afternoonPriority || '',
+      eveningWin: currentWorkflow.eveningReflection.win || '',
+      eveningDrain: currentWorkflow.eveningReflection.drain || '',
+      eveningAdjustment: currentWorkflow.eveningReflection.adjustment || '',
+      eveningGratitude: currentWorkflow.eveningReflection.gratitude || '',
+      brainDumpText: currentWorkflow.brainDumpText || '',
+    });
+  }, [today]);
+
   const updateWorkflow = (updates: Partial<DailyWorkflow>) => {
     if (isGuest) { onRestricted(); return; }
     const newWorkflow = { ...currentWorkflow, ...updates };
@@ -42,16 +70,20 @@ const JournalView: React.FC<Props> = ({ data, update, isGuest, onRestricted, isM
   };
 
   const togglePriority = (idx: number) => {
-    const newPriorities = [...currentWorkflow.priorities];
-    newPriorities[idx].completed = !newPriorities[idx].completed;
+    const newPriorities = currentWorkflow.priorities.map((p, i) => ({
+      ...p,
+      text: localWorkflow.priorityTexts[i] ?? p.text,
+      completed: i === idx ? !p.completed : p.completed,
+    }));
     updateWorkflow({ priorities: newPriorities });
   };
 
-  const updatePriorityText = (idx: number, text: string) => {
-    const newPriorities = [...currentWorkflow.priorities];
-    newPriorities[idx].text = text;
-    updateWorkflow({ priorities: newPriorities });
-  };
+  const setPriorityText = (idx: number, text: string) =>
+    setLocalWorkflow(prev => {
+      const texts = [...prev.priorityTexts];
+      texts[idx] = text;
+      return { ...prev, priorityTexts: texts };
+    });
 
   const isUnlocked = data.tier === 'Adept' || data.tier === 'Legend';
   
@@ -96,9 +128,10 @@ const JournalView: React.FC<Props> = ({ data, update, isGuest, onRestricted, isM
       {/* I. DAILY INTENTION */}
       <section className="glass-card p-6 md:p-8 transition-all duration-300 ease-in-out hover:-translate-y-1">
         <h3 className="text-lg font-black uppercase tracking-widest text-[#f78121] mb-6">I. Daily Intention</h3>
-        <textarea 
-          value={currentWorkflow.mindsetLog}
-          onChange={(e) => updateWorkflow({ mindsetLog: e.target.value })}
+        <textarea
+          value={localWorkflow.mindsetLog}
+          onChange={(e) => setLocalWorkflow(prev => ({ ...prev, mindsetLog: e.target.value }))}
+          onBlur={() => updateWorkflow({ mindsetLog: localWorkflow.mindsetLog })}
           placeholder="Clear the fog. State your intent..."
           className="w-full h-32 bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-4 text-sm text-[#595b61] font-bold focus:border-[#f78121] transition-all placeholder:text-[#595b61]/70"
         />
@@ -116,10 +149,11 @@ const JournalView: React.FC<Props> = ({ data, update, isGuest, onRestricted, isM
                 >
                   {p.completed && <Check size={18} className="text-white" />}
                 </button>
-                <input 
-                  type="text" 
-                  value={p.text}
-                  onChange={(e) => updatePriorityText(idx, e.target.value)}
+                <input
+                  type="text"
+                  value={localWorkflow.priorityTexts[idx] ?? ''}
+                  onChange={(e) => setPriorityText(idx, e.target.value)}
+                  onBlur={() => updateWorkflow({ priorities: currentWorkflow.priorities.map((pr, i) => ({ ...pr, text: localWorkflow.priorityTexts[i] ?? pr.text })) })}
                   placeholder={`Primary Objective ${idx + 1}`}
                   className={`flex-1 bg-[#eef1f1] border-b border-transparent focus:border-[#f78121] py-2 px-3 text-sm text-[#595b61] font-bold transition-all rounded ${p.completed ? 'line-through text-slate-400' : ''}`}
                 />
@@ -128,10 +162,11 @@ const JournalView: React.FC<Props> = ({ data, update, isGuest, onRestricted, isM
         </div>
         <div>
            <label className="text-[10px] font-black uppercase tracking-widest text-[#45d0d0] mb-2 block">Definition of Success</label>
-           <input 
+           <input
               type="text"
-              value={currentWorkflow.definitionOfDone}
-              onChange={(e) => updateWorkflow({ definitionOfDone: e.target.value })}
+              value={localWorkflow.definitionOfDone}
+              onChange={(e) => setLocalWorkflow(prev => ({ ...prev, definitionOfDone: e.target.value }))}
+              onBlur={() => updateWorkflow({ definitionOfDone: localWorkflow.definitionOfDone })}
               placeholder="What does absolute victory look like today?"
               className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl px-4 py-3 text-sm text-[#595b61] font-bold focus:border-[#f78121] placeholder:text-[#595b61]/70"
            />
@@ -143,8 +178,9 @@ const JournalView: React.FC<Props> = ({ data, update, isGuest, onRestricted, isM
         {!isUnlocked && <RestrictedOverlay />}
         <h3 className="text-lg font-black uppercase tracking-widest text-[#f78121] mb-6">III. Mid-Day Check-In</h3>
         <textarea 
-          value={currentWorkflow.afternoonMomentum}
-          onChange={(e) => updateWorkflow({ afternoonMomentum: e.target.value })}
+          value={localWorkflow.afternoonMomentum}
+          onChange={(e) => setLocalWorkflow(prev => ({ ...prev, afternoonMomentum: e.target.value }))}
+          onBlur={() => updateWorkflow({ afternoonMomentum: localWorkflow.afternoonMomentum })}
           placeholder="Pivot or Persist? Log reality..."
           className="w-full h-24 bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-4 text-sm text-[#595b61] font-bold focus:border-[#f78121] transition-all placeholder:text-[#595b61]/70"
         />
@@ -155,8 +191,9 @@ const JournalView: React.FC<Props> = ({ data, update, isGuest, onRestricted, isM
         {!isUnlocked && <RestrictedOverlay />}
         <h3 className="text-lg font-black uppercase tracking-widest text-[#f78121] mb-6">IV. Afternoon Priorities</h3>
         <textarea 
-          value={currentWorkflow.afternoonPriority}
-          onChange={(e) => updateWorkflow({ afternoonPriority: e.target.value })}
+          value={localWorkflow.afternoonPriority}
+          onChange={(e) => setLocalWorkflow(prev => ({ ...prev, afternoonPriority: e.target.value }))}
+          onBlur={() => updateWorkflow({ afternoonPriority: localWorkflow.afternoonPriority })}
           placeholder="Second-half targets (Free Form)..."
           className="w-full h-32 bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-4 text-sm text-[#595b61] font-bold focus:border-[#f78121] transition-all placeholder:text-[#595b61]/70"
         />
@@ -170,19 +207,19 @@ const JournalView: React.FC<Props> = ({ data, update, isGuest, onRestricted, isM
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
            <div className="space-y-1">
              <label className="text-[10px] font-black uppercase tracking-widest text-[#45d0d0]">Today's Victory</label>
-             <input value={currentWorkflow.eveningReflection.win} onChange={(e) => updateWorkflow({ eveningReflection: { ...currentWorkflow.eveningReflection, win: e.target.value } })} className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl px-4 py-3 text-sm focus:border-[#f78121] text-[#595b61] font-bold" />
+             <input value={localWorkflow.eveningWin} onChange={(e) => setLocalWorkflow(prev => ({ ...prev, eveningWin: e.target.value }))} onBlur={() => updateWorkflow({ eveningReflection: { ...currentWorkflow.eveningReflection, win: localWorkflow.eveningWin } })} className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl px-4 py-3 text-sm focus:border-[#f78121] text-[#595b61] font-bold" />
            </div>
            <div className="space-y-1">
              <label className="text-[10px] font-black uppercase tracking-widest text-[#45d0d0]">Energy Drain</label>
-             <input value={currentWorkflow.eveningReflection.drain} onChange={(e) => updateWorkflow({ eveningReflection: { ...currentWorkflow.eveningReflection, drain: e.target.value } })} className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl px-4 py-3 text-sm focus:border-[#f78121] text-[#595b61] font-bold" />
+             <input value={localWorkflow.eveningDrain} onChange={(e) => setLocalWorkflow(prev => ({ ...prev, eveningDrain: e.target.value }))} onBlur={() => updateWorkflow({ eveningReflection: { ...currentWorkflow.eveningReflection, drain: localWorkflow.eveningDrain } })} className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl px-4 py-3 text-sm focus:border-[#f78121] text-[#595b61] font-bold" />
            </div>
            <div className="space-y-1">
              <label className="text-[10px] font-black uppercase tracking-widest text-[#45d0d0]">Tomorrow's Adjustment</label>
-             <input value={currentWorkflow.eveningReflection.adjustment} onChange={(e) => updateWorkflow({ eveningReflection: { ...currentWorkflow.eveningReflection, adjustment: e.target.value } })} className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl px-4 py-3 text-sm focus:border-[#f78121] text-[#595b61] font-bold" />
+             <input value={localWorkflow.eveningAdjustment} onChange={(e) => setLocalWorkflow(prev => ({ ...prev, eveningAdjustment: e.target.value }))} onBlur={() => updateWorkflow({ eveningReflection: { ...currentWorkflow.eveningReflection, adjustment: localWorkflow.eveningAdjustment } })} className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl px-4 py-3 text-sm focus:border-[#f78121] text-[#595b61] font-bold" />
            </div>
            <div className="space-y-1">
              <label className="text-[10px] font-black uppercase tracking-widest text-[#45d0d0]">Gratitude</label>
-             <input value={currentWorkflow.eveningReflection.gratitude} onChange={(e) => updateWorkflow({ eveningReflection: { ...currentWorkflow.eveningReflection, gratitude: e.target.value } })} className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl px-4 py-3 text-sm focus:border-[#f78121] text-[#595b61] font-bold" />
+             <input value={localWorkflow.eveningGratitude} onChange={(e) => setLocalWorkflow(prev => ({ ...prev, eveningGratitude: e.target.value }))} onBlur={() => updateWorkflow({ eveningReflection: { ...currentWorkflow.eveningReflection, gratitude: localWorkflow.eveningGratitude } })} className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl px-4 py-3 text-sm focus:border-[#f78121] text-[#595b61] font-bold" />
            </div>
         </div>
 
@@ -211,8 +248,9 @@ const JournalView: React.FC<Props> = ({ data, update, isGuest, onRestricted, isM
         <div className="relative">
            <label className="text-[10px] font-black uppercase tracking-widest text-[#45d0d0] mb-2 block">Tomorrow's Brain Dump</label>
            <textarea 
-             value={currentWorkflow.brainDumpText}
-             onChange={(e) => updateWorkflow({ brainDumpText: e.target.value })}
+             value={localWorkflow.brainDumpText}
+             onChange={(e) => setLocalWorkflow(prev => ({ ...prev, brainDumpText: e.target.value }))}
+             onBlur={() => updateWorkflow({ brainDumpText: localWorkflow.brainDumpText })}
              placeholder="Clear the mind..."
              className="w-full h-32 bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-4 text-sm text-[#595b61] font-bold focus:border-[#f78121] transition-all placeholder:text-[#595b61]/70"
            />
