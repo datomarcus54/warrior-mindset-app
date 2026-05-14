@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { UserData, HealthMetrics, MealAnalysis, WorkoutCategory, WorkoutSession, DailyHealthLog } from '../types';
-import { 
-  Activity, Moon, Clock, Droplet, Camera, Plus, Trash2, 
-  Flame, Wind, Dumbbell, Move, Calendar as CalendarIcon, 
-  ChevronLeft, ChevronRight, Scale, Info, X, Zap, Pill, BarChart2
+import {
+  Activity, Moon, Clock, Droplet, Camera, Plus, Trash2,
+  Flame, Wind, Dumbbell, Move, Calendar as CalendarIcon,
+  ChevronLeft, ChevronRight, Scale, Info, X, Zap, Pill, BarChart2, Save
 } from 'lucide-react';
 import { analyzeMealImage } from '../services/gemini';
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
@@ -209,8 +209,8 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
       )}
 
       {/* Header */}
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8">
-        <div className="w-full md:w-auto">
+      <header className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-8">
+        <div>
             <div className="flex items-center gap-3 mb-2">
               <h2 className="text-4xl md:text-6xl font-black font-brand-header uppercase text-[#f78121] tracking-wider whitespace-nowrap">Body & Energy</h2>
               <button onClick={() => setShowLesson(true)} className="text-[#f78121] hover:text-white transition-colors" aria-label="Warrior Lesson">
@@ -223,6 +223,15 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
             </div>
             <p className="text-xs md:text-sm text-[#45d0d0] font-black uppercase tracking-[0.2em] mt-2">Daily Care</p>
         </div>
+        {!isGuest && (
+          <button
+            onClick={() => updateMetric({})}
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#f78121] text-white font-black uppercase tracking-widest text-xs rounded-lg hover:bg-white hover:text-[#0A3762] transition-all self-start"
+          >
+            <Save size={14} />
+            Save Ageless
+          </button>
+        )}
       </header>
 
       {/* Sub-Nav Tabs */}

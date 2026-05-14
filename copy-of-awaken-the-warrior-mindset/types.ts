@@ -206,6 +206,7 @@ export interface UserData {
   dailyWorkflows: DailyWorkflow[]; // New Journal Data
   lifeWheel: LifeDomain[];
   visionText: string;
+  lastFoundationSave?: string;
   goals: Goal[];
   habits: Habit[];
   challenges: Challenge[];

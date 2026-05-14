@@ -1,8 +1,8 @@
 
 import React, { useState, useCallback, useMemo, memo, useEffect } from 'react';
 import { UserData } from '../types';
-import { 
-  Plus, Trash2, Info, TrendingUp, Landmark, Calendar, X, Lock
+import {
+  Plus, Trash2, Info, TrendingUp, Landmark, Calendar, X, Lock, Save
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
@@ -57,11 +57,11 @@ const FinancialTable = memo(({ title, entries, path, showTarget = true, canAdd =
                 <td className="py-4 md:py-5 px-3 md:px-5 text-xs md:text-sm font-bold text-white">{entry.label}</td>
                 {showTarget && (
                   <td className="py-2 md:py-3 px-3 md:px-5 text-right">
-                    <input type="number" value={`${idx}-target` in localNums ? localNums[`${idx}-target`] : (entry.target || '')} onChange={(e) => setLocalNums(prev => ({ ...prev, [`${idx}-target`]: e.target.value }))} onBlur={(e) => onChangeWrapper([...path, idx.toString()], 'target', e.target.value)} className="w-20 md:w-28 bg-[#eef1f1] border border-[#45d0d0]/20 rounded-lg px-2 md:px-3 py-1.5 md:py-2 text-xs md:text-sm text-right outline-none focus:border-[#f78121] text-[#595b61] font-bold" />
+                    <input type="number" value={`${idx}-target` in localNums ? localNums[`${idx}-target`] : (entry.target || '')} onChange={(e) => { setLocalNums(prev => ({ ...prev, [`${idx}-target`]: e.target.value })); onChangeWrapper([...path, idx.toString()], 'target', e.target.value); }} className="w-20 md:w-28 bg-[#eef1f1] border border-[#45d0d0]/20 rounded-lg px-2 md:px-3 py-1.5 md:py-2 text-xs md:text-sm text-right outline-none focus:border-[#f78121] text-[#595b61] font-bold" />
                   </td>
                 )}
                 <td className="py-2 md:py-3 px-3 md:px-5 text-right">
-                  <input type="number" value={`${idx}-actual` in localNums ? localNums[`${idx}-actual`] : (entry.actual ?? entry.value ?? '')} onChange={(e) => setLocalNums(prev => ({ ...prev, [`${idx}-actual`]: e.target.value }))} onBlur={(e) => onChangeWrapper([...path, idx.toString()], entry.value !== undefined ? 'value' : 'actual', e.target.value)} className="w-20 md:w-28 bg-[#eef1f1] border border-[#45d0d0]/20 rounded-lg px-2 md:px-3 py-1.5 md:py-2 text-xs md:text-sm text-right outline-none focus:border-[#f78121] text-[#595b61] font-bold" />
+                  <input type="number" value={`${idx}-actual` in localNums ? localNums[`${idx}-actual`] : (entry.actual ?? entry.value ?? '')} onChange={(e) => { setLocalNums(prev => ({ ...prev, [`${idx}-actual`]: e.target.value })); onChangeWrapper([...path, idx.toString()], entry.value !== undefined ? 'value' : 'actual', e.target.value); }} className="w-20 md:w-28 bg-[#eef1f1] border border-[#45d0d0]/20 rounded-lg px-2 md:px-3 py-1.5 md:py-2 text-xs md:text-sm text-right outline-none focus:border-[#f78121] text-[#595b61] font-bold" />
                 </td>
                 <td className="py-2 md:py-3 px-3 md:px-5 text-right">
                   <button onClick={() => { if(isGuest) onRestricted(); else removeItem(path, idx); }} className="text-white/50 hover:text-[#f78121] opacity-0 group-hover:opacity-100 transition-all p-1"><Trash2 size={14} /></button>
@@ -184,17 +184,31 @@ const MasteryView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => 
 
       {/* Header */}
       <header className="mb-8">
-        <div>
-          <div className="flex items-center gap-4 mb-2">
-            <h2 className="text-4xl md:text-6xl font-black font-brand-header uppercase text-[#f78121] tracking-wider whitespace-nowrap">Your Finances</h2>
-            <button onClick={() => setShowLesson(true)} className="p-2 bg-gradient-to-br from-white/10 to-white/5 border border-[#f78121]/30 rounded-full hover:text-white text-[#f78121] transition-colors">
-              <Info size={20} />
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-4 mb-2">
+              <h2 className="text-4xl md:text-6xl font-black font-brand-header uppercase text-[#f78121] tracking-wider whitespace-nowrap">Your Finances</h2>
+              <button onClick={() => setShowLesson(true)} className="p-2 bg-gradient-to-br from-white/10 to-white/5 border border-[#f78121]/30 rounded-full hover:text-white text-[#f78121] transition-colors">
+                <Info size={20} />
+              </button>
+            </div>
+            <div className="flex items-center space-x-2 text-[#45d0d0] mt-1">
+               <Calendar size={12} className="md:w-4 md:h-4" />
+               <p className="text-[10px] md:text-xs font-black uppercase tracking-widest">Last Updated: {lastUpdatedFormatted}</p>
+            </div>
+          </div>
+          {!isGuest && (
+            <button
+              onClick={() => {
+                const newData = { ...data.financialData, lastUpdated: new Date().toISOString() };
+                update({ financialData: newData });
+              }}
+              className="flex items-center gap-2 px-5 py-2.5 bg-[#f78121] text-white font-black uppercase tracking-widest text-xs rounded-lg hover:bg-white hover:text-[#0A3762] transition-all self-start"
+            >
+              <Save size={14} />
+              Save Wealth
             </button>
-          </div>
-          <div className="flex items-center space-x-2 text-[#45d0d0] mt-1">
-             <Calendar size={12} className="md:w-4 md:h-4" />
-             <p className="text-[10px] md:text-xs font-black uppercase tracking-widest">Last Updated: {lastUpdatedFormatted}</p>
-          </div>
+          )}
         </div>
       </header>
 

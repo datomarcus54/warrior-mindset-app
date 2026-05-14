@@ -96,6 +96,7 @@ export const INITIAL_USER_DATA: UserData = {
   dailyWorkflows: [],
   lifeWheel: INITIAL_LIFE_DOMAINS,
   visionText: '',
+  lastFoundationSave: undefined,
   goals: [],
   habits: [],
   challenges: [],

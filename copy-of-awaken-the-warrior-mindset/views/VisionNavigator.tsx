@@ -1,8 +1,8 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts';
 import { UserData } from '../types';
 import { DAILY_AFFIRMATIONS } from '../constants';
-import { Sparkles, Quote, Info, X } from 'lucide-react';
+import { Sparkles, Quote, Info, X, Save } from 'lucide-react';
 
 interface Props {
   data: UserData;
@@ -32,6 +32,16 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
   const [isMounted, setIsMounted] = useState(false);
   const [localVisionText, setLocalVisionText] = useState(data.visionText || '');
 
+  const flushRef = useRef<() => void>(() => {});
+  flushRef.current = () => {
+    if (isGuest) return;
+    update({ visionText: localVisionText });
+  };
+
+  useEffect(() => {
+    return () => { flushRef.current(); };
+  }, []);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsMounted(true);
@@ -40,12 +50,22 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    
+
     return () => {
       clearTimeout(timer);
       window.removeEventListener('resize', checkMobile);
     };
   }, []);
+
+  const handleSave = useCallback(() => {
+    if (isGuest) return;
+    update({ visionText: localVisionText, lastFoundationSave: new Date().toISOString() });
+  }, [isGuest, update, localVisionText]);
+
+  const lastSaveFormatted = useMemo(() => {
+    if (!data.lastFoundationSave) return null;
+    return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(data.lastFoundationSave));
+  }, [data.lastFoundationSave]);
 
   const handleDomainChange = (index: number, val: number) => {
     if (isGuest) return;
@@ -165,11 +185,11 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
           )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 mt-8 md:mt-12">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-4 md:gap-6 mt-8 md:mt-12">
           {displayData.map((domain, idx) => (
-            <div key={domain.name} className="bg-white/10 border border-white/20 rounded-xl flex items-center justify-between p-4 md:p-6 shadow-sm">
-              <span className="text-[10px] md:text-xs text-white uppercase font-black tracking-widest truncate mr-3">{domain.displayName}</span>
-              <div className="flex items-center gap-2 shrink-0" onClick={isGuest ? onRestricted : undefined}>
+            <div key={domain.name} className="bg-white/10 border border-white/20 rounded-xl flex flex-col items-center justify-center p-4 md:p-5 gap-3 shadow-sm">
+              <span className="text-[10px] md:text-xs text-white uppercase font-black tracking-widest text-center leading-tight">{domain.displayName}</span>
+              <div className="flex items-center gap-1.5" onClick={isGuest ? onRestricted : undefined}>
                 <input
                   type="number"
                   min="1"
@@ -204,9 +224,22 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
               disabled={isGuest}
             />
         </div>
-        <div className="mt-4 md:mt-6 flex justify-between items-center opacity-80">
-           <span className="text-[10px] md:text-xs text-white/60 uppercase font-black tracking-widest">3-Year Vision</span>
-           <span className="text-[10px] md:text-xs text-[#f78121] uppercase font-black">Saved</span>
+        <div className="mt-4 md:mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] md:text-xs text-white/60 uppercase font-black tracking-widest">3-Year Vision</span>
+            {lastSaveFormatted && (
+              <span className="text-[10px] text-white/40 uppercase font-bold tracking-widest">Last saved: {lastSaveFormatted}</span>
+            )}
+          </div>
+          {!isGuest && (
+            <button
+              onClick={handleSave}
+              className="flex items-center gap-2 px-5 py-2.5 bg-[#f78121] text-white font-black uppercase tracking-widest text-xs rounded-lg hover:bg-white hover:text-[#0A3762] transition-all self-start sm:self-auto"
+            >
+              <Save size={14} />
+              Save Foundation
+            </button>
+          )}
         </div>
       </section>
     </div>
