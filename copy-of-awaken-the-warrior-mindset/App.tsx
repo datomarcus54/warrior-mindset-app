@@ -142,7 +142,7 @@ const App: React.FC = () => {
       'Journal': <JournalView {...props} />,
       'Resilience': <ResilienceView {...props} />,
       'Ageless': <AgelessLiving {...props} />,
-      'Mastery': <MasteryView {...props} />,
+      'Wealth': <MasteryView {...props} />,
       'Tribe': <TribeView {...props} />,
       'Legacy': <LegacyView {...props} />,
       'Community': <CommunityView {...props} />,
@@ -292,7 +292,7 @@ const App: React.FC = () => {
           <NavItem view="Foundation" label="Foundation" />
           <NavItem view="Journal" label="Journal" />
           <NavItem view="Ageless" label="Ageless" />
-          <NavItem view="Mastery" label="Mastery" />
+          <NavItem view="Wealth" label="Wealth" />
           <NavItem view="Resilience" label="Resilience" />
           <NavItem view="Tribe" label="Tribe" />
           <NavItem view="Community" label="Community" />

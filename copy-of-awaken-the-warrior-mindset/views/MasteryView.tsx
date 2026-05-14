@@ -160,7 +160,7 @@ const MasteryView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => 
         <div className="absolute inset-0 z-50 bg-[#0A3762]/90 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center h-[100vh]">
             <Lock size={48} className="text-[#f78121] mb-4" />
             <h3 className="text-2xl font-black uppercase text-white mb-2">Restricted Intel</h3>
-            <p className="text-[#45d0d0] mb-8 max-w-sm">Upgrade to Adept Class to access Financial Mastery.</p>
+            <p className="text-[#45d0d0] mb-8 max-w-sm">Upgrade to Adept Class to access Wealth.</p>
             {!isMobileMode && <button onClick={() => update({ tier: 'Adept' })} className="px-8 py-3 bg-[#f78121] text-white font-black uppercase tracking-widest rounded-lg hover:bg-white hover:text-[#0A3762] transition-all">Unlock Access</button>}
         </div>
       )}
