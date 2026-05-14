@@ -109,7 +109,7 @@ const GoalMaster: React.FC<Props> = ({ data, update }) => {
   const weeklyProgress = weeklyGoals.length > 0 ? (weeklyCompleted / weeklyGoals.length) * 100 : 0;
 
   return (
-    <div className="space-y-12 md:space-y-16 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20 relative">
+    <div className="space-y-12 md:space-y-16 pb-20 relative">
       
       {celebration.show && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-[#001b3d]/95 backdrop-blur-xl animate-bounce">

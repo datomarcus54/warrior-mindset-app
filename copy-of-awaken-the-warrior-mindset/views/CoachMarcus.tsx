@@ -41,7 +41,7 @@ const CoachMarcus: React.FC<Props> = ({ data }) => {
   };
 
   return (
-    <div className="flex flex-col h-full animate-in fade-in zoom-in-95 duration-500 overflow-hidden text-white">
+    <div className="flex flex-col h-full overflow-hidden text-white">
       {/* Dynamic Background / Header Integration */}
       <div className="mb-6 md:mb-8 p-4 md:p-6 bg-[#595b61] border-2 border-[#f78121]/50 rounded-xl flex items-center justify-between shadow-lg relative overflow-hidden transition-all duration-300 ease-in-out hover:-translate-y-1">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#f78121] to-[#e67e22] opacity-50" />

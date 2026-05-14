@@ -22,7 +22,7 @@ const RelationalFinancial: React.FC<Props> = ({ data, update }) => {
   };
 
   return (
-    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
+    <div className="space-y-10 pb-10">
       <div className="flex p-1.5 glass-card shadow-inner">
         <button 
           onClick={() => setActiveTab('Relational')}

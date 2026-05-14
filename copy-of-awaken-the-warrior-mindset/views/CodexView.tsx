@@ -60,7 +60,7 @@ const CodexView: React.FC<Props> = () => {
   );
 
   return (
-    <div className="space-y-12 md:space-y-16 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-24">
+    <div className="space-y-12 md:space-y-16 pb-24">
       {showPrivacy && (
         <LegalModal title="Privacy Protocol" onClose={() => setShowPrivacy(false)}>
            <div className="space-y-4"><p><strong>1. Data Collection & Usage</strong><br/>We collect email addresses solely for secure account authentication.</p></div>

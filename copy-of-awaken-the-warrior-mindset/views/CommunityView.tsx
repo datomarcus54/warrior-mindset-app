@@ -113,7 +113,7 @@ const CommunityView: React.FC<Props> = ({ data, update }) => {
   const fullLeaderboard = [...baseLeaderboard, userEntry].sort((a, b) => b.points - a.points);
 
   return (
-    <div className="space-y-10 md:space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
+    <div className="space-y-10 md:space-y-12 pb-20">
       
       {showLesson && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-[#001b3d]/90 backdrop-blur-sm animate-in fade-in duration-300">

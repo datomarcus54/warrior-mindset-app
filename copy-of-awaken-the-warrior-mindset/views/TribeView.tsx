@@ -21,7 +21,7 @@ const TribeView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => vo
   const isUnlocked = data.tier === 'Legend';
 
   return (
-    <div className="space-y-12 md:space-y-16 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20 relative">
+    <div className="space-y-12 md:space-y-16 pb-20 relative">
       {!isUnlocked && (
         <div className="absolute inset-0 z-50 bg-[#0A3762]/90 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center h-[100vh]">
             <Lock size={48} className="text-[#f78121] mb-4" />

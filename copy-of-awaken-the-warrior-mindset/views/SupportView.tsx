@@ -83,7 +83,7 @@ const SupportView: React.FC<Props> = ({ isGuest, onRestricted }) => {
   );
 
   return (
-    <div className="space-y-12 md:space-y-16 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20 md:px-8 lg:px-16">
+    <div className="space-y-12 md:space-y-16 pb-20 md:px-8 lg:px-16">
       
       {/* Warrior Lesson Popup */}
       {showLesson && (

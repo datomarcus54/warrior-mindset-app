@@ -46,7 +46,7 @@ const ChallengeNavigator: React.FC<Props> = ({ data, update }) => {
   const activeChallenge = activeChallengeIndex !== null ? data.challenges[activeChallengeIndex] : null;
 
   return (
-    <div className="space-y-10 md:space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
+    <div className="space-y-10 md:space-y-12 pb-10">
       {showLesson && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-[#001b3d]/90 backdrop-blur-sm animate-in fade-in duration-300">
            <div className="relative w-full max-w-md bg-[#595b61] p-8 md:p-10 border border-[#45d0d0]/30 rounded-2xl shadow-2xl">

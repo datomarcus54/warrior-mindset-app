@@ -45,7 +45,7 @@ const LegacyView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => v
   };
 
   return (
-    <div className="space-y-12 md:space-y-16 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10 md:px-16 lg:px-24">
+    <div className="space-y-12 md:space-y-16 pb-10 md:px-16 lg:px-24">
       
       {showLesson && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-[#001b3d]/90 backdrop-blur-sm animate-in fade-in duration-300">

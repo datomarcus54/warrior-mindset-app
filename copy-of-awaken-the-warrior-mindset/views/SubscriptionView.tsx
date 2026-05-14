@@ -18,7 +18,7 @@ const SubscriptionView: React.FC<Props> = ({ data, update }) => {
   const xpNeeded = nextRank ? nextRank.minPoints - data.warriorCodePoints : 0;
 
   return (
-    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
+    <div className="space-y-12 pb-10">
       
       {/* HEADER SECTION */}
       <div className="text-center space-y-4">
