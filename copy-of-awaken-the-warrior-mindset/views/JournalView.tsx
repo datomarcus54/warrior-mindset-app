@@ -36,13 +36,9 @@ const JournalView: React.FC<Props> = ({ data, update, isGuest, onRestricted, isM
 
   const updateWorkflow = (updates: Partial<DailyWorkflow>) => {
     if (isGuest) { onRestricted(); return; }
-    let xpDelta = 0;
     const newWorkflow = { ...currentWorkflow, ...updates };
     const otherWorkflows = data.dailyWorkflows?.filter(w => w.date !== today) || [];
-    update({ 
-      dailyWorkflows: [newWorkflow, ...otherWorkflows],
-      warriorCodePoints: data.warriorCodePoints + xpDelta
-    });
+    update({ dailyWorkflows: [newWorkflow, ...otherWorkflows] });
   };
 
   const togglePriority = (idx: number) => {
@@ -73,7 +69,7 @@ const JournalView: React.FC<Props> = ({ data, update, isGuest, onRestricted, isM
   );
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
+    <div className="space-y-8 pb-20">
        
        {showLesson && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-[#001b3d]/90 backdrop-blur-sm animate-in fade-in duration-300">
