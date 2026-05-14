@@ -332,15 +332,29 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
               <button onClick={() => updateMetric({ waterIntakeMl: data.health.waterIntakeMl + 250 })} className="px-6 py-3 bg-blue-600 text-white font-black text-sm uppercase rounded-xl active:scale-95 shadow-lg">+250ml</button>
            </section>
 
+           <button
+             onClick={() => fileInputRef.current?.click()}
+             disabled={isAnalyzing}
+             className="w-full glass-card p-6 md:p-8 border-2 border-[#f78121]/40 hover:border-[#f78121] transition-all duration-300 flex flex-col items-center justify-center gap-3 group disabled:opacity-60"
+           >
+             <div className="p-4 bg-[#f78121]/10 rounded-full border border-[#f78121]/30 group-hover:bg-[#f78121]/20 transition-colors">
+               <Camera size={28} className="text-[#f78121]" />
+             </div>
+             {isAnalyzing ? (
+               <span className="text-sm font-black uppercase tracking-widest text-white animate-pulse">Scanning Bio-Data...</span>
+             ) : (
+               <>
+                 <span className="text-sm font-black uppercase tracking-widest text-white">Log a Meal</span>
+                 <span className="text-xs text-white/50 font-bold">Take or upload a photo — AI analyses the nutrition</span>
+               </>
+             )}
+           </button>
+           <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageCapture} />
+
            <section className="glass-card p-6 md:p-8 transition-all duration-300 ease-in-out hover:-translate-y-1">
               <div className="flex justify-between items-center mb-6">
                  <h3 className="text-lg font-black uppercase tracking-widest text-white">Nutritional Intel</h3>
-                 <button onClick={() => fileInputRef.current?.click()} className="text-[#f78121] flex items-center text-xs font-black uppercase tracking-widest hover:text-white transition-colors">
-                    <Camera size={16} className="mr-2" /> Log Fuel
-                 </button>
-                 <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageCapture} />
               </div>
-              {isAnalyzing && <div className="p-4 text-center text-white font-black uppercase tracking-widest animate-pulse">Scanning Bio-Data...</div>}
               <div className="space-y-4">
                  {todayMeals.map((meal, i) => (
                     <div key={i} className="bg-black/20 border border-white/10 rounded-xl p-4 flex justify-between items-center shadow-sm">
