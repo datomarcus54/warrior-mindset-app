@@ -265,7 +265,7 @@ const MasteryView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => 
                     formatter={(value: number, name: string) => [`RM ${value.toLocaleString()}`, name === 'actual' ? 'Actual' : 'Target']}
                   />
                   <Legend formatter={(value) => value === 'actual' ? 'Actual' : 'Target'} wrapperStyle={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#94a3b8' }} />
-                  <Bar dataKey="target" fill="#4b6383" radius={[4, 4, 0, 0]} barSize={28} />
+                  <Bar dataKey="target" fill="#6B9FD4" radius={[4, 4, 0, 0]} barSize={28} />
                   <Bar dataKey="actual" fill="#f78121" radius={[4, 4, 0, 0]} barSize={28} />
                </BarChart>
             </ResponsiveContainer>

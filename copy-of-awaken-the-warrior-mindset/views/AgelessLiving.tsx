@@ -35,6 +35,31 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
     setTimeout(() => setIsMounted(true), 500);
   }, []);
 
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    if (!isGuest && data.health.healthDate !== today) {
+      updateMetric({
+        healthDate: today,
+        waterIntakeMl: 0,
+        vo2MaxToday: false,
+        strengthToday: false,
+        stabilityToday: false,
+        rpeToday: 0,
+        timeAsleepHours: 0,
+        timeAsleepMinutes: 0,
+        timeInBedHours: 0,
+        timeInBedMinutes: 0,
+        deepSleepHours: 0,
+        deepSleepMinutes: 0,
+        remSleepHours: 0,
+        remSleepMinutes: 0,
+        sleepScore: 0,
+        supplementLogsToday: {},
+        fastingStart: null,
+      });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const updateMetric = (updates: Partial<HealthMetrics>) => {
     if (isGuest) return;
     const newHealth = { ...data.health, ...updates };

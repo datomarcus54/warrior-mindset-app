@@ -30,12 +30,14 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
   const [activeLesson, setActiveLesson] = useState<keyof typeof LESSONS | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const [localVisionText, setLocalVisionText] = useState(data.visionText || '');
+  const [localVision1Year, setLocalVision1Year] = useState(data.vision1Year || '');
+  const [localVision3Year, setLocalVision3Year] = useState(data.vision3Year || '');
+  const [localVision5Year, setLocalVision5Year] = useState(data.vision5Year || '');
 
   const flushRef = useRef<() => void>(() => {});
   flushRef.current = () => {
     if (isGuest) return;
-    update({ visionText: localVisionText });
+    update({ vision1Year: localVision1Year, vision3Year: localVision3Year, vision5Year: localVision5Year });
   };
 
   useEffect(() => {
@@ -59,8 +61,8 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
 
   const handleSave = useCallback(() => {
     if (isGuest) return;
-    update({ visionText: localVisionText, lastFoundationSave: new Date().toISOString() });
-  }, [isGuest, update, localVisionText]);
+    update({ vision1Year: localVision1Year, vision3Year: localVision3Year, vision5Year: localVision5Year, lastFoundationSave: new Date().toISOString() });
+  }, [isGuest, update, localVision1Year, localVision3Year, localVision5Year]);
 
   const lastSaveFormatted = useMemo(() => {
     if (!data.lastFoundationSave) return null;
@@ -214,19 +216,27 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
                 <Info size={20} />
             </button>
         </div>
-        <div onClick={isGuest ? onRestricted : undefined}>
-            <textarea
-              value={localVisionText}
-              onChange={(e) => { if (isGuest) { onRestricted(); return; } setLocalVisionText(e.target.value); }}
-              onBlur={() => { if (!isGuest) update({ visionText: localVisionText }); }}
-              placeholder="Dictate the future state. Be precise. Be lethal. What does the victory look like?"
-              className="w-full h-64 md:h-80 warrior-input rounded-xl p-6 md:p-8 text-base md:text-lg text-[#595b61] font-bold focus:outline-none focus:border-[#f78121] transition-all placeholder:text-[#595b61]/70 leading-relaxed disabled:opacity-50"
-              disabled={isGuest}
-            />
+        <div className="space-y-6 md:space-y-8" onClick={isGuest ? onRestricted : undefined}>
+          {[
+            { label: '1 Year', value: localVision1Year, set: setLocalVision1Year, key: 'vision1Year' as const, placeholder: 'Where will you be in 12 months? Be specific.' },
+            { label: '3 Years', value: localVision3Year, set: setLocalVision3Year, key: 'vision3Year' as const, placeholder: 'What does victory look like in 3 years?' },
+            { label: '5 Years', value: localVision5Year, set: setLocalVision5Year, key: 'vision5Year' as const, placeholder: 'Dictate the 5-year future state. Be lethal.' },
+          ].map(({ label, value, set, key, placeholder }) => (
+            <div key={key}>
+              <label className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-[#45d0d0] block mb-3">{label}</label>
+              <textarea
+                value={value}
+                onChange={(e) => { if (isGuest) { onRestricted(); return; } set(e.target.value); }}
+                onBlur={() => { if (!isGuest) update({ [key]: value }); }}
+                placeholder={placeholder}
+                disabled={isGuest}
+                className="w-full h-40 md:h-48 warrior-input rounded-xl p-4 md:p-6 text-sm md:text-base text-[#595b61] font-bold focus:outline-none focus:border-[#f78121] transition-all placeholder:text-[#595b61]/70 leading-relaxed disabled:opacity-50"
+              />
+            </div>
+          ))}
         </div>
-        <div className="mt-4 md:mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="mt-6 md:mt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex flex-col gap-1">
-            <span className="text-[10px] md:text-xs text-white/60 uppercase font-black tracking-widest">3-Year Vision</span>
             {lastSaveFormatted && (
               <span className="text-[10px] text-white/40 uppercase font-bold tracking-widest">Last saved: {lastSaveFormatted}</span>
             )}

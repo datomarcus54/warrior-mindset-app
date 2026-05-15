@@ -119,6 +119,7 @@ export interface HealthMetrics {
   remSleepMinutes: number;
   sleepScore: number;
   medicines: string[];
+  healthDate?: string;
 }
 
 export interface Relationship {
@@ -206,7 +207,13 @@ export interface UserData {
   dailyWorkflows: DailyWorkflow[]; // New Journal Data
   lifeWheel: LifeDomain[];
   visionText: string;
+  vision1Year?: string;
+  vision3Year?: string;
+  vision5Year?: string;
   lastFoundationSave?: string;
+  journalStreak: number;
+  lastJournalSaveDate: string;
+  lastJournalSave?: string;
   goals: Goal[];
   habits: Habit[];
   challenges: Challenge[];

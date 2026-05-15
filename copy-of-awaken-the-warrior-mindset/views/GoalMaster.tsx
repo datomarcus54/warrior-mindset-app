@@ -11,10 +11,10 @@ interface Props {
 const CATEGORIES: Goal['category'][] = ['Weekly', 'Short-Term', 'Mid-Range', 'Big Vision'];
 
 const TIMELINE_CONFIG = {
-  'Weekly': { label: '7 Days', width: '15%' },
-  'Short-Term': { label: '6 Months', width: '40%' },
-  'Mid-Range': { label: '1 Year', width: '70%' },
-  'Big Vision': { label: '3 Years', width: '100%' }
+  'Weekly': { label: 'Weekly', width: '15%' },
+  'Short-Term': { label: '3 Months', width: '40%' },
+  'Mid-Range': { label: '6 Months', width: '70%' },
+  'Big Vision': { label: '12 Months', width: '100%' }
 };
 
 const COACH_PHRASES = {
@@ -149,7 +149,7 @@ const GoalMaster: React.FC<Props> = ({ data, update }) => {
             <h3 className="text-sm font-black uppercase tracking-widest text-white flex items-center gap-2">
                <Calendar size={16} className="text-[#f78121]" /> Tactical Horizon
             </h3>
-            <span className="text-[10px] font-bold text-[#45d0d0] uppercase tracking-widest">{activeCategory} View</span>
+            <span className="text-[10px] font-bold text-[#45d0d0] uppercase tracking-widest">{TIMELINE_CONFIG[activeCategory].label} View</span>
          </div>
          <div className="relative h-2 bg-white/10 rounded-full mb-8">
             <div 
@@ -169,7 +169,7 @@ const GoalMaster: React.FC<Props> = ({ data, update }) => {
                  onClick={() => setActiveCategory(cat)}
                  className={`flex-1 py-3 text-[10px] md:text-xs font-black uppercase tracking-widest rounded-lg transition-all ${activeCategory === cat ? 'bg-[#f78121] text-white shadow-md' : 'text-[#595b61] hover:bg-white/50'}`}
                >
-                 {cat === 'Big Vision' ? 'Vision' : cat}
+                 {TIMELINE_CONFIG[cat as Goal['category']].label}
                </button>
             ))}
          </div>

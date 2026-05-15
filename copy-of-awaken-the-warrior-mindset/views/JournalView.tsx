@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { UserData, DailyWorkflow } from '../types';
-import { Check, Lock, Info, X } from 'lucide-react';
+import { Check, Lock, Info, X, Flame, Save } from 'lucide-react';
 
 interface Props {
   data: UserData;
@@ -95,6 +95,33 @@ const JournalView: React.FC<Props> = ({ data, update, isGuest, onRestricted, isM
     update({ dailyWorkflows: [newWorkflow, ...otherWorkflows] });
   };
 
+  const handleSave = () => {
+    if (isGuest) return;
+    const lw = localWorkflow;
+    const newWorkflow = {
+      ...currentWorkflow,
+      mindsetLog: lw.mindsetLog,
+      priorities: currentWorkflow.priorities.map((p, i) => ({ ...p, text: lw.priorityTexts[i] ?? p.text })),
+      definitionOfDone: lw.definitionOfDone,
+      afternoonMomentum: lw.afternoonMomentum,
+      afternoonPriority: lw.afternoonPriority,
+      eveningReflection: { ...currentWorkflow.eveningReflection, win: lw.eveningWin, drain: lw.eveningDrain, adjustment: lw.eveningAdjustment, gratitude: lw.eveningGratitude },
+      brainDumpText: lw.brainDumpText,
+    };
+    const otherWorkflows = data.dailyWorkflows?.filter(w => w.date !== today) || [];
+    const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+    let newStreak: number;
+    if (data.lastJournalSaveDate === today) { newStreak = data.journalStreak; }
+    else if (data.lastJournalSaveDate === yesterdayStr) { newStreak = (data.journalStreak || 0) + 1; }
+    else { newStreak = 1; }
+    update({ dailyWorkflows: [newWorkflow, ...otherWorkflows], journalStreak: newStreak, lastJournalSaveDate: today, lastJournalSave: new Date().toISOString() });
+  };
+
+  const lastSaveFormatted = data.lastJournalSave
+    ? new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(data.lastJournalSave))
+    : null;
+
   const togglePriority = (idx: number) => {
     const newPriorities = currentWorkflow.priorities.map((p, i) => ({
       ...p,
@@ -150,6 +177,23 @@ const JournalView: React.FC<Props> = ({ data, update, isGuest, onRestricted, isM
         </div>
         <p className="text-xs md:text-sm text-[#45d0d0] font-black uppercase tracking-[0.2em] mt-2">Daily Execution System</p>
       </header>
+
+      {/* Streak Card */}
+      <section className="glass-card p-5 md:p-6 flex items-center gap-5 transition-all duration-300 ease-in-out hover:-translate-y-1">
+        <div className="w-14 h-14 bg-[#f78121]/10 rounded-full flex items-center justify-center border-2 border-[#f78121]/40 shrink-0">
+          <Flame size={28} className="text-[#f78121]" />
+        </div>
+        <div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-4xl font-black text-[#f78121]">{data.journalStreak || 0}</span>
+            <span className="text-xs font-black uppercase tracking-widest text-white/60">Day Streak</span>
+          </div>
+          {lastSaveFormatted
+            ? <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest mt-1">Last saved: {lastSaveFormatted}</p>
+            : <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest mt-1">Save your first entry to start your streak</p>
+          }
+        </div>
+      </section>
 
       {/* I. DAILY INTENTION */}
       <section className="glass-card p-6 md:p-8 transition-all duration-300 ease-in-out hover:-translate-y-1">
@@ -273,7 +317,7 @@ const JournalView: React.FC<Props> = ({ data, update, isGuest, onRestricted, isM
 
         <div className="relative">
            <label className="text-[10px] font-black uppercase tracking-widest text-[#45d0d0] mb-2 block">Tomorrow's Brain Dump</label>
-           <textarea 
+           <textarea
              value={localWorkflow.brainDumpText}
              onChange={(e) => setLocalWorkflow(prev => ({ ...prev, brainDumpText: e.target.value }))}
              onBlur={() => updateWorkflow({ brainDumpText: localWorkflow.brainDumpText })}
@@ -282,6 +326,23 @@ const JournalView: React.FC<Props> = ({ data, update, isGuest, onRestricted, isM
            />
         </div>
       </section>
+
+      {!isGuest && (
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">
+          <div>
+            {lastSaveFormatted && (
+              <span className="text-[10px] text-white/40 uppercase font-bold tracking-widest">Last saved: {lastSaveFormatted}</span>
+            )}
+          </div>
+          <button
+            onClick={handleSave}
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#f78121] text-white font-black uppercase tracking-widest text-xs rounded-lg hover:bg-white hover:text-[#0A3762] transition-all self-start sm:self-auto"
+          >
+            <Save size={14} />
+            Save Journal
+          </button>
+        </div>
+      )}
 
     </div>
   );
