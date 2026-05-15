@@ -99,7 +99,14 @@ const App: React.FC = () => {
         const mergedHealth = { ...INITIAL_USER_DATA.health, ...(parsed.health || {}) };
         const mergedPosts = parsed.communityPosts || INITIAL_USER_DATA.communityPosts;
         const mergedWorkflows = parsed.dailyWorkflows || [];
-        setUserData({ ...INITIAL_USER_DATA, ...parsed, health: mergedHealth, communityPosts: mergedPosts, dailyWorkflows: mergedWorkflows });
+        const pf = parsed.financialData || {};
+        const mergedFinancialData = {
+          ...INITIAL_USER_DATA.financialData,
+          ...pf,
+          assets: { ...INITIAL_USER_DATA.financialData.assets, ...(pf.assets || {}) },
+          liabilities: { ...INITIAL_USER_DATA.financialData.liabilities, ...(pf.liabilities || {}) },
+        };
+        setUserData({ ...INITIAL_USER_DATA, ...parsed, health: mergedHealth, communityPosts: mergedPosts, dailyWorkflows: mergedWorkflows, financialData: mergedFinancialData });
         const today = new Date().toISOString().split('T')[0];
         if (parsed.lastAffirmationSeen !== today) setShowAffirmation(true);
       } catch (e) { setShowAffirmation(true); }

@@ -4,7 +4,7 @@ import { UserData } from '../types';
 import {
   Plus, Trash2, Info, TrendingUp, Landmark, Calendar, X, Lock, Save
 } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 
 interface FinancialTableProps {
   title: string;
@@ -99,9 +99,8 @@ const MasteryView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => 
     let current = newData;
     for (let i = 0; i < path.length - 1; i++) current = current[path[i]];
     const targetIdx = parseInt(path[path.length - 1]);
-    if (Array.isArray(current)) { current[targetIdx][field] = parseFloat(value) || 0; } 
+    if (Array.isArray(current)) { current[targetIdx][field] = parseFloat(value) || 0; }
     else { current[path[path.length - 1]][field] = parseFloat(value) || 0; }
-    newData.lastUpdated = new Date().toISOString();
     update({ financialData: newData });
   }, [data.financialData, update]);
 
@@ -143,13 +142,21 @@ const MasteryView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => 
   }, [data.financialData]);
 
   const projections = useMemo(() => {
-    const { netCashFlow, netWorth } = stats;
-    const p6m = netWorth + (netCashFlow * 6);
-    const p1y = netWorth + (netCashFlow * 12);
-    const p3y = netWorth + (netCashFlow * 36);
-    const p5y = netWorth + (netCashFlow * 60);
-    return [{ label: '6 Months', value: p6m }, { label: '1 Year', value: p1y }, { label: '3 Years', value: p3y }, { label: '5 Years', value: p5y }];
-  }, [stats]);
+    const sum = (items: any[], key: string) => items.reduce((acc, item) => acc + (item[key] || 0), 0);
+    const targetIncome = sum(data.financialData.income, 'target');
+    const targetExpenses =
+      sum(data.financialData.expenses.fixed, 'target') +
+      sum(data.financialData.expenses.mandatory, 'target') +
+      sum(data.financialData.expenses.variable, 'target');
+    const targetCashFlow = targetIncome - targetExpenses;
+    const { netCashFlow: actualCashFlow, netWorth } = stats;
+    return [
+      { label: '6 Mo', actual: netWorth + actualCashFlow * 6, target: netWorth + targetCashFlow * 6 },
+      { label: '1 Yr',  actual: netWorth + actualCashFlow * 12, target: netWorth + targetCashFlow * 12 },
+      { label: '3 Yr',  actual: netWorth + actualCashFlow * 36, target: netWorth + targetCashFlow * 36 },
+      { label: '5 Yr',  actual: netWorth + actualCashFlow * 60, target: netWorth + targetCashFlow * 60 },
+    ];
+  }, [stats, data.financialData]);
 
   const lastUpdatedFormatted = useMemo(() => {
     const date = new Date(data.financialData.lastUpdated);
@@ -249,16 +256,17 @@ const MasteryView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => 
         <div style={{ width: '100%', height: '350px', minHeight: '350px' }} className="bg-[#595b61] border-2 border-[#f78121]/50 rounded-xl p-4">
           {isMounted ? (
             <ResponsiveContainer width="100%" height="100%">
-               <BarChart data={projections} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+               <BarChart data={projections} margin={{ top: 20, right: 30, left: 20, bottom: 5 }} barGap={4}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
                   <XAxis dataKey="label" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
                   <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `RM${(value/1000).toFixed(0)}k`} />
-                  <Tooltip 
+                  <Tooltip
                     contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#f8fafc' }}
-                    itemStyle={{ color: '#f78121' }}
-                    formatter={(value: number) => [`RM ${value.toLocaleString()}`, 'Net Worth']}
+                    formatter={(value: number, name: string) => [`RM ${value.toLocaleString()}`, name === 'actual' ? 'Actual' : 'Target']}
                   />
-                  <Bar dataKey="value" fill="#f78121" radius={[4, 4, 0, 0]} barSize={40} />
+                  <Legend formatter={(value) => value === 'actual' ? 'Actual' : 'Target'} wrapperStyle={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#94a3b8' }} />
+                  <Bar dataKey="target" fill="#4b6383" radius={[4, 4, 0, 0]} barSize={28} />
+                  <Bar dataKey="actual" fill="#f78121" radius={[4, 4, 0, 0]} barSize={28} />
                </BarChart>
             </ResponsiveContainer>
           ) : (
