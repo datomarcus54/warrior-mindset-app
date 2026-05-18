@@ -92,6 +92,14 @@ export interface DailyHealthLog {
   fastingHours: number; // 0 if no fast completed that day
   fastingCompleted: boolean;
   sleepScore?: number;
+  timeAsleepHours?: number;
+  timeAsleepMinutes?: number;
+  timeInBedHours?: number;
+  timeInBedMinutes?: number;
+  deepSleepHours?: number;
+  deepSleepMinutes?: number;
+  remSleepHours?: number;
+  remSleepMinutes?: number;
 }
 
 export interface HealthMetrics {

@@ -35,10 +35,13 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
     setTimeout(() => setIsMounted(true), 500);
   }, []);
 
+  // Daily reset — called directly (not via updateMetric) so it doesn't write
+  // false sleepScore: 0 entries into dailyLogs.
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0];
     if (!isGuest && data.health.healthDate !== today) {
-      updateMetric({
+      const newHealth: HealthMetrics = {
+        ...data.health,
         healthDate: today,
         waterIntakeMl: 0,
         vo2MaxToday: false,
@@ -56,23 +59,37 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
         sleepScore: 0,
         supplementLogsToday: {},
         fastingStart: null,
-      });
+        lastUpdated: new Date().toISOString(),
+      };
+      update({ health: newHealth });
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const SLEEP_LOG_KEYS = [
+    'sleepScore', 'timeAsleepHours', 'timeAsleepMinutes',
+    'timeInBedHours', 'timeInBedMinutes',
+    'deepSleepHours', 'deepSleepMinutes',
+    'remSleepHours', 'remSleepMinutes',
+  ] as const;
 
   const updateMetric = (updates: Partial<HealthMetrics>) => {
     if (isGuest) return;
     const newHealth = { ...data.health, ...updates };
-    newHealth.lastUpdated = new Date().toISOString(); 
-    if (updates.sleepScore !== undefined) {
-       const today = new Date().toISOString().split('T')[0];
-       const logs = newHealth.dailyLogs || []; 
-       const logIndex = logs.findIndex(l => l.date === today);
-       const todayLog = logIndex >= 0 ? logs[logIndex] : { date: today, workouts: [], fastingHours: 0, fastingCompleted: false };
-       const updatedLog = { ...todayLog, sleepScore: updates.sleepScore };
-       let newLogs = [...logs];
-       if (logIndex >= 0) newLogs[logIndex] = updatedLog; else newLogs = [updatedLog, ...newLogs];
-       newHealth.dailyLogs = newLogs;
+    newHealth.lastUpdated = new Date().toISOString();
+    // Write any sleep fields into today's dailyLog so they survive the daily reset.
+    const sleepDelta: Record<string, number> = {};
+    for (const k of SLEEP_LOG_KEYS) {
+      if (k in updates) sleepDelta[k] = (updates as any)[k];
+    }
+    if (Object.keys(sleepDelta).length > 0) {
+      const today = new Date().toISOString().split('T')[0];
+      const logs = newHealth.dailyLogs || [];
+      const logIndex = logs.findIndex(l => l.date === today);
+      const base = logIndex >= 0 ? logs[logIndex] : { date: today, workouts: [], fastingHours: 0, fastingCompleted: false };
+      const updatedLog = { ...base, ...sleepDelta };
+      const newLogs = [...logs];
+      if (logIndex >= 0) newLogs[logIndex] = updatedLog; else newLogs.unshift(updatedLog);
+      newHealth.dailyLogs = newLogs;
     }
     update({ health: newHealth });
   };
