@@ -28,6 +28,12 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
   const [isMounted, setIsMounted] = useState(false);
   
   const [newMedicine, setNewMedicine] = useState('');
+  const [showManualMeal, setShowManualMeal] = useState(false);
+  const [manualDesc, setManualDesc] = useState('');
+  const [manualCals, setManualCals] = useState('');
+  const [manualProtein, setManualProtein] = useState('');
+  const [manualCarbs, setManualCarbs] = useState('');
+  const [manualFats, setManualFats] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -217,6 +223,24 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
     reader.readAsDataURL(file);
   };
 
+  const handleManualMealLog = () => {
+    if (isGuest) { onRestricted(); return; }
+    const cals = parseInt(manualCals) || 0;
+    if (!manualDesc.trim() || cals === 0) return;
+    const newMeal: MealAnalysis = {
+      timestamp: new Date().toISOString(),
+      calories: cals,
+      protein: parseInt(manualProtein) || 0,
+      carbs: parseInt(manualCarbs) || 0,
+      fats: parseInt(manualFats) || 0,
+      description: manualDesc.trim(),
+    };
+    updateMetric({ mealLogs: [newMeal, ...data.health.mealLogs] });
+    update({ warriorCodePoints: data.warriorCodePoints + 10 });
+    setManualDesc(''); setManualCals(''); setManualProtein(''); setManualCarbs(''); setManualFats('');
+    setShowManualMeal(false);
+  };
+
   const lastUpdatedFormatted = useMemo(() => {
     const date = new Date(data.health.lastUpdated || new Date());
     return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(date);
@@ -381,6 +405,59 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
                  </div>
               </div>
               <button onClick={() => updateMetric({ waterIntakeMl: data.health.waterIntakeMl + 250 })} className="px-6 py-3 bg-blue-600 text-white font-black text-sm uppercase rounded-xl active:scale-95 shadow-lg">+250ml</button>
+           </section>
+
+           {/* Manual Meal Log */}
+           <section className="glass-card p-6 md:p-8 transition-all duration-300 ease-in-out hover:-translate-y-1">
+             <button
+               onClick={() => { if (isGuest) { onRestricted(); return; } setShowManualMeal(p => !p); }}
+               className="w-full flex items-center justify-between"
+             >
+               <div className="flex items-center gap-3">
+                 <div className="p-2 bg-[#45d0d0]/10 rounded-xl border border-[#45d0d0]/30">
+                   <Plus size={18} className="text-[#45d0d0]" />
+                 </div>
+                 <span className="text-sm font-black uppercase tracking-widest text-white">Log Meal Manually</span>
+               </div>
+               <span className="text-white/40 text-xs font-black">{showManualMeal ? '▲' : '▼'}</span>
+             </button>
+             {showManualMeal && (
+               <div className="mt-6 space-y-4">
+                 <input
+                   type="text"
+                   value={manualDesc}
+                   onChange={(e) => setManualDesc(e.target.value)}
+                   placeholder="Meal description (e.g. Chicken rice bowl)"
+                   className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl px-4 py-3 text-sm text-[#595b61] font-bold focus:border-[#f78121] outline-none placeholder:text-[#595b61]/70"
+                 />
+                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                   {([
+                     { label: 'Calories (kcal)', val: manualCals, set: setManualCals },
+                     { label: 'Protein (g)', val: manualProtein, set: setManualProtein },
+                     { label: 'Carbs (g)', val: manualCarbs, set: setManualCarbs },
+                     { label: 'Fats (g)', val: manualFats, set: setManualFats },
+                   ] as const).map(({ label, val, set }) => (
+                     <div key={label}>
+                       <label className="text-[10px] font-black uppercase tracking-widest text-[#45d0d0] block mb-1">{label}</label>
+                       <input
+                         type="number"
+                         value={val}
+                         onChange={(e) => set(e.target.value)}
+                         placeholder="0"
+                         className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl px-3 py-2 text-sm text-center text-[#595b61] font-bold focus:border-[#f78121] outline-none"
+                       />
+                     </div>
+                   ))}
+                 </div>
+                 <button
+                   onClick={handleManualMealLog}
+                   disabled={!manualDesc.trim() || !manualCals}
+                   className="w-full py-4 bg-[#45d0d0] text-white font-black uppercase tracking-widest text-sm rounded-xl hover:bg-[#3ababa] transition-all disabled:opacity-50 active:scale-[0.98]"
+                 >
+                   Log Meal
+                 </button>
+               </div>
+             )}
            </section>
 
            <label
