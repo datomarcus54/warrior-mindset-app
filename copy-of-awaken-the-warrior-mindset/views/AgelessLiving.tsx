@@ -731,6 +731,69 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
               ))}
             </div>
           </div>
+
+          {/* Body Composition */}
+          <div className="mt-10 pt-10 border-t border-white/10">
+            <h3 className="text-xl md:text-2xl font-black uppercase tracking-tighter text-white mb-8 flex items-center gap-3">
+              <Scale size={22} className="text-[#f78121]" /> Body Composition
+            </h3>
+            {(() => {
+              const wKg = data.health.weightKg || 0;
+              const hCm = data.health.heightCm || 0;
+              const bfp = data.health.bodyFatPercent || 0;
+              const unit = data.health.weightUnit || 'kg';
+              const toDisplay = (kg: number) => unit === 'lbs' ? +(kg * 2.20462).toFixed(1) : +kg.toFixed(1);
+              const fatMassKg = +(wKg * bfp / 100).toFixed(1);
+              const leanMassKg = +(wKg - fatMassKg).toFixed(1);
+              const bmi = hCm > 0 ? +(wKg / Math.pow(hCm / 100, 2)).toFixed(1) : 0;
+              const bmiCat = bmi === 0 ? '—' : bmi < 18.5 ? 'Underweight' : bmi < 25 ? 'Normal' : bmi < 30 ? 'Overweight' : 'Obese';
+              const bmiColor = bmi === 0 ? 'text-white/40' : bmi < 18.5 ? 'text-blue-400' : bmi < 25 ? 'text-[#45d0d0]' : bmi < 30 ? 'text-yellow-400' : 'text-[#f78121]';
+              return (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    {[
+                      { label: 'Age (yrs)', value: data.health.age || '', onChange: (v: string) => updateMetric({ age: parseInt(v) || 0 }), placeholder: '0' },
+                      { label: 'Height (cm)', value: data.health.heightCm || '', onChange: (v: string) => updateMetric({ heightCm: parseInt(v) || 0 }), placeholder: '0' },
+                      { label: `Weight (${unit})`, value: unit === 'kg' ? (data.health.weightKg || '') : (data.health.weightKg ? toDisplay(data.health.weightKg) : ''), onChange: (v: string) => updateMetric({ weightKg: unit === 'kg' ? (parseFloat(v) || 0) : +((parseFloat(v) || 0) / 2.20462).toFixed(2) }), placeholder: '0' },
+                      { label: 'Body Fat %', value: data.health.bodyFatPercent || '', onChange: (v: string) => updateMetric({ bodyFatPercent: parseFloat(v) || 0 }), placeholder: '0' },
+                    ].map(({ label, value, onChange, placeholder }) => (
+                      <div key={label}>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-[#45d0d0] block mb-2">{label}</label>
+                        <input
+                          type="number"
+                          value={value}
+                          onChange={(e) => onChange(e.target.value)}
+                          placeholder={placeholder}
+                          className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl px-3 py-3 text-base text-center text-[#595b61] font-bold focus:border-[#f78121] outline-none"
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={() => updateMetric({ weightUnit: unit === 'kg' ? 'lbs' : 'kg' })}
+                    className="text-[10px] font-black uppercase tracking-widest text-[#45d0d0] border border-[#45d0d0]/30 px-4 py-2 rounded-lg hover:bg-[#45d0d0]/10 transition-colors"
+                  >
+                    Switch to {unit === 'kg' ? 'lbs' : 'kg'}
+                  </button>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
+                    {[
+                      { label: 'Fat Mass', value: wKg > 0 ? `${toDisplay(fatMassKg)} ${unit}` : '—', color: 'text-[#f78121]' },
+                      { label: 'Lean Mass', value: wKg > 0 ? `${toDisplay(leanMassKg)} ${unit}` : '—', color: 'text-[#45d0d0]' },
+                      { label: 'BMI', value: bmi > 0 ? bmi.toString() : '—', color: bmiColor },
+                      { label: 'Category', value: bmiCat, color: bmiColor },
+                    ].map(({ label, value, color }) => (
+                      <div key={label} className="bg-black/20 border border-white/10 rounded-xl p-4 text-center">
+                        <div className="text-[10px] font-black uppercase tracking-widest text-white/50 mb-2">{label}</div>
+                        <div className={`text-lg font-black ${color}`}>{value}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
         </section>
       )}
 

@@ -128,6 +128,11 @@ export interface HealthMetrics {
   sleepScore: number;
   medicines: string[];
   healthDate?: string;
+  age?: number;
+  heightCm?: number;
+  weightKg?: number;
+  weightUnit?: 'kg' | 'lbs';
+  bodyFatPercent?: number;
 }
 
 export interface Relationship {

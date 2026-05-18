@@ -140,6 +140,11 @@ export const INITIAL_USER_DATA: UserData = {
     sleepScore: 0,
     medicines: [],
     healthDate: '',
+    age: 0,
+    heightCm: 0,
+    weightKg: 0,
+    weightUnit: 'kg',
+    bodyFatPercent: 0,
   },
   relationships: [],
   financialPillars: [
