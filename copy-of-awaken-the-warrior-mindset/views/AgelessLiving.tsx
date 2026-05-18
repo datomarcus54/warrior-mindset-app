@@ -224,9 +224,9 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
 
   const sleepTrendData = useMemo(() => {
     return (data.health.dailyLogs || [])
-        .filter(l => l.sleepScore !== undefined)
+        .filter(l => (l.sleepScore ?? 0) > 0)
         .sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-        .slice(-7)
+        .slice(-14)
         .map(l => ({ date: l.date.slice(5), score: l.sleepScore }));
   }, [data.health.dailyLogs]);
 
