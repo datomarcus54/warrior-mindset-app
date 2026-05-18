@@ -383,10 +383,9 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
               <button onClick={() => updateMetric({ waterIntakeMl: data.health.waterIntakeMl + 250 })} className="px-6 py-3 bg-blue-600 text-white font-black text-sm uppercase rounded-xl active:scale-95 shadow-lg">+250ml</button>
            </section>
 
-           <button
-             onClick={() => fileInputRef.current?.click()}
-             disabled={isAnalyzing}
-             className="w-full glass-card p-6 md:p-8 border-2 border-[#f78121]/40 hover:border-[#f78121] transition-all duration-300 flex flex-col items-center justify-center gap-3 group disabled:opacity-60"
+           <label
+             htmlFor="meal-upload-input"
+             className={`w-full glass-card p-6 md:p-8 border-2 border-[#f78121]/40 hover:border-[#f78121] transition-all duration-300 flex flex-col items-center justify-center gap-3 group cursor-pointer${isAnalyzing ? ' opacity-60 pointer-events-none' : ''}`}
            >
              <div className="p-4 bg-[#f78121]/10 rounded-full border border-[#f78121]/30 group-hover:bg-[#f78121]/20 transition-colors">
                <Camera size={28} className="text-[#f78121]" />
@@ -399,8 +398,16 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
                  <span className="text-xs text-white/50 font-bold">Take or upload a photo — AI analyses the nutrition</span>
                </>
              )}
-           </button>
-           <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageCapture} />
+           </label>
+           <input
+             id="meal-upload-input"
+             type="file"
+             accept="image/*"
+             className="hidden"
+             ref={fileInputRef}
+             onChange={handleImageCapture}
+             disabled={isAnalyzing}
+           />
 
            <section className="glass-card p-6 md:p-8 transition-all duration-300 ease-in-out hover:-translate-y-1">
               <div className="flex justify-between items-center mb-6">
