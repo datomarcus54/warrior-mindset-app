@@ -26,6 +26,7 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
   const [workoutMins, setWorkoutMins] = useState<string>('');
   const [workoutCals, setWorkoutCals] = useState<string>('');
   const [currentMonthDate, setCurrentMonthDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(() => new Date().toLocaleDateString('en-CA'));
   const [isMounted, setIsMounted] = useState(false);
   
   const [newMedicine, setNewMedicine] = useState('');
@@ -49,7 +50,7 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
   // Daily reset — called directly (not via updateMetric) so it doesn't write
   // false sleepScore: 0 entries into dailyLogs.
   useEffect(() => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toLocaleDateString('en-CA');
     if (!isGuest && data.health.healthDate !== today) {
       const newHealth: HealthMetrics = {
         ...data.health,
@@ -93,7 +94,7 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
       if (k in updates) sleepDelta[k] = (updates as any)[k];
     }
     if (Object.keys(sleepDelta).length > 0) {
-      const today = new Date().toISOString().split('T')[0];
+      const today = new Date().toLocaleDateString('en-CA');
       const logs = newHealth.dailyLogs || [];
       const logIndex = logs.findIndex(l => l.date === today);
       const base = logIndex >= 0 ? logs[logIndex] : { date: today, workouts: [], fastingHours: 0, fastingCompleted: false };
@@ -124,7 +125,7 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
     return () => clearInterval(timer);
   }, [data.health.fastingStart, data.health.fastingWindowHours]);
 
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = new Date().toLocaleDateString('en-CA');
   const getTodayLog = (): DailyHealthLog => {
     const logs = data.health.dailyLogs || [];
     const found = logs.find(l => l.date === todayStr);
@@ -170,6 +171,16 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
   const todayTotalCarbs   = todayMeals.reduce((acc, curr) => acc + (curr.carbs   || 0), 0);
   const todayTotalFats    = todayMeals.reduce((acc, curr) => acc + (curr.fats    || 0), 0);
   const netCalories = todayConsumedCals - todayTotalBurned;
+
+  const isViewingToday = selectedDate === todayStr;
+  const selectedLog = (data.health.dailyLogs || []).find(l => l.date === selectedDate);
+  const selectedMeals = data.health.mealLogs.filter(log => log.timestamp.startsWith(selectedDate));
+  const selectedConsumedCals = selectedMeals.reduce((acc, curr) => acc + curr.calories, 0);
+  const selectedTotalProtein = selectedMeals.reduce((acc, curr) => acc + (curr.protein || 0), 0);
+  const selectedTotalCarbs   = selectedMeals.reduce((acc, curr) => acc + (curr.carbs   || 0), 0);
+  const selectedTotalFats    = selectedMeals.reduce((acc, curr) => acc + (curr.fats    || 0), 0);
+  const selectedBurned = selectedLog?.workouts?.reduce((acc, curr) => acc + curr.calories, 0) || 0;
+  const selectedNetCalories = selectedConsumedCals - selectedBurned;
 
   const getCategoryTotal = (cat: WorkoutCategory) => {
     const sessions = todayLog.workouts.filter(w => w.category === cat);
@@ -386,22 +397,28 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
            <section className="glass-card p-6 md:p-8 transition-all duration-300 ease-in-out hover:-translate-y-1">
               <header className="flex items-center space-x-3 mb-6">
                  <div className="p-3 bg-[#f78121]/10 rounded-xl"><Scale className="text-[#f78121]" size={20} /></div>
-                 <h3 className="text-lg font-black uppercase tracking-widest text-white">Fuel Balance (Today)</h3>
+                 <h3 className="text-lg font-black uppercase tracking-widest text-white">Fuel Balance</h3>
               </header>
+              {!isViewingToday && (
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-xs font-black uppercase tracking-widest text-white/50">{selectedDate}</p>
+                  <button onClick={() => setSelectedDate(todayStr)} className="text-xs font-black uppercase tracking-widest text-[#f78121] border border-[#f78121]/30 px-3 py-1 rounded-lg hover:bg-[#f78121]/10 transition-all">Back to Today</button>
+                </div>
+              )}
               <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-0 text-center mb-8">
                  <div className="flex-1">
                     <div className="text-xs text-white/70 font-black uppercase tracking-widest mb-1">Intake</div>
-                    <div className="text-3xl font-black text-[#45d0d0]">{todayConsumedCals} <span className="text-sm text-white/50">kcal</span></div>
+                    <div className="text-3xl font-black text-[#45d0d0]">{selectedConsumedCals} <span className="text-sm text-white/50">kcal</span></div>
                  </div>
                  <div className="text-white/50 font-bold text-xl hidden md:block">-</div>
                  <div className="flex-1">
                     <div className="text-xs text-white/70 font-black uppercase tracking-widest mb-1">Output</div>
-                    <div className="text-3xl font-black text-[#f78121]">{todayTotalBurned} <span className="text-sm text-white/50">kcal</span></div>
+                    <div className="text-3xl font-black text-[#f78121]">{selectedBurned} <span className="text-sm text-white/50">kcal</span></div>
                  </div>
                  <div className="text-white/50 font-bold text-xl hidden md:block">=</div>
                  <div className="flex-1 bg-black/20 py-4 rounded-xl w-full md:w-auto border border-white/10">
                     <div className="text-xs text-white/70 font-black uppercase tracking-widest mb-1">Net Load</div>
-                    <div className={`text-4xl font-black ${netCalories > 0 ? 'text-white' : 'text-blue-400'}`}>{netCalories} <span className="text-sm text-white/50">kcal</span></div>
+                    <div className={`text-4xl font-black ${selectedNetCalories > 0 ? 'text-white' : 'text-blue-400'}`}>{selectedNetCalories} <span className="text-sm text-white/50">kcal</span></div>
                  </div>
               </div>
            </section>
@@ -496,16 +513,25 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
            {/* Meal Cards + Daily Totals */}
            <section className="glass-card p-6 md:p-8 transition-all duration-300 ease-in-out hover:-translate-y-1">
               <h3 className="text-lg font-black uppercase tracking-widest text-white mb-6">Nutrition Summary</h3>
-              {todayMeals.length === 0 ? (
-                <EmptyState
-                  heading="No Meals Logged Today"
-                  message="Fuel your body with intention. Log your first meal to begin tracking your nutrition."
-                  buttonLabel="Log Your First Meal"
-                  onButtonClick={() => setShowManualMeal(true)}
-                />
+              {selectedMeals.length === 0 ? (
+                isViewingToday ? (
+                  <EmptyState
+                    heading="No Meals Logged Today"
+                    message="Fuel your body with intention. Log your first meal to begin tracking your nutrition."
+                    buttonLabel="Log Your First Meal"
+                    onButtonClick={() => setShowManualMeal(true)}
+                  />
+                ) : (
+                  <EmptyState
+                    heading="No Meals on This Day"
+                    message="No meals were logged for this date."
+                    buttonLabel="Back to Today"
+                    onButtonClick={() => setSelectedDate(todayStr)}
+                  />
+                )
               ) : (
                 <div className="space-y-4">
-                  {todayMeals.map((meal, i) => {
+                  {selectedMeals.map((meal, i) => {
                     const timeStr = new Intl.DateTimeFormat('en-US', { hour: '2-digit', minute: '2-digit' }).format(new Date(meal.timestamp));
                     const typeColors: Record<string, string> = {
                       Breakfast: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
@@ -520,7 +546,7 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
                           <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border ${badgeClass}`}>
                             {meal.mealType || 'Meal'}
                           </span>
-                          <span className="text-[10px] text-white/40 font-bold">Today, {timeStr}</span>
+                          <span className="text-[10px] text-white/40 font-bold">{isViewingToday ? 'Today' : selectedDate}, {timeStr}</span>
                         </div>
                         <div className="text-sm font-bold text-white mb-3">{meal.description}</div>
                         <div className="text-3xl font-black text-[#45d0d0] mb-4">
@@ -544,15 +570,15 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
 
                   {/* Daily Totals */}
                   <div className="bg-[#f78121]/10 border border-[#f78121]/30 rounded-2xl p-5 mt-2">
-                    <div className="text-xs font-black uppercase tracking-widest text-[#f78121] mb-3">Today's Totals</div>
+                    <div className="text-xs font-black uppercase tracking-widest text-[#f78121] mb-3">{isViewingToday ? "Today's" : selectedDate} Totals</div>
                     <div className="text-3xl font-black text-white mb-4">
-                      {todayConsumedCals} <span className="text-sm font-bold text-white/40">kcal</span>
+                      {selectedConsumedCals} <span className="text-sm font-bold text-white/40">kcal</span>
                     </div>
                     <div className="grid grid-cols-3 gap-3">
                       {[
-                        { label: 'Protein', val: todayTotalProtein },
-                        { label: 'Carbs',   val: todayTotalCarbs },
-                        { label: 'Fats',    val: todayTotalFats },
+                        { label: 'Protein', val: selectedTotalProtein },
+                        { label: 'Carbs',   val: selectedTotalCarbs },
+                        { label: 'Fats',    val: selectedTotalFats },
                       ].map(({ label, val }) => (
                         <div key={label} className="bg-white/5 rounded-xl p-3 text-center">
                           <div className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">{label}</div>
@@ -605,139 +631,197 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
                 </div>
             </div>
 
-            <div className="flex justify-center mb-10 md:mb-16">
-                <div className="relative w-40 h-40 md:w-56 md:h-56 flex items-center justify-center">
-                    <svg viewBox="0 0 160 160" className="w-full h-full -rotate-90 overflow-visible">
-                        <circle cx="80" cy="80" r="70" stroke="#334155" strokeWidth="8" fill="transparent" />
-                        <circle cx="80" cy="80" r="70" stroke="#6366F1" strokeWidth="8" 
-                            strokeDasharray={`${(data.health.sleepScore / 100) * 440} 440`} 
-                            strokeLinecap="round" fill="transparent" className="transition-all duration-1000" />
-                    </svg>
-                    <div className="absolute flex flex-col items-center">
-                        <input 
-                            type="number" 
-                            value={data.health.sleepScore || ''}
-                            onChange={(e) => updateMetric({ sleepScore: Math.min(100, Math.max(0, parseInt(e.target.value) || 0)) })}
-                            placeholder="0"
-                            className="text-5xl md:text-6xl font-black text-indigo-400 bg-transparent text-center w-24 md:w-36 outline-none font-brand-header"
-                        />
-                        <span className="text-[10px] md:text-xs text-white font-black uppercase tracking-widest mt-1 md:mt-2">Score</span>
+            {isViewingToday ? (
+              <>
+                <div className="flex justify-center mb-10 md:mb-16">
+                    <div className="relative w-40 h-40 md:w-56 md:h-56 flex items-center justify-center">
+                        <svg viewBox="0 0 160 160" className="w-full h-full -rotate-90 overflow-visible">
+                            <circle cx="80" cy="80" r="70" stroke="#334155" strokeWidth="8" fill="transparent" />
+                            <circle cx="80" cy="80" r="70" stroke="#6366F1" strokeWidth="8"
+                                strokeDasharray={`${(data.health.sleepScore / 100) * 440} 440`}
+                                strokeLinecap="round" fill="transparent" className="transition-all duration-1000" />
+                        </svg>
+                        <div className="absolute flex flex-col items-center">
+                            <input
+                                type="number"
+                                value={data.health.sleepScore || ''}
+                                onChange={(e) => updateMetric({ sleepScore: Math.min(100, Math.max(0, parseInt(e.target.value) || 0)) })}
+                                placeholder="0"
+                                className="text-5xl md:text-6xl font-black text-indigo-400 bg-transparent text-center w-24 md:w-36 outline-none font-brand-header"
+                            />
+                            <span className="text-[10px] md:text-xs text-white font-black uppercase tracking-widest mt-1 md:mt-2">Score</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-            
-            {/* SAFE MOUNT CHART for Sleep Trends */}
-            <div className="mb-12 bg-black/20 rounded-2xl p-4 border border-white/10">
-               <div className="flex items-center gap-2 mb-4">
-                  <BarChart2 size={16} className="text-indigo-400" />
-                  <span className="text-xs font-black uppercase tracking-widest text-indigo-400">Recovery Trend</span>
-               </div>
-               {/* SAFETY WRAPPER */}
-               {isMounted && sleepTrendData.length === 0 ? (
-                 <EmptyState
-                   heading="No Sleep Data Yet"
-                   message="Rest is your foundation for growth. Log your first night to begin tracking your recovery."
-                   buttonLabel="Log Your Sleep"
-                   onButtonClick={() => {}}
-                 />
-               ) : (
-                 <div style={{ width: '100%', height: '200px', minHeight: '200px' }}>
-                   {isMounted && sleepTrendData.length > 0 ? (
+
+                {/* SAFE MOUNT CHART for Sleep Trends */}
+                <div className="mb-12 bg-black/20 rounded-2xl p-4 border border-white/10">
+                   <div className="flex items-center gap-2 mb-4">
+                      <BarChart2 size={16} className="text-indigo-400" />
+                      <span className="text-xs font-black uppercase tracking-widest text-indigo-400">Recovery Trend</span>
+                   </div>
+                   {isMounted && sleepTrendData.length === 0 ? (
+                     <EmptyState
+                       heading="No Sleep Data Yet"
+                       message="Rest is your foundation for growth. Log your first night to begin tracking your recovery."
+                       buttonLabel="Log Your Sleep"
+                       onButtonClick={() => {}}
+                     />
+                   ) : (
+                     <div style={{ width: '100%', height: '200px', minHeight: '200px' }}>
+                       {isMounted && sleepTrendData.length > 0 ? (
+                          <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={sleepTrendData}>
+                              <defs>
+                                <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="#6366F1" stopOpacity={0.8}/>
+                                  <stop offset="95%" stopColor="#6366F1" stopOpacity={0}/>
+                                </linearGradient>
+                              </defs>
+                              <Tooltip contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#f8fafc' }} />
+                              <Area type="monotone" dataKey="score" stroke="#6366F1" fillOpacity={1} fill="url(#colorScore)" />
+                              <XAxis dataKey="date" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
+                            </AreaChart>
+                          </ResponsiveContainer>
+                       ) : (
+                          <div className="w-full h-full flex items-center justify-center text-white/20 text-xs font-bold uppercase tracking-widest bg-white/5 rounded-xl">
+                             Loading Chart...
+                          </div>
+                       )}
+                     </div>
+                   )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-8">
+                    <div className="bg-black/20 rounded-2xl p-6 md:p-8 border border-white/10 shadow-sm">
+                        <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6 text-white">
+                            <Clock size={16} className="md:w-5 md:h-5" />
+                            <span className="text-xs md:text-sm font-black uppercase tracking-widest">Time In Bed</span>
+                        </div>
+                        <div className="flex items-center space-x-3 md:space-x-4">
+                            <div className="flex-1 relative">
+                                <input type="number" value={data.health.timeInBedHours || ''} onChange={(e) => updateMetric({ timeInBedHours: parseInt(e.target.value) || 0 })} placeholder="0" className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-3 md:p-4 text-center font-bold text-lg md:text-xl focus:border-indigo-400 text-[#595b61]" />
+                                <span className="absolute right-2 md:right-3 top-3 md:top-4 text-[10px] md:text-xs text-[#595b61] font-black">HR</span>
+                            </div>
+                            <div className="flex-1 relative">
+                                <input type="number" value={data.health.timeInBedMinutes || ''} onChange={(e) => updateMetric({ timeInBedMinutes: parseInt(e.target.value) || 0 })} placeholder="0" className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-3 md:p-4 text-center font-bold text-lg md:text-xl focus:border-indigo-400 text-[#595b61]" />
+                                <span className="absolute right-2 md:right-3 top-3 md:top-4 text-[10px] md:text-xs text-[#595b61] font-black">MIN</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-black/20 rounded-2xl p-6 md:p-8 border border-white/10 shadow-sm">
+                        <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6 text-indigo-400">
+                            <Moon size={16} className="md:w-5 md:h-5" />
+                            <span className="text-xs md:text-sm font-black uppercase tracking-widest">Actual Sleep</span>
+                        </div>
+                        <div className="flex items-center space-x-3 md:space-x-4">
+                            <div className="flex-1 relative">
+                                <input type="number" value={data.health.timeAsleepHours || ''} onChange={(e) => updateMetric({ timeAsleepHours: parseInt(e.target.value) || 0 })} className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-3 md:p-4 text-center font-bold text-lg md:text-xl focus:border-indigo-400 text-[#595b61]" />
+                                <span className="absolute right-2 md:right-3 top-3 md:top-4 text-[10px] md:text-xs text-[#595b61] font-black">HR</span>
+                            </div>
+                            <div className="flex-1 relative">
+                                <input type="number" value={data.health.timeAsleepMinutes || ''} onChange={(e) => updateMetric({ timeAsleepMinutes: parseInt(e.target.value) || 0 })} className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-3 md:p-4 text-center font-bold text-lg md:text-xl focus:border-indigo-400 text-[#595b61]" />
+                                <span className="absolute right-2 md:right-3 top-3 md:top-4 text-[10px] md:text-xs text-[#595b61] font-black">MIN</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-black/20 rounded-2xl p-6 md:p-8 border border-white/10 shadow-sm">
+                        <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6 text-indigo-300">
+                            <Zap size={16} className="md:w-5 md:h-5" />
+                            <span className="text-xs md:text-sm font-black uppercase tracking-widest">Deep Sleep</span>
+                        </div>
+                        <div className="flex items-center space-x-3 md:space-x-4">
+                            <div className="flex-1 relative">
+                                <input type="number" value={data.health.deepSleepHours || ''} onChange={(e) => updateMetric({ deepSleepHours: parseInt(e.target.value) || 0 })} className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-3 md:p-4 text-center font-bold text-lg md:text-xl focus:border-indigo-400 text-[#595b61]" />
+                                <span className="absolute right-2 md:right-3 top-3 md:top-4 text-[10px] md:text-xs text-[#595b61] font-black">HR</span>
+                            </div>
+                            <div className="flex-1 relative">
+                                <input type="number" value={data.health.deepSleepMinutes || ''} onChange={(e) => updateMetric({ deepSleepMinutes: parseInt(e.target.value) || 0 })} className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-3 md:p-4 text-center font-bold text-lg md:text-xl focus:border-indigo-400 text-[#595b61]" />
+                                <span className="absolute right-2 md:right-3 top-3 md:top-4 text-[10px] md:text-xs text-[#595b61] font-black">MIN</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-black/20 rounded-2xl p-6 md:p-8 border border-white/10 shadow-sm">
+                        <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6 text-sky-400">
+                            <Activity size={16} className="md:w-5 md:h-5" />
+                            <span className="text-xs md:text-sm font-black uppercase tracking-widest">REM Sleep</span>
+                        </div>
+                        <div className="flex items-center space-x-3 md:space-x-4">
+                            <div className="flex-1 relative">
+                                <input type="number" value={data.health.remSleepHours || ''} onChange={(e) => updateMetric({ remSleepHours: parseInt(e.target.value) || 0 })} className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-3 md:p-4 text-center font-bold text-lg md:text-xl focus:border-indigo-400 text-[#595b61]" />
+                                <span className="absolute right-2 md:right-3 top-3 md:top-4 text-[10px] md:text-xs text-[#595b61] font-black">HR</span>
+                            </div>
+                            <div className="flex-1 relative">
+                                <input type="number" value={data.health.remSleepMinutes || ''} onChange={(e) => updateMetric({ remSleepMinutes: parseInt(e.target.value) || 0 })} className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-3 md:p-4 text-center font-bold text-lg md:text-xl focus:border-indigo-400 text-[#595b61]" />
+                                <span className="absolute right-2 md:right-3 top-3 md:top-4 text-[10px] md:text-xs text-[#595b61] font-black">MIN</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center justify-between mb-6">
+                  <p className="text-xs font-black uppercase tracking-widest text-white/50">{selectedDate}</p>
+                  <button onClick={() => setSelectedDate(todayStr)} className="text-xs font-black uppercase tracking-widest text-[#f78121] border border-[#f78121]/30 px-3 py-1.5 rounded-lg hover:bg-[#f78121]/10 transition-all">Back to Today</button>
+                </div>
+
+                {selectedLog && (selectedLog.sleepScore || 0) > 0 ? (
+                  <div className="space-y-4 mb-8">
+                    <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-2xl p-6 text-center">
+                      <div className="text-6xl font-black text-indigo-400 mb-1">{selectedLog.sleepScore}</div>
+                      <div className="text-xs font-black uppercase tracking-widest text-white/50">Sleep Score</div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      {[
+                        { label: 'Time In Bed',  h: selectedLog.timeInBedHours  || 0, m: selectedLog.timeInBedMinutes  || 0 },
+                        { label: 'Actual Sleep', h: selectedLog.timeAsleepHours || 0, m: selectedLog.timeAsleepMinutes || 0 },
+                        { label: 'Deep Sleep',   h: selectedLog.deepSleepHours  || 0, m: selectedLog.deepSleepMinutes  || 0 },
+                        { label: 'REM Sleep',    h: selectedLog.remSleepHours   || 0, m: selectedLog.remSleepMinutes   || 0 },
+                      ].map(({ label, h, m }) => (
+                        <div key={label} className="bg-black/20 border border-white/10 rounded-xl p-4 text-center">
+                          <div className="text-[10px] font-black uppercase tracking-widest text-white/50 mb-2">{label}</div>
+                          <div className="text-xl font-black text-white">{h}h {m}m</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mb-8">
+                    <EmptyState
+                      heading="No Sleep Data Yet"
+                      message="Rest is your foundation for growth. Log your first night to begin tracking your recovery."
+                      buttonLabel="Log Your Sleep"
+                      onButtonClick={() => setSelectedDate(todayStr)}
+                    />
+                  </div>
+                )}
+
+                {isMounted && sleepTrendData.length > 0 && (
+                  <div className="bg-black/20 rounded-2xl p-4 border border-white/10">
+                    <div className="flex items-center gap-2 mb-4">
+                      <BarChart2 size={16} className="text-indigo-400" />
+                      <span className="text-xs font-black uppercase tracking-widest text-indigo-400">Recovery Trend</span>
+                    </div>
+                    <div style={{ width: '100%', height: '200px', minHeight: '200px' }}>
                       <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={sleepTrendData}>
                           <defs>
-                            <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                            <linearGradient id="colorScore2" x1="0" y1="0" x2="0" y2="1">
                               <stop offset="5%" stopColor="#6366F1" stopOpacity={0.8}/>
                               <stop offset="95%" stopColor="#6366F1" stopOpacity={0}/>
                             </linearGradient>
                           </defs>
                           <Tooltip contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#f8fafc' }} />
-                          <Area type="monotone" dataKey="score" stroke="#6366F1" fillOpacity={1} fill="url(#colorScore)" />
+                          <Area type="monotone" dataKey="score" stroke="#6366F1" fillOpacity={1} fill="url(#colorScore2)" />
                           <XAxis dataKey="date" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
                         </AreaChart>
                       </ResponsiveContainer>
-                   ) : (
-                      <div className="w-full h-full flex items-center justify-center text-white/20 text-xs font-bold uppercase tracking-widest bg-white/5 rounded-xl">
-                         Loading Chart...
-                      </div>
-                   )}
-                 </div>
-               )}
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-8">
-                {/* Time In Bed */}
-                <div className="bg-black/20 rounded-2xl p-6 md:p-8 border border-white/10 shadow-sm">
-                    <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6 text-white">
-                        <Clock size={16} className="md:w-5 md:h-5" />
-                        <span className="text-xs md:text-sm font-black uppercase tracking-widest">Time In Bed</span>
                     </div>
-                    <div className="flex items-center space-x-3 md:space-x-4">
-                        <div className="flex-1 relative">
-                            <input type="number" value={data.health.timeInBedHours || ''} onChange={(e) => updateMetric({ timeInBedHours: parseInt(e.target.value) || 0 })} placeholder="0" className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-3 md:p-4 text-center font-bold text-lg md:text-xl focus:border-indigo-400 text-[#595b61]" />
-                            <span className="absolute right-2 md:right-3 top-3 md:top-4 text-[10px] md:text-xs text-[#595b61] font-black">HR</span>
-                        </div>
-                        <div className="flex-1 relative">
-                            <input type="number" value={data.health.timeInBedMinutes || ''} onChange={(e) => updateMetric({ timeInBedMinutes: parseInt(e.target.value) || 0 })} placeholder="0" className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-3 md:p-4 text-center font-bold text-lg md:text-xl focus:border-indigo-400 text-[#595b61]" />
-                            <span className="absolute right-2 md:right-3 top-3 md:top-4 text-[10px] md:text-xs text-[#595b61] font-black">MIN</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Actual Sleep */}
-                <div className="bg-black/20 rounded-2xl p-6 md:p-8 border border-white/10 shadow-sm">
-                    <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6 text-indigo-400">
-                        <Moon size={16} className="md:w-5 md:h-5" />
-                        <span className="text-xs md:text-sm font-black uppercase tracking-widest">Actual Sleep</span>
-                    </div>
-                    <div className="flex items-center space-x-3 md:space-x-4">
-                         <div className="flex-1 relative">
-                            <input type="number" value={data.health.timeAsleepHours || ''} onChange={(e) => updateMetric({ timeAsleepHours: parseInt(e.target.value) || 0 })} className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-3 md:p-4 text-center font-bold text-lg md:text-xl focus:border-indigo-400 text-[#595b61]" />
-                            <span className="absolute right-2 md:right-3 top-3 md:top-4 text-[10px] md:text-xs text-[#595b61] font-black">HR</span>
-                        </div>
-                        <div className="flex-1 relative">
-                            <input type="number" value={data.health.timeAsleepMinutes || ''} onChange={(e) => updateMetric({ timeAsleepMinutes: parseInt(e.target.value) || 0 })} className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-3 md:p-4 text-center font-bold text-lg md:text-xl focus:border-indigo-400 text-[#595b61]" />
-                            <span className="absolute right-2 md:right-3 top-3 md:top-4 text-[10px] md:text-xs text-[#595b61] font-black">MIN</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Deep Sleep */}
-                <div className="bg-black/20 rounded-2xl p-6 md:p-8 border border-white/10 shadow-sm">
-                    <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6 text-indigo-300">
-                        <Zap size={16} className="md:w-5 md:h-5" />
-                        <span className="text-xs md:text-sm font-black uppercase tracking-widest">Deep Sleep</span>
-                    </div>
-                    <div className="flex items-center space-x-3 md:space-x-4">
-                         <div className="flex-1 relative">
-                            <input type="number" value={data.health.deepSleepHours || ''} onChange={(e) => updateMetric({ deepSleepHours: parseInt(e.target.value) || 0 })} className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-3 md:p-4 text-center font-bold text-lg md:text-xl focus:border-indigo-400 text-[#595b61]" />
-                            <span className="absolute right-2 md:right-3 top-3 md:top-4 text-[10px] md:text-xs text-[#595b61] font-black">HR</span>
-                        </div>
-                        <div className="flex-1 relative">
-                            <input type="number" value={data.health.deepSleepMinutes || ''} onChange={(e) => updateMetric({ deepSleepMinutes: parseInt(e.target.value) || 0 })} className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-3 md:p-4 text-center font-bold text-lg md:text-xl focus:border-indigo-400 text-[#595b61]" />
-                            <span className="absolute right-2 md:right-3 top-3 md:top-4 text-[10px] md:text-xs text-[#595b61] font-black">MIN</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* REM Sleep */}
-                <div className="bg-black/20 rounded-2xl p-6 md:p-8 border border-white/10 shadow-sm">
-                    <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6 text-sky-400">
-                        <Activity size={16} className="md:w-5 md:h-5" />
-                        <span className="text-xs md:text-sm font-black uppercase tracking-widest">REM Sleep</span>
-                    </div>
-                    <div className="flex items-center space-x-3 md:space-x-4">
-                         <div className="flex-1 relative">
-                            <input type="number" value={data.health.remSleepHours || ''} onChange={(e) => updateMetric({ remSleepHours: parseInt(e.target.value) || 0 })} className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-3 md:p-4 text-center font-bold text-lg md:text-xl focus:border-indigo-400 text-[#595b61]" />
-                            <span className="absolute right-2 md:right-3 top-3 md:top-4 text-[10px] md:text-xs text-[#595b61] font-black">HR</span>
-                        </div>
-                        <div className="flex-1 relative">
-                            <input type="number" value={data.health.remSleepMinutes || ''} onChange={(e) => updateMetric({ remSleepMinutes: parseInt(e.target.value) || 0 })} className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-3 md:p-4 text-center font-bold text-lg md:text-xl focus:border-indigo-400 text-[#595b61]" />
-                            <span className="absolute right-2 md:right-3 top-3 md:top-4 text-[10px] md:text-xs text-[#595b61] font-black">MIN</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                  </div>
+                )}
+              </>
+            )}
         </section>
       )}
 
@@ -881,17 +965,29 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
           <div className="grid grid-cols-7 gap-1 md:gap-2">
               {calendarData.map((day, i) => {
                 if (!day) return <div key={`blank-${i}`} className="aspect-square" />;
-                
-                const hasActivity = hasData(day.log);
-                const isToday = day.dateStr === todayStr;
 
-                let activeColor = 'bg-[#f78121]'; 
+                const hasNutritionDot = activeTab === 'Nutrition' && data.health.mealLogs.some(m => m.timestamp.startsWith(day.dateStr));
+                const hasActivity = hasData(day.log) || hasNutritionDot;
+                const isToday = day.dateStr === todayStr;
+                const isSelected = day.dateStr === selectedDate;
+
+                let activeColor = 'bg-[#f78121]';
                 if (activeTab === 'Fasting') activeColor = 'bg-[#45d0d0]';
                 if (activeTab === 'Sleep') activeColor = 'bg-indigo-500';
 
                 return (
-                    <div key={day.dateStr} className={`aspect-square rounded-lg md:rounded-xl flex flex-col items-center justify-center relative border transition-all ${isToday ? 'border-[#f78121] bg-white/10 shadow-sm' : 'border-transparent bg-white/5'}`}>
-                      <span className={`text-[10px] md:text-xs font-bold ${isToday ? 'text-white' : 'text-white/50'}`}>{day.dayNum}</span>
+                    <div
+                      key={day.dateStr}
+                      onClick={() => setSelectedDate(day.dateStr)}
+                      className={`aspect-square rounded-lg md:rounded-xl flex flex-col items-center justify-center relative border transition-all cursor-pointer ${
+                        isToday
+                          ? 'border-[#f78121] bg-white/10 shadow-sm'
+                          : isSelected
+                          ? 'border-white/50 bg-white/15 shadow-sm'
+                          : 'border-transparent bg-white/5 hover:bg-white/10'
+                      }`}
+                    >
+                      <span className={`text-[10px] md:text-xs font-bold ${isToday || isSelected ? 'text-white' : 'text-white/50'}`}>{day.dayNum}</span>
                       {hasActivity && (
                           <div className={`w-1.5 h-1.5 rounded-full mt-1 ${activeColor}`} />
                       )}
