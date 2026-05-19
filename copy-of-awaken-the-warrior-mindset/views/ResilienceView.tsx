@@ -1,8 +1,9 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { UserData, FailureLog } from '../types';
 import ChallengeNavigator from './ChallengeNavigator';
 import { Brain, Sparkles, Trash2, ArrowRight, AlertTriangle, Zap, History, Info, X } from 'lucide-react';
+import EmptyState from './EmptyState';
 
 const LESSONS = {
   'MINDSET': { title: "Cognitive Reconfiguration", text: "Master your internal command center. Your thoughts are your first battlefield; win there, and all else follows." },
@@ -10,6 +11,7 @@ const LESSONS = {
 };
 
 const ResilienceView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => void; isGuest: boolean; onRestricted: () => void }> = ({ data, update, isGuest, onRestricted }) => {
+  const eventInputRef = useRef<HTMLInputElement>(null);
   const [distorted, setDistorted] = useState('');
   const [balanced, setBalanced] = useState('');
   const [activeLesson, setActiveLesson] = useState<keyof typeof LESSONS | null>(null);
@@ -95,7 +97,7 @@ const ResilienceView: React.FC<{ data: UserData; update: (u: Partial<UserData>) 
         </div>
 
         <div className="space-y-4 mb-8">
-           <input value={event} onChange={e => setEvent(e.target.value)} placeholder="Describe what happened..." className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-4 text-sm text-[#595b61] font-bold focus:border-[#f78121] outline-none placeholder:text-[#595b61]/70" />
+           <input ref={eventInputRef} value={event} onChange={e => setEvent(e.target.value)} placeholder="Describe what happened..." className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-4 text-sm text-[#595b61] font-bold focus:border-[#f78121] outline-none placeholder:text-[#595b61]/70" />
            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <input value={lesson} onChange={e => setLesson(e.target.value)} placeholder="What did you learn?" className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-4 text-sm text-[#595b61] font-bold focus:border-[#45d0d0] outline-none placeholder:text-[#595b61]/70" />
               <input value={action} onChange={e => setAction(e.target.value)} placeholder="What will you do differently?" className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-4 text-sm text-[#595b61] font-bold focus:border-[#f78121] outline-none placeholder:text-[#595b61]/70" />
@@ -104,7 +106,14 @@ const ResilienceView: React.FC<{ data: UserData; update: (u: Partial<UserData>) 
         </div>
 
         <div className="space-y-4">
-           {data.failures.map(log => (
+           {data.failures.length === 0 ? (
+             <EmptyState
+               heading="No Reviews Yet"
+               message="Every experience holds a lesson. Record your first After Action Review to begin growing."
+               buttonLabel="Record Your First Review"
+               onButtonClick={() => eventInputRef.current?.focus()}
+             />
+           ) : data.failures.map(log => (
              <div key={log.id} className="bg-black/20 border border-white/10 rounded-2xl p-6">
                 <div className="flex items-start justify-between mb-4">
                    <div className="flex items-center space-x-2"><History size={16} className="text-white/50" /><span className="text-xs font-bold text-white/50">{new Date(log.timestamp).toLocaleDateString()}</span></div>
