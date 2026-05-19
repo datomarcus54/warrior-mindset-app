@@ -633,27 +633,36 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
                   <span className="text-xs font-black uppercase tracking-widest text-indigo-400">Recovery Trend</span>
                </div>
                {/* SAFETY WRAPPER */}
-               <div style={{ width: '100%', height: '200px', minHeight: '200px' }}>
-                 {isMounted && sleepTrendData.length > 0 ? (
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={sleepTrendData}>
-                        <defs>
-                          <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#6366F1" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#6366F1" stopOpacity={0}/>
-                          </linearGradient>
-                        </defs>
-                        <Tooltip contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#f8fafc' }} />
-                        <Area type="monotone" dataKey="score" stroke="#6366F1" fillOpacity={1} fill="url(#colorScore)" />
-                        <XAxis dataKey="date" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                 ) : (
-                    <div className="w-full h-full flex items-center justify-center text-white/20 text-xs font-bold uppercase tracking-widest bg-white/5 rounded-xl">
-                       {isMounted ? 'No data recorded' : 'Loading Chart...'}
-                    </div>
-                 )}
-               </div>
+               {isMounted && sleepTrendData.length === 0 ? (
+                 <EmptyState
+                   heading="No Sleep Data Yet"
+                   message="Rest is your foundation for growth. Log your first night to begin tracking your recovery."
+                   buttonLabel="Log Your Sleep"
+                   onButtonClick={() => {}}
+                 />
+               ) : (
+                 <div style={{ width: '100%', height: '200px', minHeight: '200px' }}>
+                   {isMounted && sleepTrendData.length > 0 ? (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={sleepTrendData}>
+                          <defs>
+                            <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#6366F1" stopOpacity={0.8}/>
+                              <stop offset="95%" stopColor="#6366F1" stopOpacity={0}/>
+                            </linearGradient>
+                          </defs>
+                          <Tooltip contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#f8fafc' }} />
+                          <Area type="monotone" dataKey="score" stroke="#6366F1" fillOpacity={1} fill="url(#colorScore)" />
+                          <XAxis dataKey="date" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                   ) : (
+                      <div className="w-full h-full flex items-center justify-center text-white/20 text-xs font-bold uppercase tracking-widest bg-white/5 rounded-xl">
+                         Loading Chart...
+                      </div>
+                   )}
+                 </div>
+               )}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-8">
