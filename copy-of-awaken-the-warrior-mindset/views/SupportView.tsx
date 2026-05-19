@@ -24,8 +24,8 @@ const FAQS = [
     answer: "Resets are available. Contact Support. Warning: This wipes your history. Ensure you are ready to start from zero."
   },
   {
-    question: "What is the purpose of Coach Marcus?",
-    answer: "Coach Marcus is not a friend. He is a strategic asset designed to break your excuses and force action. Use him when you are stuck or drifting."
+    question: "What is the purpose of Coach Marcus AI?",
+    answer: "Coach Marcus AI is not a friend. He is a strategic asset designed to break your excuses and force action. Use him when you are stuck or drifting."
   },
   {
     question: "Is my data private?",

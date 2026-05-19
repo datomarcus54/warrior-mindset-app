@@ -9,6 +9,17 @@ const bmiCategory = (bmi: number): string => {
   return 'Obese';
 };
 
+const sumActual = (items: Array<{ actual: number }>) =>
+  items.reduce((acc, i) => acc + (i.actual || 0), 0);
+const sumValue = (items: Array<{ value: number }>) =>
+  items.reduce((acc, i) => acc + (i.value || 0), 0);
+
+const section = (heading: string, items: string[], out: string[]) => {
+  if (!items.length) return;
+  out.push(heading);
+  items.forEach(l => out.push(`  - ${l}`));
+};
+
 const buildUserContext = (data: UserData): string => {
   const lines: string[] = [];
   const h = data.health;
@@ -30,10 +41,7 @@ const buildUserContext = (data: UserData): string => {
       body.push(`Lean Mass: ${(h.weightKg - fatMass).toFixed(1)} kg`);
     }
   }
-  if (body.length) {
-    lines.push('Body Composition:');
-    body.forEach(l => lines.push(`  - ${l}`));
-  }
+  section('Body Composition:', body, lines);
 
   // Sleep
   const sleep: string[] = [];
@@ -42,16 +50,77 @@ const buildUserContext = (data: UserData): string => {
   if (bedMins) sleep.push(`Time in Bed: ${(bedMins / 60).toFixed(1)} hrs`);
   const asleepMins = (h.timeAsleepHours || 0) * 60 + (h.timeAsleepMinutes || 0);
   if (asleepMins) sleep.push(`Actual Sleep: ${(asleepMins / 60).toFixed(1)} hrs`);
-  if (sleep.length) {
-    lines.push('Sleep (latest logged):');
-    sleep.forEach(l => lines.push(`  - ${l}`));
-  }
+  section('Sleep (latest logged):', sleep, lines);
 
   // Life Circle scores — omit any at 0
   const lifeScores = data.lifeWheel.filter(d => d.value > 0);
   if (lifeScores.length) {
     lines.push('Life Circle Scores (1–10):');
     lifeScores.forEach(d => lines.push(`  - ${d.name}: ${d.value}/10`));
+  }
+
+  // Journal — latest daily workflow + streak
+  const journal: string[] = [];
+  if (data.journalStreak) journal.push(`Streak: ${data.journalStreak} days`);
+  const latestWf = [...data.dailyWorkflows]
+    .sort((a, b) => b.date.localeCompare(a.date))[0];
+  if (latestWf) {
+    if (latestWf.mindsetLog?.trim())
+      journal.push(`Morning Intention (${latestWf.date}): ${latestWf.mindsetLog.trim()}`);
+    const er = latestWf.eveningReflection;
+    if (er?.win?.trim())        journal.push(`Evening Win: ${er.win.trim()}`);
+    if (er?.drain?.trim())      journal.push(`Energy Drain: ${er.drain.trim()}`);
+    if (er?.adjustment?.trim()) journal.push(`Tomorrow's Adjustment: ${er.adjustment.trim()}`);
+  }
+  section('Journal (latest):', journal, lines);
+
+  // Wealth — computed from financial data
+  const fd = data.financialData;
+  const totalAssets = sumValue(fd.assets.liquid) + sumValue(fd.assets.fixed);
+  const totalLiabilities = sumValue(fd.liabilities.shortTerm) + sumValue(fd.liabilities.longTerm);
+  const netWorth = totalAssets - totalLiabilities;
+  const monthlyIncome = sumActual(fd.income);
+  const totalExpenses = sumActual(fd.expenses.fixed) + sumActual(fd.expenses.mandatory) + sumActual(fd.expenses.variable);
+  const netCashFlow = monthlyIncome - totalExpenses;
+  const wealth: string[] = [];
+  if (totalAssets)      wealth.push(`Total Assets: RM ${totalAssets.toLocaleString()}`);
+  if (totalLiabilities) wealth.push(`Total Liabilities: RM ${totalLiabilities.toLocaleString()}`);
+  if (totalAssets || totalLiabilities) wealth.push(`Net Worth: RM ${netWorth.toLocaleString()}`);
+  if (monthlyIncome)    wealth.push(`Monthly Income: RM ${monthlyIncome.toLocaleString()}`);
+  if (netCashFlow !== 0) wealth.push(`Net Cash Flow: RM ${netCashFlow.toLocaleString()} / mo`);
+  section('Wealth:', wealth, lines);
+
+  // Resilience — latest After Action Report
+  const latestAAR = [...data.failures]
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
+  if (latestAAR) {
+    const aar: string[] = [];
+    if (latestAAR.event?.trim())  aar.push(`What happened: ${latestAAR.event.trim()}`);
+    if (latestAAR.lesson?.trim()) aar.push(`What was learned: ${latestAAR.lesson.trim()}`);
+    if (latestAAR.action?.trim()) aar.push(`What will be done differently: ${latestAAR.action.trim()}`);
+    section('Resilience (latest AAR):', aar, lines);
+  }
+
+  // Active goals with milestone progress
+  const activeGoals = data.goals.filter(g => !g.completed);
+  if (activeGoals.length) {
+    lines.push('Active Goals:');
+    activeGoals.forEach(g => {
+      const pct = g.milestones.length
+        ? Math.round(g.milestones.reduce((acc, m) => acc + m.progress, 0) / g.milestones.length)
+        : null;
+      const prog = pct !== null ? ` (${pct}% complete)` : '';
+      lines.push(`  - [${g.category}] ${g.text}${prog}`);
+    });
+  }
+
+  // Habit Laboratory — active habits and streaks
+  if (data.habits.length) {
+    lines.push('Habits:');
+    data.habits.forEach(habit => {
+      const streak = habit.streak ? ` — ${habit.streak} day streak` : ' — no current streak';
+      lines.push(`  - ${habit.name}${streak}`);
+    });
   }
 
   if (!lines.length) return '';

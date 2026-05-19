@@ -27,7 +27,7 @@ const FoundationView: React.FC<Props> = ({ data, update, isGuest, onRestricted, 
             onClick={onNavigateToCoach}
             className="px-6 py-3 rounded-xl bg-[#f78121] text-white font-bold text-sm uppercase tracking-widest hover:bg-[#f78121]/80 transition-colors"
           >
-            Talk to Coach Marcus
+            Talk to Coach Marcus AI
           </button>
           <button
             onClick={() => lifeCircleRef.current?.scrollIntoView({ behavior: 'smooth' })}

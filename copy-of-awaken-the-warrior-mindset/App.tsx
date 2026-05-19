@@ -234,7 +234,7 @@ const App: React.FC = () => {
             </button>
             <button onClick={() => { setCurrentView('Coach'); setIsMenuOpen(false); }} className="w-full p-4 flex items-center space-x-4 hover:bg-white/5 rounded-xl transition-all group border border-transparent hover:border-[#f78121]/30">
                <Bot className="text-[#f78121] group-hover:scale-110 transition-transform" />
-               <div className="text-left"><span className="block text-sm font-black uppercase tracking-widest text-white">Coach Marcus</span><span className="block text-[10px] text-[#45d0d0]">AI Accountability</span></div>
+               <div className="text-left"><span className="block text-sm font-black uppercase tracking-widest text-white">Coach Marcus AI</span><span className="block text-[10px] text-[#45d0d0]">AI Accountability</span></div>
             </button>
             <button onClick={() => { setCurrentView('Support'); setIsMenuOpen(false); }} className="w-full p-4 flex items-center space-x-4 hover:bg-white/5 rounded-xl transition-all group border border-transparent hover:border-[#f78121]/30">
                <LifeBuoy className="text-[#45d0d0] group-hover:scale-110 transition-transform" />

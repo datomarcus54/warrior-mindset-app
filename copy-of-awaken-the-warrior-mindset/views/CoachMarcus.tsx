@@ -18,7 +18,7 @@ const normalizeMarkdown = (text: string): string =>
 const CoachMarcus: React.FC<Props> = ({ data }) => {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<{ role: 'user' | 'bot', text: string }[]>([
-    { role: 'bot', text: "Warrior. I am Coach Marcus. I am here to extract your potential, not validate your feelings. What is the specific target you are striking today? Report." }
+    { role: 'bot', text: "Warrior. I am Coach Marcus AI. I am here to extract your potential, not validate your feelings. What is the specific target you are striking today? Report." }
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -60,7 +60,7 @@ const CoachMarcus: React.FC<Props> = ({ data }) => {
             </div>
           </div>
           <div>
-            <h2 className="text-xl md:text-2xl font-black font-brand-header uppercase text-white leading-none tracking-wider">Coach Marcus</h2>
+            <h2 className="text-xl md:text-2xl font-black font-brand-header uppercase text-white leading-none tracking-wider">Coach Marcus AI</h2>
             <div className="flex items-center text-[10px] md:text-xs text-[#45d0d0] font-black uppercase tracking-[0.2em] mt-1 md:mt-2">
               <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-[#45d0d0] rounded-full mr-2 animate-pulse" />
               Active Session
