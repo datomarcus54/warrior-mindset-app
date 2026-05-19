@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { UserData, HealthMetrics, MealAnalysis, WorkoutCategory, WorkoutSession, DailyHealthLog } from '../types';
+import { UserData, HealthMetrics, MealAnalysis, MealType, WorkoutCategory, WorkoutSession, DailyHealthLog } from '../types';
 import {
   Activity, Moon, Clock, Droplet, Camera, Plus, Trash2,
   Flame, Wind, Dumbbell, Move, Calendar as CalendarIcon,
@@ -31,6 +31,13 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
   const [showManualMeal, setShowManualMeal] = useState(false);
   const [manualDesc, setManualDesc] = useState('');
   const [isEstimating, setIsEstimating] = useState(false);
+  const [mealType, setMealType] = useState<MealType>(() => {
+    const h = new Date().getHours();
+    if (h < 10) return 'Breakfast';
+    if (h < 14) return 'Lunch';
+    if (h < 19) return 'Dinner';
+    return 'Supper';
+  });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -158,6 +165,9 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
   const todayTotalBurned = todayLog.workouts.reduce((acc, curr) => acc + curr.calories, 0);
   const todayMeals = data.health.mealLogs.filter(log => log.timestamp.startsWith(todayStr));
   const todayConsumedCals = todayMeals.reduce((acc, curr) => acc + curr.calories, 0);
+  const todayTotalProtein = todayMeals.reduce((acc, curr) => acc + (curr.protein || 0), 0);
+  const todayTotalCarbs   = todayMeals.reduce((acc, curr) => acc + (curr.carbs   || 0), 0);
+  const todayTotalFats    = todayMeals.reduce((acc, curr) => acc + (curr.fats    || 0), 0);
   const netCalories = todayConsumedCals - todayTotalBurned;
 
   const getCategoryTotal = (cat: WorkoutCategory) => {
@@ -210,7 +220,7 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
       const base64 = (reader.result as string).split(',')[1];
       const result = await analyzeMealImage(base64);
       if (result) {
-        const newMeal: MealAnalysis = { timestamp: new Date().toISOString(), calories: result.calories || 0, protein: result.protein || 0, carbs: result.carbs || 0, fats: result.fats || 0, description: result.description || 'Warrior Fuel' };
+        const newMeal: MealAnalysis = { timestamp: new Date().toISOString(), calories: result.calories || 0, protein: result.protein || 0, carbs: result.carbs || 0, fats: result.fats || 0, description: result.description || 'Warrior Fuel', mealType };
         updateMetric({ mealLogs: [newMeal, ...data.health.mealLogs] });
         update({ warriorCodePoints: data.warriorCodePoints + 20 });
       }
@@ -233,6 +243,7 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
       carbs: result?.carbs || 0,
       fats: result?.fats || 0,
       description: result?.description || manualDesc.trim(),
+      mealType,
     };
     updateMetric({ mealLogs: [newMeal, ...data.health.mealLogs] });
     update({ warriorCodePoints: data.warriorCodePoints + 10 });
@@ -406,6 +417,22 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
               <button onClick={() => updateMetric({ waterIntakeMl: data.health.waterIntakeMl + 250 })} className="px-6 py-3 bg-blue-600 text-white font-black text-sm uppercase rounded-xl active:scale-95 shadow-lg">+250ml</button>
            </section>
 
+           {/* Meal Type Selector */}
+           <section className="glass-card p-5 transition-all duration-300 ease-in-out hover:-translate-y-1">
+             <div className="text-[10px] font-black uppercase tracking-widest text-white/50 mb-3">Meal Type</div>
+             <div className="flex gap-2 flex-wrap">
+               {(['Breakfast', 'Lunch', 'Dinner', 'Supper'] as const).map(t => (
+                 <button
+                   key={t}
+                   onClick={() => setMealType(t)}
+                   className={`px-4 py-2 text-xs font-black uppercase tracking-widest rounded-xl transition-all ${mealType === t ? 'bg-[#f78121] text-white shadow-md' : 'bg-white/10 text-white/50 hover:text-white'}`}
+                 >
+                   {t}
+                 </button>
+               ))}
+             </div>
+           </section>
+
            {/* Manual Meal Log */}
            <section className="glass-card p-6 md:p-8 transition-all duration-300 ease-in-out hover:-translate-y-1">
              <button
@@ -465,24 +492,71 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
              )}
            </label>
 
+           {/* Meal Cards + Daily Totals */}
            <section className="glass-card p-6 md:p-8 transition-all duration-300 ease-in-out hover:-translate-y-1">
-              <div className="flex justify-between items-center mb-6">
-                 <h3 className="text-lg font-black uppercase tracking-widest text-white">Nutritional Intel</h3>
-              </div>
-              <div className="space-y-4">
-                 {todayMeals.map((meal, i) => (
-                    <div key={i} className="bg-black/20 border border-white/10 rounded-xl p-4 flex justify-between items-center shadow-sm">
-                       <div>
-                          <div className="text-sm font-bold text-white">{meal.description}</div>
-                          <div className="text-[10px] text-white/70 font-bold mt-1">
-                             PRO: {meal.protein}g | CARB: {meal.carbs}g | FAT: {meal.fats}g
-                          </div>
-                       </div>
-                       <div className="text-xl font-black text-[#45d0d0]">{meal.calories} kcal</div>
+              <h3 className="text-lg font-black uppercase tracking-widest text-white mb-6">Nutritional Intel</h3>
+              {todayMeals.length === 0 ? (
+                <div className="text-center text-xs text-white/50 italic py-4">Fuel intake unrecorded.</div>
+              ) : (
+                <div className="space-y-4">
+                  {todayMeals.map((meal, i) => {
+                    const timeStr = new Intl.DateTimeFormat('en-US', { hour: '2-digit', minute: '2-digit' }).format(new Date(meal.timestamp));
+                    const typeColors: Record<string, string> = {
+                      Breakfast: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+                      Lunch:     'bg-[#45d0d0]/20 text-[#45d0d0] border-[#45d0d0]/30',
+                      Dinner:    'bg-indigo-500/20 text-indigo-400 border-indigo-500/30',
+                      Supper:    'bg-purple-500/20 text-purple-400 border-purple-500/30',
+                    };
+                    const badgeClass = meal.mealType ? typeColors[meal.mealType] : 'bg-white/10 text-white/50 border-white/20';
+                    return (
+                      <div key={i} className="bg-black/20 border border-white/10 rounded-2xl p-5 shadow-sm">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border ${badgeClass}`}>
+                            {meal.mealType || 'Meal'}
+                          </span>
+                          <span className="text-[10px] text-white/40 font-bold">Today, {timeStr}</span>
+                        </div>
+                        <div className="text-sm font-bold text-white mb-3">{meal.description}</div>
+                        <div className="text-3xl font-black text-[#45d0d0] mb-4">
+                          {meal.calories} <span className="text-sm font-bold text-white/40">kcal</span>
+                        </div>
+                        <div className="grid grid-cols-3 gap-3">
+                          {[
+                            { label: 'Protein', val: meal.protein },
+                            { label: 'Carbs',   val: meal.carbs },
+                            { label: 'Fats',    val: meal.fats },
+                          ].map(({ label, val }) => (
+                            <div key={label} className="bg-white/5 rounded-xl p-3 text-center">
+                              <div className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">{label}</div>
+                              <div className="text-base font-black text-white">{val}g</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {/* Daily Totals */}
+                  <div className="bg-[#f78121]/10 border border-[#f78121]/30 rounded-2xl p-5 mt-2">
+                    <div className="text-xs font-black uppercase tracking-widest text-[#f78121] mb-3">Today's Totals</div>
+                    <div className="text-3xl font-black text-white mb-4">
+                      {todayConsumedCals} <span className="text-sm font-bold text-white/40">kcal</span>
                     </div>
-                 ))}
-                 {todayMeals.length === 0 && <div className="text-center text-xs text-white/50 italic py-4">Fuel intake unrecorded.</div>}
-              </div>
+                    <div className="grid grid-cols-3 gap-3">
+                      {[
+                        { label: 'Protein', val: todayTotalProtein },
+                        { label: 'Carbs',   val: todayTotalCarbs },
+                        { label: 'Fats',    val: todayTotalFats },
+                      ].map(({ label, val }) => (
+                        <div key={label} className="bg-white/5 rounded-xl p-3 text-center">
+                          <div className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">{label}</div>
+                          <div className="text-base font-black text-[#45d0d0]">{val}g</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
            </section>
         </div>
       )}

@@ -38,6 +38,8 @@ export interface JournalEntry {
   timestamp: string;
 }
 
+export type MealType = 'Breakfast' | 'Lunch' | 'Dinner' | 'Supper';
+
 export interface MealAnalysis {
   timestamp: string;
   calories: number;
@@ -45,6 +47,7 @@ export interface MealAnalysis {
   carbs: number;
   fats: number;
   description: string;
+  mealType?: MealType;
 }
 
 export interface FinancialEntry {
