@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { 
-  Trophy, Sparkles, Bot, X, Menu, LifeBuoy, BookOpen, LogOut, User, BarChart3, Lock, Shield
+import {
+  Trophy, Sparkles, Bot, X, Menu, LifeBuoy, BookOpen, LogOut, User, BarChart3, Lock, Shield, Compass
 } from 'lucide-react';
 import { UserData, ViewType } from './types';
 import { INITIAL_USER_DATA, getRank, WARRIOR_RANKS } from './constants';
@@ -17,7 +17,8 @@ import SupportView from './views/SupportView';
 import CodexView from './views/CodexView';
 import TribeView from './views/TribeView';
 import JournalView from './views/JournalView';
-import SubscriptionView from './views/SubscriptionView'; 
+import SubscriptionView from './views/SubscriptionView';
+import OnboardingModal from './views/OnboardingModal';
 
 // --- CONSOLE SILENCER ---
 // This suppresses the harmless "width(-1)" warning from Recharts during animations
@@ -66,6 +67,8 @@ const App: React.FC = () => {
   const [showScoringRules, setShowScoringRules] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem('onboardingComplete'));
+  const [onboardingFromMenu, setOnboardingFromMenu] = useState(false);
   
   const isMobileMode = useMemo(() => {
     const ua = navigator.userAgent || '';
@@ -138,6 +141,19 @@ const App: React.FC = () => {
 
   const handleAcceptMission = () => enterDashboard(15);
   const handleGuestEntry = () => enterDashboard(15);
+
+  const handleOnboardingClose = () => {
+    localStorage.setItem('onboardingComplete', 'true');
+    setShowOnboarding(false);
+    if (!onboardingFromMenu) enterDashboard(15);
+    setOnboardingFromMenu(false);
+  };
+
+  const openOnboardingFromMenu = () => {
+    setOnboardingFromMenu(true);
+    setShowOnboarding(true);
+    setIsMenuOpen(false);
+  };
   const openAuth = (mode: 'login' | 'signup') => { const w = window as any; if (w.netlifyIdentity) w.netlifyIdentity.open(mode); };
   const onRestrictedAction = () => { setCurrentView('Subscription'); };
   const isGuest = !currentUser;
@@ -179,6 +195,9 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col h-[100dvh] overflow-hidden bg-[#0A3762] text-white font-brand-body selection:bg-[#f78121] selection:text-white">
+      {/* Onboarding */}
+      {showOnboarding && <OnboardingModal onClose={handleOnboardingClose} />}
+
       {/* Scoring Rules */}
       {showScoringRules && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#001b3d]/95 backdrop-blur-xl animate-in fade-in duration-300">
@@ -239,6 +258,10 @@ const App: React.FC = () => {
             <button onClick={() => { setCurrentView('Support'); setIsMenuOpen(false); }} className="w-full p-4 flex items-center space-x-4 hover:bg-white/5 rounded-xl transition-all group border border-transparent hover:border-[#f78121]/30">
                <LifeBuoy className="text-[#45d0d0] group-hover:scale-110 transition-transform" />
                <div className="text-left"><span className="block text-sm font-black uppercase tracking-widest text-white">Help & Resources</span><span className="block text-[10px] text-[#45d0d0]">FAQ & Info</span></div>
+            </button>
+            <button onClick={openOnboardingFromMenu} className="w-full p-4 flex items-center space-x-4 hover:bg-white/5 rounded-xl transition-all group border border-transparent hover:border-[#f78121]/30">
+               <Compass className="text-[#45d0d0] group-hover:scale-110 transition-transform" />
+               <div className="text-left"><span className="block text-sm font-black uppercase tracking-widest text-white">App Guide</span><span className="block text-[10px] text-[#45d0d0]">Revisit the tour</span></div>
             </button>
             <button onClick={() => { setCurrentView('Codex'); setIsMenuOpen(false); }} className="w-full p-4 flex items-center space-x-4 hover:bg-white/5 rounded-xl transition-all group border border-transparent hover:border-[#f78121]/30">
                <BookOpen className="text-slate-400 group-hover:text-white group-hover:scale-110 transition-transform" />
