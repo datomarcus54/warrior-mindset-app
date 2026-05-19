@@ -4,9 +4,9 @@ import { MealAnalysis } from "../types";
 
 // Used only by analyzeMealImage — chat functions route through the serverless function instead
 const getApiKey = () => {
-  const key = import.meta.env.VITE_GOOGLE_API_KEY;
+  const key = import.meta.env.VITE_GEMINI_API_KEY;
   if (!key) {
-    console.error("API KEY MISSING: Check Netlify Environment Variables for 'VITE_GOOGLE_API_KEY'");
+    console.error("API KEY MISSING: Check Netlify Environment Variables for 'VITE_GEMINI_API_KEY'");
     throw new Error("API Key not found");
   }
   return key;
