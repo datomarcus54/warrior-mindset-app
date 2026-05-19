@@ -96,7 +96,7 @@ const CommunityView: React.FC<Props> = ({ data, update }) => {
   };
 
   const baseLeaderboard = [
-    { name: 'Cmdr. Jaxon', rank: 'Legend', short: 45, mid: 12, long: 3, points: 5200 },
+    { name: 'Jaxon', rank: 'Legend', short: 45, mid: 12, long: 3, points: 5200 },
     { name: 'Vanguard Kael', rank: 'Master', short: 30, mid: 8, long: 1, points: 2100 },
     { name: 'Warrior Sarah', rank: 'Adept', short: 15, mid: 4, long: 0, points: 850 },
   ];
@@ -182,7 +182,7 @@ const CommunityView: React.FC<Props> = ({ data, update }) => {
       {activeTab === 'Hub' && (
         <div className="space-y-8 animate-in fade-in slide-in-from-right-4">
           <section className="glass-card p-6 md:p-8 transition-all duration-300 ease-in-out hover:-translate-y-1">
-            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-[#f78121] mb-4">Report Victory</h3>
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-[#f78121] mb-4">Share an Update</h3>
             <textarea 
               value={newPostText}
               onChange={(e) => setNewPostText(e.target.value)}
@@ -213,7 +213,7 @@ const CommunityView: React.FC<Props> = ({ data, update }) => {
                 disabled={!newPostText.trim()}
                 className="bg-[#f78121] text-white px-6 py-2 rounded-lg font-black uppercase tracking-widest text-xs disabled:opacity-50 hover:bg-orange-600 transition-all flex items-center space-x-2 shadow-lg"
               >
-                <span>Broadcast</span> <Send size={14} />
+                <span>Post</span> <Send size={14} />
               </button>
             </div>
           </section>

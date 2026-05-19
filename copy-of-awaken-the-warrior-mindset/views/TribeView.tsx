@@ -35,9 +35,9 @@ const TribeView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => vo
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-[#001b3d]/90 backdrop-blur-sm animate-in fade-in duration-300">
            <div className="relative w-full max-w-md bg-[#595b61] p-8 md:p-10 border border-[#white]/20 rounded-2xl shadow-2xl">
               <button onClick={() => setShowLesson(false)} className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors"><X size={24}/></button>
-              <h3 className="text-xl font-black font-brand-header uppercase tracking-tight text-[#f78121] mb-4">High-Value Alliances</h3>
+              <h3 className="text-xl font-black font-brand-header uppercase tracking-tight text-[#f78121] mb-4">Strong Relationships</h3>
               <p className="text-base text-white/70 font-medium leading-relaxed italic">
-                "You become the average of your five closest allies. If they are weak, you become weak. Audit your circle."
+                "You become the average of the five people you spend the most time with. Choose them carefully. Audit your circle."
               </p>
            </div>
         </div>
@@ -45,12 +45,12 @@ const TribeView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => vo
 
       <header className="mb-8">
         <div className="flex items-center gap-3">
-          <h2 className="text-4xl md:text-6xl font-black font-brand-header uppercase text-[#f78121] tracking-wider whitespace-nowrap">Alliance Grid</h2>
+          <h2 className="text-4xl md:text-6xl font-black font-brand-header uppercase text-[#f78121] tracking-wider whitespace-nowrap">Your Circle</h2>
           <button onClick={() => setShowLesson(true)} className="text-[#f78121] hover:text-white cursor-pointer transition-colors" aria-label="Warrior Lesson">
             <Info size={24} />
           </button>
         </div>
-        <p className="text-xs md:text-sm text-[#45d0d0] font-black uppercase tracking-[0.2em] mt-2">Network Architecture</p>
+        <p className="text-xs md:text-sm text-[#45d0d0] font-black uppercase tracking-[0.2em] mt-2">People Around You</p>
       </header>
 
       {/* Main Tribe Card */}
@@ -62,8 +62,8 @@ const TribeView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => vo
               <Shield size={24} color="#f78121" />
            </div>
            <div>
-              <h3 className="text-xl md:text-2xl font-black font-brand-header uppercase tracking-wider text-white">Tribe Network</h3>
-              <p className="text-xs font-bold text-[#f78121] uppercase tracking-[0.2em]">Active Assets</p>
+              <h3 className="text-xl md:text-2xl font-black font-brand-header uppercase tracking-wider text-white">Your Tribe</h3>
+              <p className="text-xs font-bold text-[#f78121] uppercase tracking-[0.2em]">Active Members</p>
            </div>
         </div>
 
@@ -72,7 +72,7 @@ const TribeView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => vo
         <div className="flex flex-col space-y-6 md:space-y-8">
           <input 
             value={name} onChange={(e) => setName(e.target.value)}
-            placeholder="Recruit Asset..."
+            placeholder="Add a person..."
             className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-warrior px-6 md:px-8 py-4 md:py-6 text-base md:text-lg text-[#595b61] focus:outline-none focus:border-[#f78121] transition-all placeholder:text-[#595b61]/70 font-bold"
           />
           <div className="grid grid-cols-3 gap-3 md:gap-4">
@@ -89,7 +89,7 @@ const TribeView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => vo
             onClick={addRelationship} 
             className="w-full py-6 md:py-8 bg-[#f78121] text-white rounded-warrior font-black uppercase tracking-[0.2em] shadow-lg flex items-center justify-center space-x-3 md:space-x-4 active:scale-[0.98] transition-all hover:bg-orange-600 text-sm md:text-lg"
           >
-            <UserPlus size={20} className="md:w-6 md:h-6" /> <span>RECRUIT ASSET (+10 Steps)</span>
+            <UserPlus size={20} className="md:w-6 md:h-6" /> <span>Add to Circle (+10 XP)</span>
           </button>
         </div>
 
@@ -110,7 +110,7 @@ const TribeView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => vo
                   </div>
                 ))}
                 {data.relationships.filter(r => r.tier === currentTier).length === 0 && (
-                  <p className="text-[10px] md:text-xs text-white/30 italic font-medium px-4">Sector Empty. Recruit or Perish.</p>
+                  <p className="text-[10px] md:text-xs text-white/30 italic font-medium px-4">None added yet.</p>
                 )}
               </div>
             </div>
