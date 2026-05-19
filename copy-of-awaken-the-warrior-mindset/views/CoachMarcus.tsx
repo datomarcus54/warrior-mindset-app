@@ -41,7 +41,7 @@ const CoachMarcus: React.FC<Props> = ({ data }) => {
     setInput('');
     setIsLoading(true);
 
-    const response = await getCoachMarcusResponse(textToSend);
+    const response = await getCoachMarcusResponse(textToSend, data);
     setMessages(prev => [...prev, { role: 'bot' as const, text: response || "Something went wrong. Try again, warrior." }]);
     setIsLoading(false);
   };

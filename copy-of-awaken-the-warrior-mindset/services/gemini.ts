@@ -1,6 +1,68 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { COACH_SYSTEM_PROMPT } from "../constants";
-import { MealAnalysis } from "../types";
+import { MealAnalysis, UserData } from "../types";
+
+const bmiCategory = (bmi: number): string => {
+  if (bmi < 18.5) return 'Underweight';
+  if (bmi < 25) return 'Normal weight';
+  if (bmi < 30) return 'Overweight';
+  return 'Obese';
+};
+
+const buildUserContext = (data: UserData): string => {
+  const lines: string[] = [];
+  const h = data.health;
+
+  // Body composition
+  const body: string[] = [];
+  if (h.age) body.push(`Age: ${h.age}`);
+  if (h.heightCm) body.push(`Height: ${h.heightCm} cm`);
+  if (h.weightKg) {
+    body.push(`Weight: ${h.weightKg} kg`);
+    if (h.heightCm) {
+      const bmi = h.weightKg / Math.pow(h.heightCm / 100, 2);
+      body.push(`BMI: ${bmi.toFixed(1)} (${bmiCategory(bmi)})`);
+    }
+    if (h.bodyFatPercent) {
+      const fatMass = h.weightKg * (h.bodyFatPercent / 100);
+      body.push(`Body Fat: ${h.bodyFatPercent}%`);
+      body.push(`Fat Mass: ${fatMass.toFixed(1)} kg`);
+      body.push(`Lean Mass: ${(h.weightKg - fatMass).toFixed(1)} kg`);
+    }
+  }
+  if (body.length) {
+    lines.push('Body Composition:');
+    body.forEach(l => lines.push(`  - ${l}`));
+  }
+
+  // Sleep
+  const sleep: string[] = [];
+  if (h.sleepScore) sleep.push(`Sleep Score: ${h.sleepScore}/100`);
+  const bedMins = (h.timeInBedHours || 0) * 60 + (h.timeInBedMinutes || 0);
+  if (bedMins) sleep.push(`Time in Bed: ${(bedMins / 60).toFixed(1)} hrs`);
+  const asleepMins = (h.timeAsleepHours || 0) * 60 + (h.timeAsleepMinutes || 0);
+  if (asleepMins) sleep.push(`Actual Sleep: ${(asleepMins / 60).toFixed(1)} hrs`);
+  if (sleep.length) {
+    lines.push('Sleep (latest logged):');
+    sleep.forEach(l => lines.push(`  - ${l}`));
+  }
+
+  // Life Circle scores — omit any at 0
+  const lifeScores = data.lifeWheel.filter(d => d.value > 0);
+  if (lifeScores.length) {
+    lines.push('Life Circle Scores (1–10):');
+    lifeScores.forEach(d => lines.push(`  - ${d.name}: ${d.value}/10`));
+  }
+
+  if (!lines.length) return '';
+
+  return (
+    '\n\n---\n' +
+    'USER PROFILE (injected by app — use naturally, never reference as "the database" or "your record"):\n' +
+    lines.join('\n') +
+    '\n---'
+  );
+};
 
 // Used only by analyzeMealImage — chat functions route through the serverless function instead
 const getApiKey = () => {
@@ -26,9 +88,11 @@ const callChatFunction = async (message: string, systemPrompt: string): Promise<
   return data.response ?? '';
 };
 
-export const getCoachMarcusResponse = async (message: string) => {
+export const getCoachMarcusResponse = async (message: string, data: UserData) => {
   try {
-    return await callChatFunction(message, COACH_SYSTEM_PROMPT);
+    const context = buildUserContext(data);
+    const systemPrompt = context ? COACH_SYSTEM_PROMPT + context : COACH_SYSTEM_PROMPT;
+    return await callChatFunction(message, systemPrompt);
   } catch (error) {
     console.error("Coach Marcus error:", error);
     return "I'm having trouble connecting right now. Please try again in a moment.";
