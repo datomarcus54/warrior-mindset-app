@@ -70,7 +70,7 @@ const SupportView: React.FC<Props> = ({ isGuest, onRestricted }) => {
          <div className="p-6 md:p-10 overflow-y-auto custom-scrollbar text-white space-y-6 leading-relaxed bg-[#595b61]">
             {children}
             <div className="pt-6 border-t border-white/20 text-xs text-white/50 italic">
-                For full legal documentation or inquiries, contact <span className="text-[#f78121]">support@warriormindset.io</span>.
+                For full legal documentation or inquiries, contact <span className="text-[#f78121]">support@warriormindset.my</span>.
             </div>
          </div>
          <div className="p-6 border-t border-white/20 bg-[#595b61] flex justify-end">
@@ -199,7 +199,7 @@ const SupportView: React.FC<Props> = ({ isGuest, onRestricted }) => {
                     <div className="w-10 h-10 rounded-full bg-[#f78121]/10 flex items-center justify-center text-[#f78121]">
                        <Mail size={18} />
                     </div>
-                    <span>support@warriormindset.app</span>
+                    <span>support@warriormindset.my</span>
                  </div>
                  <div className="flex items-center space-x-4 text-sm font-bold text-white">
                     <div className="w-10 h-10 rounded-full bg-[#f78121]/10 flex items-center justify-center text-[#f78121]">

@@ -29,7 +29,7 @@ const CodexView: React.FC<Props> = () => {
          <div className="p-6 md:p-10 overflow-y-auto custom-scrollbar text-white space-y-6 leading-relaxed bg-[#595b61]">
             {children}
             <div className="pt-6 border-t border-white/20 text-xs text-white/50 italic">
-                For full legal documentation or inquiries, contact <span className="text-[#f78121]">support@warriormindset.io</span>.
+                For full legal documentation or inquiries, contact <span className="text-[#f78121]">support@warriormindset.my</span>.
             </div>
          </div>
          <div className="p-6 border-t border-white/20 bg-[#595b61] flex justify-end">
@@ -76,9 +76,9 @@ const CodexView: React.FC<Props> = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-[#001b3d]/90 backdrop-blur-sm animate-in fade-in duration-300">
            <div className="relative w-full max-w-md bg-[#595b61] p-8 md:p-10 border border-white/20 rounded-2xl shadow-2xl">
               <button onClick={() => setShowLesson(false)} className="absolute top-4 right-4 text-white hover:text-white transition-colors"><X size={24}/></button>
-              <h3 className="text-xl font-black font-brand-header uppercase tracking-tight text-white mb-4">System Architecture</h3>
+              <h3 className="text-xl font-black font-brand-header uppercase tracking-tight text-white mb-4">About This App</h3>
               <p className="text-base text-white/80 font-medium leading-relaxed italic">
-                "The System Manual is not a philosophy textbook. It is a set of practical tools for navigating chaos and building legacy."
+                "This is not theory. It is a set of practical tools for building a life you are proud of."
               </p>
            </div>
         </div>
@@ -86,12 +86,12 @@ const CodexView: React.FC<Props> = () => {
 
       <header className="mb-8">
         <div className="flex items-center gap-3">
-          <h2 className="text-4xl md:text-6xl font-black font-brand-header uppercase text-[#f78121] tracking-wider whitespace-nowrap">Field Manual (SOP)</h2>
+          <h2 className="text-4xl md:text-6xl font-black font-brand-header uppercase text-[#f78121] tracking-wider whitespace-nowrap">How It Works</h2>
           <button onClick={() => setShowLesson(true)} className="text-[#f78121] hover:text-white cursor-pointer transition-colors" aria-label="Warrior Lesson">
             <Info size={24} />
           </button>
         </div>
-        <p className="text-xs md:text-sm text-[#45d0d0] font-black uppercase tracking-[0.2em] mt-2">Standard Operating Procedures</p>
+        <p className="text-xs md:text-sm text-[#45d0d0] font-black uppercase tracking-[0.2em] mt-2">Your App Guide</p>
       </header>
 
       <section className="animate-in fade-in slide-in-from-top-2">
@@ -106,7 +106,7 @@ const CodexView: React.FC<Props> = () => {
                </div>
                <div className="shrink-0">
                   <span className="inline-flex items-center gap-2 px-4 py-2 bg-[#f78121]/10 border border-[#f78121]/30 rounded-lg text-xs font-black uppercase tracking-widest text-white">
-                     <Activity size={14} className="text-[#f78121]" /> System Active
+                     <Activity size={14} className="text-[#f78121]" /> App Active
                   </span>
                </div>
             </div>
@@ -116,28 +116,28 @@ const CodexView: React.FC<Props> = () => {
       <section className="space-y-6">
         <div className="flex items-center gap-2 px-1">
            <ShieldCheck size={16} className="text-[#f78121]" />
-           <span className="text-xs font-black uppercase tracking-[0.25em] text-white/50">Tier 1: Core Systems</span>
+           <span className="text-xs font-black uppercase tracking-[0.25em] text-white/50">Part 1: Daily Practice</span>
         </div>
         <div className="grid grid-cols-1 gap-4">
-           <OperatingCard tier="command" title="Strategic Alignment Scan" description="Diagnostic tool for trajectory vs. intended destination. Identifies operational drift." icon={Compass} />
-           <OperatingCard tier="command" title="Challenge Response System" description="A framework for emotional regulation and decision-making during high-stress situations." icon={ShieldAlert} />
-           <OperatingCard tier="command" title="Vitality & Longevity Systems" description="Biological hardware maintenance. Sleep, fuel, and kinetic output optimization is mandatory." icon={Activity} />
+           <OperatingCard tier="command" title="Life Assessment" description="A daily check-in to see where you are vs. where you want to be." icon={Compass} />
+           <OperatingCard tier="command" title="Resilience Framework" description="A framework for emotional regulation and decision-making during high-stress situations." icon={ShieldAlert} />
+           <OperatingCard tier="command" title="Body & Health" description="Track your sleep, food, movement and recovery every day." icon={Activity} />
         </div>
       </section>
 
       {/* Tier 2 & 3 similarly styled */}
       <section className="space-y-6">
-        <div className="flex items-center gap-2 px-1"><Users size={16} className="text-white/50" /><span className="text-xs font-black uppercase tracking-[0.25em] text-white/50">Tier 2: Growth Systems</span></div>
+        <div className="flex items-center gap-2 px-1"><Users size={16} className="text-white/50" /><span className="text-xs font-black uppercase tracking-[0.25em] text-white/50">Part 2: Growth</span></div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-           <OperatingCard tier="support" title="Wealth Discipline Framework" description="Eliminate financial fog. Direct capital with intentionality. Secure resources." icon={Wallet} />
-           <OperatingCard tier="support" title="Alliance & Brotherhood Design" description="Audit the circle. Eliminate weak links. Strengthen the tribe." icon={Users} />
-           <OperatingCard tier="support" title="Community Code of Conduct" description="Shared values. Mutual respect. Zero tolerance for weakness." icon={Scroll} />
+           <OperatingCard tier="support" title="Wealth & Finances" description="Track your money, set goals, build financial clarity." icon={Wallet} />
+           <OperatingCard tier="support" title="Tribe & Community" description="Build your circle. Surround yourself with people who raise your standards." icon={Users} />
+           <OperatingCard tier="support" title="Community Values" description="Shared values. Mutual respect. Respect, growth, and accountability for all." icon={Scroll} />
         </div>
       </section>
 
       <section className="space-y-6">
-        <div className="flex items-center gap-2 px-1"><History size={16} className="text-white/50" /><span className="text-xs font-black uppercase tracking-[0.25em] text-white/50">Tier 3: Legacy</span></div>
-        <OperatingCard tier="endgame" title="Legacy & Impact Blueprint" description="What you leave behind is the only thing that matters." icon={History} glow={true} />
+        <div className="flex items-center gap-2 px-1"><History size={16} className="text-white/50" /><span className="text-xs font-black uppercase tracking-[0.25em] text-white/50">Part 3: Legacy</span></div>
+        <OperatingCard tier="endgame" title="Legacy & Impact" description="What you leave behind is the only thing that matters." icon={History} glow={true} />
       </section>
 
       <footer className="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-8 pt-12 border-t border-white/10 opacity-80 hover:opacity-100 transition-opacity text-white/50">
