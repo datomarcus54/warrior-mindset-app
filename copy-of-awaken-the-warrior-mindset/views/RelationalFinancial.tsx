@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { UserData, Relationship } from '../types';
 import { Shield, Users, DollarSign, Wallet, PiggyBank, Briefcase, Plus, Heart, Target, UserPlus, Info } from 'lucide-react';
+import EmptyState from './EmptyState';
 
 interface Props {
   data: UserData;
@@ -11,6 +12,12 @@ const RelationalFinancial: React.FC<Props> = ({ data, update }) => {
   const [activeTab, setActiveTab] = useState<'Relational' | 'Financial'>('Relational');
   const [newRelName, setNewRelName] = useState('');
   const [newRelTier, setNewRelTier] = useState<Relationship['tier']>('Inner Circle');
+
+  const hasWealthData =
+    (data.financialData?.assets?.liquid?.length || 0) > 0 ||
+    (data.financialData?.assets?.fixed?.length || 0) > 0 ||
+    (data.financialData?.liabilities?.shortTerm?.length || 0) > 0 ||
+    (data.financialData?.liabilities?.longTerm?.length || 0) > 0;
 
   const addRelationship = () => {
     if (!newRelName.trim()) return;
@@ -122,26 +129,35 @@ const RelationalFinancial: React.FC<Props> = ({ data, update }) => {
                 </p>
              </div>
              
-             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-               {[
-                 { icon: Wallet, label: 'Income Streams', color: 'text-sky-400', bg: 'bg-sky-400/10' },
-                 { icon: Briefcase, label: 'Growth Assets', color: 'text-indigo-400', bg: 'bg-indigo-400/10' },
-                 { icon: PiggyBank, label: 'Defensive Fund', color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-                 { icon: DollarSign, label: 'Cash Flow', color: 'text-amber-400', bg: 'bg-amber-400/10' },
-                 { icon: Shield, label: 'Risk Coverage', color: 'text-rose-400', bg: 'bg-rose-400/10' },
-                 { icon: Heart, label: 'Philanthropy', color: 'text-pink-400', bg: 'bg-pink-400/10' }
-               ].map((pillar) => (
-                 <div key={pillar.label} className="glass-card p-8 flex flex-col items-center group hover:bg-white/5 transition-all">
-                    <div className={`p-5 ${pillar.bg} rounded-3xl mb-4 group-hover:scale-110 transition-transform`}>
-                      <pillar.icon size={28} className={pillar.color} />
-                    </div>
-                    <span className="text-[11px] text-off-white font-black uppercase tracking-widest text-center mb-6">{pillar.label}</span>
-                    <button className="w-full py-3 text-[9px] font-black uppercase tracking-widest text-resilience-gold border border-resilience-gold/30 rounded-xl hover:bg-resilience-gold hover:text-dark-base transition-all active:scale-95">
-                      Recalibrate Pillar
-                    </button>
-                 </div>
-               ))}
-             </div>
+             {hasWealthData ? (
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                 {[
+                   { icon: Wallet, label: 'Income Streams', color: 'text-sky-400', bg: 'bg-sky-400/10' },
+                   { icon: Briefcase, label: 'Growth Assets', color: 'text-indigo-400', bg: 'bg-indigo-400/10' },
+                   { icon: PiggyBank, label: 'Defensive Fund', color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
+                   { icon: DollarSign, label: 'Cash Flow', color: 'text-amber-400', bg: 'bg-amber-400/10' },
+                   { icon: Shield, label: 'Risk Coverage', color: 'text-rose-400', bg: 'bg-rose-400/10' },
+                   { icon: Heart, label: 'Philanthropy', color: 'text-pink-400', bg: 'bg-pink-400/10' }
+                 ].map((pillar) => (
+                   <div key={pillar.label} className="glass-card p-8 flex flex-col items-center group hover:bg-white/5 transition-all">
+                      <div className={`p-5 ${pillar.bg} rounded-3xl mb-4 group-hover:scale-110 transition-transform`}>
+                        <pillar.icon size={28} className={pillar.color} />
+                      </div>
+                      <span className="text-[11px] text-off-white font-black uppercase tracking-widest text-center mb-6">{pillar.label}</span>
+                      <button className="w-full py-3 text-[9px] font-black uppercase tracking-widest text-resilience-gold border border-resilience-gold/30 rounded-xl hover:bg-resilience-gold hover:text-dark-base transition-all active:scale-95">
+                        Recalibrate Pillar
+                      </button>
+                   </div>
+                 ))}
+               </div>
+             ) : (
+               <EmptyState
+                 heading="Your Wealth Journey Starts Here"
+                 message="Add your first asset or liability to begin tracking your financial foundation."
+                 buttonLabel="Add Your First Entry"
+                 onButtonClick={() => {}}
+               />
+             )}
           </section>
         </section>
       )}
