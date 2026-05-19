@@ -2,10 +2,11 @@
 import React, { useState, useRef } from 'react';
 import { UserData, CommunityPost } from '../types';
 import { getRank } from '../constants';
-import { 
-  Trophy, Flame, Swords, Camera, Send, 
+import {
+  Trophy, Flame, Swords, Camera, Send,
   HandMetal, Award, Info, X
 } from 'lucide-react';
+import EmptyState from './EmptyState';
 
 interface Props {
   data: UserData;
@@ -19,6 +20,7 @@ const CommunityView: React.FC<Props> = ({ data, update }) => {
   const [showLesson, setShowLesson] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const postTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   const currentRank = getRank(data.warriorCodePoints);
 
@@ -183,7 +185,8 @@ const CommunityView: React.FC<Props> = ({ data, update }) => {
         <div className="space-y-8 animate-in fade-in slide-in-from-right-4">
           <section className="glass-card p-6 md:p-8 transition-all duration-300 ease-in-out hover:-translate-y-1">
             <h3 className="text-xs font-black uppercase tracking-[0.2em] text-[#f78121] mb-4">Share an Update</h3>
-            <textarea 
+            <textarea
+              ref={postTextareaRef}
               value={newPostText}
               onChange={(e) => setNewPostText(e.target.value)}
               placeholder="Share an update..."
@@ -219,7 +222,14 @@ const CommunityView: React.FC<Props> = ({ data, update }) => {
           </section>
 
           <div className="space-y-6">
-            {data.communityPosts.map(post => (
+            {data.communityPosts.length === 0 ? (
+              <EmptyState
+                heading="Your Circle is Empty"
+                message="Growth accelerates in community. Add your first person to build your support circle."
+                buttonLabel="Add Someone to Your Circle"
+                onButtonClick={() => postTextareaRef.current?.focus()}
+              />
+            ) : data.communityPosts.map(post => (
               <div key={post.id} className="glass-card p-6 md:p-8 transition-all duration-300 ease-in-out hover:-translate-y-1">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-3">
