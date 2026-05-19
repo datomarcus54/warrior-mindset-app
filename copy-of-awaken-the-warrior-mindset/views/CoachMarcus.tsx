@@ -1,6 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, Sparkles, Zap, ShieldAlert, X } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import { UserData } from '../types';
 import { STARTER_PROMPTS } from '../constants';
 import { getCoachMarcusResponse } from '../services/gemini';
@@ -8,6 +9,11 @@ import { getCoachMarcusResponse } from '../services/gemini';
 interface Props {
   data: UserData;
 }
+
+// Gemini sometimes emits inline bullets like " * item" inside a paragraph.
+// ReactMarkdown requires list items on their own line to render correctly.
+const normalizeMarkdown = (text: string): string =>
+  text.replace(/ \* /g, '\n* ');
 
 const CoachMarcus: React.FC<Props> = ({ data }) => {
   const [input, setInput] = useState('');
@@ -71,11 +77,24 @@ const CoachMarcus: React.FC<Props> = ({ data }) => {
         {messages.map((m, idx) => (
           <div key={idx} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2 duration-300`}>
             <div className={`max-w-[90%] p-4 md:p-6 rounded-[1.25rem] md:rounded-[1.75rem] text-sm md:text-base leading-relaxed shadow-lg ${
-              m.role === 'user' 
-              ? 'bg-[#f78121] text-white font-bold rounded-tr-none shadow-md' 
+              m.role === 'user'
+              ? 'bg-[#f78121] text-white font-bold rounded-tr-none shadow-md'
               : 'bg-[#001b3d] text-white rounded-tl-none font-medium border border-white/10'
             }`}>
-              {m.text}
+              {m.role === 'user' ? m.text : (
+                <ReactMarkdown
+                  components={{
+                    p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                    strong: ({ children }) => <strong className="font-bold text-white">{children}</strong>,
+                    ul: ({ children }) => <ul className="list-disc list-inside space-y-1 mb-2">{children}</ul>,
+                    ol: ({ children }) => <ol className="list-decimal list-inside space-y-1 mb-2">{children}</ol>,
+                    li: ({ children }) => <li className="leading-snug">{children}</li>,
+                    hr: () => <hr className="border-white/20 my-3" />,
+                  }}
+                >
+                  {normalizeMarkdown(m.text)}
+                </ReactMarkdown>
+              )}
             </div>
           </div>
         ))}
