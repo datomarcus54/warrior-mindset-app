@@ -72,6 +72,18 @@ export const getLegacyCoachResponse = async (
   }
 };
 
+export const estimateMealFromDescription = async (description: string): Promise<Partial<MealAnalysis> | null> => {
+  try {
+    const prompt = `Estimate the nutritional content of this meal: "${description}". Return ONLY a valid JSON object with exactly these fields (all values must be numbers): {"calories": number, "protein": number, "carbs": number, "fats": number, "description": "${description}"}. No markdown, no explanation, just the JSON object.`;
+    const raw = await callChatFunction(prompt, 'You are a nutrition expert. Always respond with a single valid JSON object only — no markdown, no code fences, no extra text.');
+    const clean = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    return JSON.parse(clean);
+  } catch (error) {
+    console.error('Meal estimation error:', error);
+    return null;
+  }
+};
+
 export const analyzeMealImage = async (base64Data: string): Promise<Partial<MealAnalysis> | null> => {
   try {
     const ai = new GoogleGenAI({ apiKey: getApiKey() });

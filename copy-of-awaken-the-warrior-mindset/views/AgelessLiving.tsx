@@ -6,7 +6,7 @@ import {
   Flame, Wind, Dumbbell, Move, Calendar as CalendarIcon,
   ChevronLeft, ChevronRight, Scale, Info, X, Zap, Pill, BarChart2, Save
 } from 'lucide-react';
-import { analyzeMealImage } from '../services/gemini';
+import { analyzeMealImage, estimateMealFromDescription } from '../services/gemini';
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface Props {
@@ -30,10 +30,7 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
   const [newMedicine, setNewMedicine] = useState('');
   const [showManualMeal, setShowManualMeal] = useState(false);
   const [manualDesc, setManualDesc] = useState('');
-  const [manualCals, setManualCals] = useState('');
-  const [manualProtein, setManualProtein] = useState('');
-  const [manualCarbs, setManualCarbs] = useState('');
-  const [manualFats, setManualFats] = useState('');
+  const [isEstimating, setIsEstimating] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -223,21 +220,23 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
     reader.readAsDataURL(file);
   };
 
-  const handleManualMealLog = () => {
+  const handleManualMealLog = async () => {
     if (isGuest) { onRestricted(); return; }
-    const cals = parseInt(manualCals) || 0;
-    if (!manualDesc.trim() || cals === 0) return;
+    if (!manualDesc.trim()) return;
+    setIsEstimating(true);
+    const result = await estimateMealFromDescription(manualDesc.trim());
+    setIsEstimating(false);
     const newMeal: MealAnalysis = {
       timestamp: new Date().toISOString(),
-      calories: cals,
-      protein: parseInt(manualProtein) || 0,
-      carbs: parseInt(manualCarbs) || 0,
-      fats: parseInt(manualFats) || 0,
-      description: manualDesc.trim(),
+      calories: result?.calories || 0,
+      protein: result?.protein || 0,
+      carbs: result?.carbs || 0,
+      fats: result?.fats || 0,
+      description: result?.description || manualDesc.trim(),
     };
     updateMetric({ mealLogs: [newMeal, ...data.health.mealLogs] });
     update({ warriorCodePoints: data.warriorCodePoints + 10 });
-    setManualDesc(''); setManualCals(''); setManualProtein(''); setManualCarbs(''); setManualFats('');
+    setManualDesc('');
     setShowManualMeal(false);
   };
 
@@ -427,43 +426,32 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
                    type="text"
                    value={manualDesc}
                    onChange={(e) => setManualDesc(e.target.value)}
-                   placeholder="Meal description (e.g. Chicken rice bowl)"
+                   onKeyDown={(e) => e.key === 'Enter' && handleManualMealLog()}
+                   placeholder="Describe the meal (e.g. Chicken rice bowl with vegetables)"
                    className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl px-4 py-3 text-sm text-[#595b61] font-bold focus:border-[#f78121] outline-none placeholder:text-[#595b61]/70"
                  />
-                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                   {([
-                     { label: 'Calories (kcal)', val: manualCals, set: setManualCals },
-                     { label: 'Protein (g)', val: manualProtein, set: setManualProtein },
-                     { label: 'Carbs (g)', val: manualCarbs, set: setManualCarbs },
-                     { label: 'Fats (g)', val: manualFats, set: setManualFats },
-                   ] as const).map(({ label, val, set }) => (
-                     <div key={label}>
-                       <label className="text-[10px] font-black uppercase tracking-widest text-[#45d0d0] block mb-1">{label}</label>
-                       <input
-                         type="number"
-                         value={val}
-                         onChange={(e) => set(e.target.value)}
-                         placeholder="0"
-                         className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl px-3 py-2 text-sm text-center text-[#595b61] font-bold focus:border-[#f78121] outline-none"
-                       />
-                     </div>
-                   ))}
-                 </div>
                  <button
                    onClick={handleManualMealLog}
-                   disabled={!manualDesc.trim() || !manualCals}
+                   disabled={!manualDesc.trim() || isEstimating}
                    className="w-full py-4 bg-[#45d0d0] text-white font-black uppercase tracking-widest text-sm rounded-xl hover:bg-[#3ababa] transition-all disabled:opacity-50 active:scale-[0.98]"
                  >
-                   Log Meal
+                   {isEstimating ? 'Analysing Nutrition...' : 'Analyse & Log'}
                  </button>
                </div>
              )}
            </section>
 
            <label
-             htmlFor="meal-upload-input"
              className={`w-full glass-card p-6 md:p-8 border-2 border-[#f78121]/40 hover:border-[#f78121] transition-all duration-300 flex flex-col items-center justify-center gap-3 group cursor-pointer${isAnalyzing ? ' opacity-60 pointer-events-none' : ''}`}
            >
+             <input
+               type="file"
+               accept="image/*"
+               className="hidden"
+               ref={fileInputRef}
+               onChange={handleImageCapture}
+               disabled={isAnalyzing}
+             />
              <div className="p-4 bg-[#f78121]/10 rounded-full border border-[#f78121]/30 group-hover:bg-[#f78121]/20 transition-colors">
                <Camera size={28} className="text-[#f78121]" />
              </div>
@@ -476,15 +464,6 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
                </>
              )}
            </label>
-           <input
-             id="meal-upload-input"
-             type="file"
-             accept="image/*"
-             className="hidden"
-             ref={fileInputRef}
-             onChange={handleImageCapture}
-             disabled={isAnalyzing}
-           />
 
            <section className="glass-card p-6 md:p-8 transition-all duration-300 ease-in-out hover:-translate-y-1">
               <div className="flex justify-between items-center mb-6">
