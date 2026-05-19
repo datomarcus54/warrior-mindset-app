@@ -239,7 +239,7 @@ const App: React.FC = () => {
       {/* Side Menu */}
       <aside className={`fixed top-0 left-0 bottom-0 z-[90] w-[80%] max-w-xs bg-[#001b3d] border-r border-[#45d0d0]/20 transition-transform duration-300 transform ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
          <div className="p-6 border-b border-[#45d0d0]/20 flex justify-between items-center">
-            <span className="text-xl font-brand-header font-black uppercase text-[#f78121] tracking-widest">Command Center</span>
+            <span className="text-xl font-brand-header font-black uppercase text-[#f78121] tracking-widest">Main Menu</span>
             <button onClick={() => setIsMenuOpen(false)} className="text-[#45d0d0] hover:text-white"><X size={24}/></button>
          </div>
          <div className="p-4 space-y-2">
@@ -265,7 +265,7 @@ const App: React.FC = () => {
             </button>
             <button onClick={() => { setCurrentView('Codex'); setIsMenuOpen(false); }} className="w-full p-4 flex items-center space-x-4 hover:bg-white/5 rounded-xl transition-all group border border-transparent hover:border-[#f78121]/30">
                <BookOpen className="text-slate-400 group-hover:text-white group-hover:scale-110 transition-transform" />
-               <div className="text-left"><span className="block text-sm font-black uppercase tracking-widest text-white">System Manual</span><span className="block text-[10px] text-[#45d0d0]">Operating System</span></div>
+               <div className="text-left"><span className="block text-sm font-black uppercase tracking-widest text-white">How It Works</span><span className="block text-[10px] text-[#45d0d0]">Operating System</span></div>
             </button>
          </div>
          <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-[#45d0d0]/20 bg-[#001b3d]">
