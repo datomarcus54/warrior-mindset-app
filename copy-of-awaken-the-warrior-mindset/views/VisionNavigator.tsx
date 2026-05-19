@@ -33,6 +33,10 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
   const [localVision1Year, setLocalVision1Year] = useState(data.vision1Year || '');
   const [localVision3Year, setLocalVision3Year] = useState(data.vision3Year || '');
   const [localVision5Year, setLocalVision5Year] = useState(data.vision5Year || '');
+  // Raw string values while the user is typing into a score input
+  const [scoreInputs, setScoreInputs] = useState<Record<number, string>>({});
+  // Indices whose current raw value failed 1-10 validation
+  const [scoreErrors, setScoreErrors] = useState<Set<number>>(new Set());
 
   const flushRef = useRef<() => void>(() => {});
   flushRef.current = () => {
@@ -79,6 +83,28 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
     });
     update({ lifeWheel: newWheel });
   };
+
+  const handleScoreChange = (idx: number, raw: string) => {
+    if (isGuest) { onRestricted(); return; }
+    const digitsOnly = raw.replace(/[^0-9]/g, '');
+    setScoreInputs(prev => ({ ...prev, [idx]: digitsOnly }));
+    setScoreErrors(prev => { const s = new Set(prev); s.delete(idx); return s; });
+  };
+
+  const handleScoreBlur = (idx: number, currentValue: number) => {
+    const raw = scoreInputs[idx];
+    if (raw === undefined) return;
+    const num = parseInt(raw, 10);
+    const valid = raw !== '' && !isNaN(num) && num >= 1 && num <= 10;
+    if (valid) {
+      setScoreErrors(prev => { const s = new Set(prev); s.delete(idx); return s; });
+      setScoreInputs(prev => { const next = { ...prev }; delete next[idx]; return next; });
+      handleDomainChange(idx, num);
+    } else {
+      setScoreErrors(prev => new Set(prev).add(idx));
+      setScoreInputs(prev => { const next = { ...prev }; delete next[idx]; return next; });
+    }
+  };;
   
 
   const affirmation = useMemo(() => {
@@ -193,13 +219,18 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
               <span className="text-[10px] md:text-xs text-white uppercase font-black tracking-widest text-center leading-tight">{domain.displayName}</span>
               <div className="flex items-center gap-1.5" onClick={isGuest ? onRestricted : undefined}>
                 <input
-                  type="number"
-                  min="1"
-                  max="10"
-                  value={domain.value}
-                  onChange={(e) => handleDomainChange(idx, parseInt(e.target.value) || 0)}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={scoreInputs[idx] !== undefined ? scoreInputs[idx] : String(domain.value)}
+                  onChange={(e) => handleScoreChange(idx, e.target.value)}
+                  onBlur={() => handleScoreBlur(idx, domain.value)}
                   disabled={isGuest}
-                  className="w-14 bg-[#0A3762] border border-[#f78121]/40 rounded-lg px-2 py-1.5 text-center font-black text-[#f78121] text-base outline-none focus:border-[#f78121] disabled:opacity-50"
+                  className={`w-14 bg-[#0A3762] border rounded-lg px-2 py-1.5 text-center font-black text-base outline-none disabled:opacity-50 transition-colors ${
+                    scoreErrors.has(idx)
+                      ? 'border-red-500 text-red-400'
+                      : 'border-[#f78121]/40 text-[#f78121] focus:border-[#f78121]'
+                  }`}
                 />
                 <span className="text-white/50 text-xs font-black">/10</span>
               </div>
