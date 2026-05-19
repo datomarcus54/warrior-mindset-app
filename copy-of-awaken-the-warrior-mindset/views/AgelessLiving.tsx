@@ -7,6 +7,7 @@ import {
   ChevronLeft, ChevronRight, Scale, Info, X, Zap, Pill, BarChart2, Save
 } from 'lucide-react';
 import { analyzeMealImage, estimateMealFromDescription } from '../services/gemini';
+import EmptyState from './EmptyState';
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface Props {
@@ -496,7 +497,12 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
            <section className="glass-card p-6 md:p-8 transition-all duration-300 ease-in-out hover:-translate-y-1">
               <h3 className="text-lg font-black uppercase tracking-widest text-white mb-6">Nutrition Summary</h3>
               {todayMeals.length === 0 ? (
-                <div className="text-center text-xs text-white/50 italic py-4">Fuel intake unrecorded.</div>
+                <EmptyState
+                  heading="No Meals Logged Today"
+                  message="Fuel your body with intention. Log your first meal to begin tracking your nutrition."
+                  buttonLabel="Log Your First Meal"
+                  onButtonClick={() => setShowManualMeal(true)}
+                />
               ) : (
                 <div className="space-y-4">
                   {todayMeals.map((meal, i) => {
