@@ -278,7 +278,7 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
               </div>
               <h3 className="text-xl font-black font-brand-header uppercase tracking-tight text-[#f78121] mb-4">The Warrior Body</h3>
               <p className="text-base text-white font-medium leading-relaxed italic">
-                "Peak physical utility and biological longevity are the foundation of your mental fortress. Condition yourself for the long mission."
+                "Peak physical utility and biological longevity are the foundation of your mental fortress. Condition yourself for the long term."
               </p>
            </div>
         </div>
@@ -494,7 +494,7 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
 
            {/* Meal Cards + Daily Totals */}
            <section className="glass-card p-6 md:p-8 transition-all duration-300 ease-in-out hover:-translate-y-1">
-              <h3 className="text-lg font-black uppercase tracking-widest text-white mb-6">Nutritional Intel</h3>
+              <h3 className="text-lg font-black uppercase tracking-widest text-white mb-6">Nutrition Summary</h3>
               {todayMeals.length === 0 ? (
                 <div className="text-center text-xs text-white/50 italic py-4">Fuel intake unrecorded.</div>
               ) : (
@@ -569,7 +569,7 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
                <Clock size={48} className="text-[#f78121] relative z-10" />
             </div>
             <h3 className="text-5xl md:text-7xl font-black text-[#f78121] font-brand-header tracking-tighter mb-4">{timeLeft || 'READY'}</h3>
-            <p className="text-xs md:text-sm text-white font-black uppercase tracking-[0.2em] mb-8">Fasting Protocol: {data.health.fastingWindowHours} Hours</p>
+            <p className="text-xs md:text-sm text-white font-black uppercase tracking-[0.2em] mb-8">Fasting Window: {data.health.fastingWindowHours} Hours</p>
             
             <div className="flex space-x-4 w-full max-w-md">
                {!data.health.fastingStart ? (
@@ -594,7 +594,7 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
                     <Moon size={24} className="text-indigo-400 md:w-9 md:h-9" />
                 </div>
                 <div>
-                    <h3 className="text-xl md:text-3xl font-black uppercase tracking-tight text-white">Recovery Protocol</h3>
+                    <h3 className="text-xl md:text-3xl font-black uppercase tracking-tight text-white">Recovery & Sleep</h3>
                     <p className="text-xs md:text-sm text-white/60 font-black uppercase tracking-widest">System Reboot & Consolidation</p>
                 </div>
             </div>
@@ -758,7 +758,7 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
 
           {/* Medicines (New) */}
           <div>
-            <h3 className="text-xl md:text-2xl font-black uppercase tracking-tighter text-white mb-6 flex items-center"><Pill className="mr-3" /> Medicine Protocol</h3>
+            <h3 className="text-xl md:text-2xl font-black uppercase tracking-tighter text-white mb-6 flex items-center"><Pill className="mr-3" /> Medicines</h3>
             <div className="flex space-x-3 md:space-x-5 mb-6">
               <input 
                 value={newMedicine}

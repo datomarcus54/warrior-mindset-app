@@ -62,7 +62,7 @@ const CodexView: React.FC<Props> = () => {
   return (
     <div className="space-y-12 md:space-y-16 pb-24">
       {showPrivacy && (
-        <LegalModal title="Privacy Protocol" onClose={() => setShowPrivacy(false)}>
+        <LegalModal title="Privacy Policy" onClose={() => setShowPrivacy(false)}>
            <div className="space-y-4"><p><strong>1. Data Collection & Usage</strong><br/>We collect email addresses solely for secure account authentication.</p></div>
         </LegalModal>
       )}
@@ -78,7 +78,7 @@ const CodexView: React.FC<Props> = () => {
               <button onClick={() => setShowLesson(false)} className="absolute top-4 right-4 text-white hover:text-white transition-colors"><X size={24}/></button>
               <h3 className="text-xl font-black font-brand-header uppercase tracking-tight text-white mb-4">System Architecture</h3>
               <p className="text-base text-white/80 font-medium leading-relaxed italic">
-                "The System Manual is not a philosophy textbook. It is a set of executable protocols for navigating chaos and building legacy."
+                "The System Manual is not a philosophy textbook. It is a set of practical tools for navigating chaos and building legacy."
               </p>
            </div>
         </div>
@@ -101,7 +101,7 @@ const CodexView: React.FC<Props> = () => {
                <div className="flex-1">
                   <h3 className="text-2xl font-brand-header font-black uppercase tracking-tight text-white mb-2">How the Warrior Mindset Works</h3>
                   <p className="text-base text-white/80 font-medium leading-relaxed">
-                     The book taught the framework. This app demands the execution. Read the manual, deploy the protocols, and report the results.
+                     The book taught the framework. This app demands the execution. Read the manual, apply the tools, and track the results.
                   </p>
                </div>
                <div className="shrink-0">
@@ -120,7 +120,7 @@ const CodexView: React.FC<Props> = () => {
         </div>
         <div className="grid grid-cols-1 gap-4">
            <OperatingCard tier="command" title="Strategic Alignment Scan" description="Diagnostic tool for trajectory vs. intended destination. Identifies operational drift." icon={Compass} />
-           <OperatingCard tier="command" title="Challenge Response System" description="Protocol for emotional regulation and decision-making during high-stress combat scenarios." icon={ShieldAlert} />
+           <OperatingCard tier="command" title="Challenge Response System" description="A framework for emotional regulation and decision-making during high-stress situations." icon={ShieldAlert} />
            <OperatingCard tier="command" title="Vitality & Longevity Systems" description="Biological hardware maintenance. Sleep, fuel, and kinetic output optimization is mandatory." icon={Activity} />
         </div>
       </section>
@@ -129,7 +129,7 @@ const CodexView: React.FC<Props> = () => {
       <section className="space-y-6">
         <div className="flex items-center gap-2 px-1"><Users size={16} className="text-white/50" /><span className="text-xs font-black uppercase tracking-[0.25em] text-white/50">Tier 2: Growth Systems</span></div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-           <OperatingCard tier="support" title="Wealth Discipline Framework" description="Eliminate financial fog. Deploy capital with intentionality. Secure resources." icon={Wallet} />
+           <OperatingCard tier="support" title="Wealth Discipline Framework" description="Eliminate financial fog. Direct capital with intentionality. Secure resources." icon={Wallet} />
            <OperatingCard tier="support" title="Alliance & Brotherhood Design" description="Audit the circle. Eliminate weak links. Strengthen the tribe." icon={Users} />
            <OperatingCard tier="support" title="Community Code of Conduct" description="Shared values. Mutual respect. Zero tolerance for weakness." icon={Scroll} />
         </div>

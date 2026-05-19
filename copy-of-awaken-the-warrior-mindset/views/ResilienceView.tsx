@@ -67,7 +67,7 @@ const ResilienceView: React.FC<{ data: UserData; update: (u: Partial<UserData>) 
             <textarea value={distorted} onChange={(e) => setDistorted(e.target.value)} placeholder="Locate the point of failure..." className="w-full h-32 bg-[#eef1f1] border border-[#45d0d0]/20 rounded-warrior p-4 text-sm text-[#595b61] font-bold focus:outline-none focus:border-[#f78121] transition-all placeholder:text-[#595b61]/70" />
           </div>
           <div className="space-y-3">
-            <label className="text-[10px] font-black uppercase tracking-widest text-[#45d0d0] flex items-center"><Sparkles size={12} className="mr-2" /> Tactical Reframing</label>
+            <label className="text-[10px] font-black uppercase tracking-widest text-[#45d0d0] flex items-center"><Sparkles size={12} className="mr-2" /> Reframing</label>
             <textarea value={balanced} onChange={(e) => setBalanced(e.target.value)} placeholder="Re-engage with logic..." className="w-full h-32 bg-[#eef1f1] border border-[#45d0d0]/20 rounded-warrior p-4 text-sm text-[#595b61] font-bold focus:outline-none focus:border-[#45d0d0] transition-all placeholder:text-[#595b61]/70" />
           </div>
         </div>
@@ -95,10 +95,10 @@ const ResilienceView: React.FC<{ data: UserData; update: (u: Partial<UserData>) 
         </div>
 
         <div className="space-y-4 mb-8">
-           <input value={event} onChange={e => setEvent(e.target.value)} placeholder="Identify the Mission Failure..." className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-4 text-sm text-[#595b61] font-bold focus:border-[#f78121] outline-none placeholder:text-[#595b61]/70" />
+           <input value={event} onChange={e => setEvent(e.target.value)} placeholder="Describe what happened..." className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-4 text-sm text-[#595b61] font-bold focus:border-[#f78121] outline-none placeholder:text-[#595b61]/70" />
            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input value={lesson} onChange={e => setLesson(e.target.value)} placeholder="Extract Intel..." className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-4 text-sm text-[#595b61] font-bold focus:border-[#45d0d0] outline-none placeholder:text-[#595b61]/70" />
-              <input value={action} onChange={e => setAction(e.target.value)} placeholder="Adjust Protocol..." className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-4 text-sm text-[#595b61] font-bold focus:border-[#f78121] outline-none placeholder:text-[#595b61]/70" />
+              <input value={lesson} onChange={e => setLesson(e.target.value)} placeholder="What did you learn?" className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-4 text-sm text-[#595b61] font-bold focus:border-[#45d0d0] outline-none placeholder:text-[#595b61]/70" />
+              <input value={action} onChange={e => setAction(e.target.value)} placeholder="What will you do differently?" className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-4 text-sm text-[#595b61] font-bold focus:border-[#f78121] outline-none placeholder:text-[#595b61]/70" />
            </div>
            <button onClick={addFailure} disabled={!event || !lesson || !action} className="w-full py-4 bg-[#f78121] text-white rounded-warrior font-black uppercase tracking-[0.2em] shadow-lg hover:bg-orange-600 transition-all disabled:opacity-50 flex items-center justify-center space-x-2"><Zap size={18} /> <span>Log Growth (+50 Steps)</span></button>
         </div>
@@ -112,8 +112,8 @@ const ResilienceView: React.FC<{ data: UserData; update: (u: Partial<UserData>) 
                 </div>
                 <h4 className="text-base font-bold text-white mb-2">{log.event}</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                   <div className="p-3 bg-[#45d0d0]/10 rounded-xl border border-[#45d0d0]/20"><span className="text-[10px] uppercase font-black tracking-widest text-[#45d0d0] block mb-1">Intel</span>{log.lesson}</div>
-                   <div className="p-3 bg-[#f78121]/10 rounded-xl border border-[#f78121]/20"><span className="text-[10px] uppercase font-black tracking-widest text-[#f78121] block mb-1">Protocol</span>{log.action}</div>
+                   <div className="p-3 bg-[#45d0d0]/10 rounded-xl border border-[#45d0d0]/20"><span className="text-[10px] uppercase font-black tracking-widest text-[#45d0d0] block mb-1">Learning</span>{log.lesson}</div>
+                   <div className="p-3 bg-[#f78121]/10 rounded-xl border border-[#f78121]/20"><span className="text-[10px] uppercase font-black tracking-widest text-[#f78121] block mb-1">Action Plan</span>{log.action}</div>
                 </div>
              </div>
            ))}

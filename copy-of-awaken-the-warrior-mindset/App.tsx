@@ -187,7 +187,7 @@ const App: React.FC = () => {
               <h3 className="text-xl font-black font-brand-header uppercase tracking-wider text-[#f78121] mb-6 flex items-center gap-2"><Trophy size={24} /> Scoring Rules</h3>
               <div className="space-y-4 text-sm text-white">
                  <div className="flex justify-between items-center p-3 bg-black/20 rounded-lg"><span>Daily Journaling</span><span className="font-bold text-[#45d0d0]">+10 XP</span></div>
-                 <div className="flex justify-between items-center p-3 bg-black/20 rounded-lg"><span>Morning Protocol</span><span className="font-bold text-[#45d0d0]">+5 XP</span></div>
+                 <div className="flex justify-between items-center p-3 bg-black/20 rounded-lg"><span>Morning Routine</span><span className="font-bold text-[#45d0d0]">+5 XP</span></div>
                  <div className="flex justify-between items-center p-3 bg-black/20 rounded-lg"><span>Deep Work</span><span className="font-bold text-[#45d0d0]">+20 XP</span></div>
               </div>
            </div>
@@ -238,7 +238,7 @@ const App: React.FC = () => {
             </button>
             <button onClick={() => { setCurrentView('Support'); setIsMenuOpen(false); }} className="w-full p-4 flex items-center space-x-4 hover:bg-white/5 rounded-xl transition-all group border border-transparent hover:border-[#f78121]/30">
                <LifeBuoy className="text-[#45d0d0] group-hover:scale-110 transition-transform" />
-               <div className="text-left"><span className="block text-sm font-black uppercase tracking-widest text-white">Help & Resources</span><span className="block text-[10px] text-[#45d0d0]">FAQ & Intel</span></div>
+               <div className="text-left"><span className="block text-sm font-black uppercase tracking-widest text-white">Help & Resources</span><span className="block text-[10px] text-[#45d0d0]">FAQ & Info</span></div>
             </button>
             <button onClick={() => { setCurrentView('Codex'); setIsMenuOpen(false); }} className="w-full p-4 flex items-center space-x-4 hover:bg-white/5 rounded-xl transition-all group border border-transparent hover:border-[#f78121]/30">
                <BookOpen className="text-slate-400 group-hover:text-white group-hover:scale-110 transition-transform" />

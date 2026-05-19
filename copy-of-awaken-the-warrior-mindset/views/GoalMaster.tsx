@@ -21,7 +21,7 @@ const COACH_PHRASES = {
   start: ["The journey begins now. Execute.", "Zero is temporary. Action is mandatory.", "Awaiting your first move, Warrior."],
   progress: ["Good. Friction proves you are moving.", "Momentum is building. Don't let up.", "You are chipping away at the marble."],
   near: ["Stay frosty. Complacency kills at the finish line.", "Visualise the victory, then take it.", "The summit is in sight. Push."],
-  complete: ["Mission Accomplished. Outstanding.", "Victory secured. Calibrate for the next target.", "This is what antifragility looks like."]
+  complete: ["Goal complete. Outstanding.", "Done. Set your next goal.", "This is what antifragility looks like."]
 };
 
 const GoalMaster: React.FC<Props> = ({ data, update }) => {
@@ -147,7 +147,7 @@ const GoalMaster: React.FC<Props> = ({ data, update }) => {
       <section className="glass-card p-6 md:p-8 mb-8 transition-all duration-300 ease-in-out hover:-translate-y-1">
          <div className="flex items-center justify-between mb-6">
             <h3 className="text-sm font-black uppercase tracking-widest text-white flex items-center gap-2">
-               <Calendar size={16} className="text-[#f78121]" /> Tactical Horizon
+               <Calendar size={16} className="text-[#f78121]" /> Timeline
             </h3>
             <span className="text-[10px] font-bold text-[#45d0d0] uppercase tracking-widest">{TIMELINE_CONFIG[activeCategory].label} View</span>
          </div>
@@ -242,7 +242,7 @@ const GoalMaster: React.FC<Props> = ({ data, update }) => {
                        value={milestoneInputs[goal.id] || ''}
                        onChange={(e) => setMilestoneInputs({...milestoneInputs, [goal.id]: e.target.value})}
                        onKeyDown={(e) => e.key === 'Enter' && addMilestone(goal.id)}
-                       placeholder="Add tactical milestone..."
+                       placeholder="Add milestone..."
                        className="flex-1 bg-transparent border-b border-white/20 text-xs text-white p-2 focus:border-[#f78121] outline-none transition-colors placeholder:text-white/30"
                      />
                      <button onClick={() => addMilestone(goal.id)} className="text-[#f78121] hover:text-white transition-colors"><Plus size={16} /></button>

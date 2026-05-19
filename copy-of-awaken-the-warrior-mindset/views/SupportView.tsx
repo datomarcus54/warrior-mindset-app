@@ -21,7 +21,7 @@ const FAQS = [
   },
   {
     question: "Can I reset my progress?",
-    answer: "Tactical resets are available. Contact Command Support. Warning: This wipes your history. Ensure you are ready to start from zero."
+    answer: "Resets are available. Contact Support. Warning: This wipes your history. Ensure you are ready to start from zero."
   },
   {
     question: "What is the purpose of Coach Marcus?",
@@ -29,7 +29,7 @@ const FAQS = [
   },
   {
     question: "Is my data private?",
-    answer: "Your intel is encrypted and locked. We do not sell your data. Your mission parameters remain classified."
+    answer: "Your data is encrypted and secure. We do not sell your data. Your personal information remains private."
   }
 ];
 
@@ -95,7 +95,7 @@ const SupportView: React.FC<Props> = ({ isGuest, onRestricted }) => {
                   <Info size={24} className="text-[#f78121]" />
                 </div>
               </div>
-              <h3 className="text-xl font-black font-brand-header uppercase tracking-tight text-[#f78121] mb-4">Intel & Communication</h3>
+              <h3 className="text-xl font-black font-brand-header uppercase tracking-tight text-[#f78121] mb-4">Help & Contact</h3>
               <p className="text-base text-white font-medium leading-relaxed italic">
                 "This is your link to the command center. Use it to report obstacles, seek guidance, or manage your account trajectory."
               </p>
@@ -105,13 +105,13 @@ const SupportView: React.FC<Props> = ({ isGuest, onRestricted }) => {
 
       {/* Privacy Policy Modal */}
       {showPrivacy && (
-        <LegalModal title="Privacy Protocol" onClose={() => setShowPrivacy(false)}>
+        <LegalModal title="Privacy Policy" onClose={() => setShowPrivacy(false)}>
            <div className="space-y-4">
               <p><strong>1. Data Collection & Usage</strong><br/>We collect email addresses solely for secure account authentication and service communication. We do not sell, rent, or trade your personal information.</p>
               
               <p><strong>2. Financial Security</strong><br/>All subscription and payment processing is handled by secure, industry-standard third-party processors (e.g., Stripe). We do not store your credit card information on our servers.</p>
               
-              <p><strong>3. Journal & Intel Confidentiality</strong><br/>Your personal journal entries, financial data, and strategic plans are strictly confidential. They are encrypted before storage, ensuring that your private reflections remain accessible only to you.</p>
+              <p><strong>3. Journal & Data Confidentiality</strong><br/>Your personal journal entries, financial data, and strategic plans are strictly confidential. They are encrypted before storage, ensuring that your private reflections remain accessible only to you.</p>
               
               <p><strong>4. Third-Party Services</strong><br/>We may use trusted third-party services for hosting and analytics to improve app performance, strictly bound by confidentiality agreements.</p>
            </div>
@@ -205,7 +205,7 @@ const SupportView: React.FC<Props> = ({ isGuest, onRestricted }) => {
                     <div className="w-10 h-10 rounded-full bg-[#f78121]/10 flex items-center justify-center text-[#f78121]">
                        <Shield size={18} />
                     </div>
-                    <span>Secure Transmission</span>
+                    <span>Send Message</span>
                  </div>
               </div>
            </div>
@@ -232,7 +232,7 @@ const SupportView: React.FC<Props> = ({ isGuest, onRestricted }) => {
                  />
               </div>
               <div>
-                 <label className="text-[10px] font-black uppercase tracking-widest text-[#f78121] mb-2 block">Transmission</label>
+                 <label className="text-[10px] font-black uppercase tracking-widest text-[#f78121] mb-2 block">Message</label>
                  <textarea 
                    value={form.message}
                    onChange={e => setForm({...form, message: e.target.value})}
@@ -266,7 +266,7 @@ const SupportView: React.FC<Props> = ({ isGuest, onRestricted }) => {
             <Shield size={12} />
             <span>Terms of Service</span>
          </button>
-         <span className="text-[10px] text-white/50 font-bold">v3.0.0 • Warrior Protocol</span>
+         <span className="text-[10px] text-white/50 font-bold">v3.0.0 • Warrior App</span>
       </footer>
 
     </div>

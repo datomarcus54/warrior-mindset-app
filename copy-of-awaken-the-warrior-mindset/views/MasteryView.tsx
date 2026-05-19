@@ -45,7 +45,7 @@ const FinancialTable = memo(({ title, entries, path, showTarget = true, canAdd =
         <table className="w-full text-left min-w-[300px]">
           <thead>
             <tr className="border-b border-[#f78121]/20">
-              <th className="pb-3 md:pb-4 px-3 md:px-5 text-[10px] md:text-xs font-black uppercase tracking-widest text-[#f78121]">Mission Item</th>
+              <th className="pb-3 md:pb-4 px-3 md:px-5 text-[10px] md:text-xs font-black uppercase tracking-widest text-[#f78121]">Item</th>
               {showTarget && <th className="pb-3 md:pb-4 px-3 md:px-5 text-[10px] md:text-xs font-black uppercase tracking-widest text-[#f78121] text-right">Target</th>}
               <th className="pb-3 md:pb-4 px-3 md:px-5 text-[10px] md:text-xs font-black uppercase tracking-widest text-[#f78121] text-right">{showTarget ? 'Actual' : 'Value'}</th>
               <th className="pb-3 md:pb-4 w-8 md:w-12"></th>
@@ -71,7 +71,7 @@ const FinancialTable = memo(({ title, entries, path, showTarget = true, canAdd =
             {canAdd && (
               <tr>
                 <td className="py-4 md:py-5 px-3 md:px-5">
-                  <input type="text" value={localLabel} onChange={(e) => setLocalLabel(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleAdd()} placeholder="Deploy resource..." className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-lg px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm outline-none focus:border-[#f78121] text-[#595b61] placeholder:text-[#595b61]/70" />
+                  <input type="text" value={localLabel} onChange={(e) => setLocalLabel(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleAdd()} placeholder="Add item..." className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-lg px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm outline-none focus:border-[#f78121] text-[#595b61] placeholder:text-[#595b61]/70" />
                 </td>
                 <td colSpan={showTarget ? 3 : 2} className="py-4 md:py-5 px-3 md:px-5 text-right">
                   <button onClick={handleAdd} className="p-1.5 md:p-2 bg-[#f78121]/10 text-[#f78121] rounded-lg hover:bg-[#f78121] hover:text-white transition-all"><Plus size={16} /></button>
@@ -171,7 +171,7 @@ const MasteryView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => 
       {!isUnlocked && (
         <div className="absolute inset-0 z-50 bg-[#0A3762]/90 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center h-[100vh]">
             <Lock size={48} className="text-[#f78121] mb-4" />
-            <h3 className="text-2xl font-black uppercase text-white mb-2">Restricted Intel</h3>
+            <h3 className="text-2xl font-black uppercase text-white mb-2">Members Only</h3>
             <p className="text-[#45d0d0] mb-8 max-w-sm">Upgrade to Adept Class to access Wealth.</p>
             {!isMobileMode && <button onClick={() => update({ tier: 'Adept' })} className="px-8 py-3 bg-[#f78121] text-white font-black uppercase tracking-widest rounded-lg hover:bg-white hover:text-[#0A3762] transition-all">Unlock Access</button>}
         </div>
@@ -181,9 +181,9 @@ const MasteryView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => 
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-[#001b3d]/90 backdrop-blur-sm">
            <div className="relative w-full max-w-md bg-[#595b61] p-8 md:p-10 border border-white/20 rounded-2xl shadow-2xl">
               <button onClick={() => setShowLesson(false)} className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors"><X size={24}/></button>
-              <h3 className="text-xl font-black font-brand-header uppercase tracking-tight text-white mb-4">Resource Protocols</h3>
+              <h3 className="text-xl font-black font-brand-header uppercase tracking-tight text-white mb-4">Resources</h3>
               <p className="text-base text-white/70 font-medium leading-relaxed italic">
-                "Money is ammunition. Do not waste it. Direct it towards targets that expand your empire."
+                "Money is a tool. Do not waste it. Direct it towards goals that build your legacy."
               </p>
            </div>
         </div>
@@ -280,7 +280,7 @@ const MasteryView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => 
       {/* Cash Flow Section */}
       <section className="space-y-6 md:space-y-8">
         <div className="flex items-center justify-between px-2 pb-2 md:pb-3 border-b border-[#f78121]/30">
-            <h3 className="text-xl md:text-2xl font-black font-brand-header uppercase text-[#f78121] drop-shadow-md">Supply Lines</h3>
+            <h3 className="text-xl md:text-2xl font-black font-brand-header uppercase text-[#f78121] drop-shadow-md">Resources</h3>
             <div className={`text-xs md:text-base font-black px-3 py-1 md:px-4 md:py-1.5 rounded-lg ${stats.netCashFlow >= 0 ? 'bg-[#45d0d0]/10 text-[#45d0d0]' : 'bg-[#f78121]/10 text-[#f78121]'}`}>
                 {stats.netCashFlow >= 0 ? '+' : ''}RM {stats.netCashFlow.toLocaleString()} / mo
             </div>

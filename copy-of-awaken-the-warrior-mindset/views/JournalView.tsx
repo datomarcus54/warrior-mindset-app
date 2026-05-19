@@ -143,7 +143,7 @@ const JournalView: React.FC<Props> = ({ data, update, isGuest, onRestricted, isM
   const RestrictedOverlay = () => (
     <div className="absolute inset-0 z-20 backdrop-blur-sm bg-[#0A3762]/80 flex flex-col items-center justify-center text-center p-6 rounded-xl">
       <Lock size={32} className="text-[#f78121] mb-3" />
-      <h4 className="text-lg font-black uppercase tracking-widest text-white mb-2">Restricted Intel</h4>
+      <h4 className="text-lg font-black uppercase tracking-widest text-white mb-2">Members Only</h4>
       <p className="text-xs text-[#45d0d0] mb-4 max-w-[240px]">Upgrade to Adept Class to unlock the full Journal.</p>
       {!isMobileMode && (
          <button onClick={() => update({ tier: 'Adept' })} className="px-6 py-2 bg-[#f78121] text-white font-black uppercase tracking-widest text-xs rounded-lg hover:bg-white hover:text-[#0A3762] transition-all">
@@ -162,7 +162,7 @@ const JournalView: React.FC<Props> = ({ data, update, isGuest, onRestricted, isM
               <button onClick={() => setShowLesson(false)} className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors"><X size={24}/></button>
               <h3 className="text-xl font-black font-brand-header uppercase tracking-tight text-[#f78121] mb-4">The Daily War</h3>
               <p className="text-base text-white font-medium leading-relaxed italic">
-                "Win the morning, win the day. The journal is your tactical map."
+                "Win the morning, win the day. The journal is your daily guide."
               </p>
            </div>
         </div>
@@ -264,7 +264,7 @@ const JournalView: React.FC<Props> = ({ data, update, isGuest, onRestricted, isM
           value={localWorkflow.afternoonPriority}
           onChange={(e) => setLocalWorkflow(prev => ({ ...prev, afternoonPriority: e.target.value }))}
           onBlur={() => updateWorkflow({ afternoonPriority: localWorkflow.afternoonPriority })}
-          placeholder="Second-half targets (Free Form)..."
+          placeholder="Afternoon focus (Free Form)..."
           className="w-full h-32 bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-4 text-sm text-[#595b61] font-bold focus:border-[#f78121] transition-all placeholder:text-[#595b61]/70"
         />
       </section>
@@ -294,7 +294,7 @@ const JournalView: React.FC<Props> = ({ data, update, isGuest, onRestricted, isM
         </div>
 
         <div className="bg-black/20 rounded-xl p-6 border border-[#45d0d0]/20 mb-6">
-           <h4 className="text-xs font-black uppercase tracking-widest text-[#45d0d0] mb-4">Shutdown Protocol</h4>
+           <h4 className="text-xs font-black uppercase tracking-widest text-[#45d0d0] mb-4">End of Day</h4>
            <div className="space-y-3">
               {[
                 { label: 'Strategic Stop (No New Inputs)', key: 'strategicStop' },

@@ -135,12 +135,12 @@ const CommunityView: React.FC<Props> = ({ data, update }) => {
       {/* Main Header */}
       <header className="mb-8">
         <div className="flex items-center gap-3">
-          <h2 className="text-4xl md:text-6xl font-black font-brand-header uppercase text-[#f78121] tracking-wider whitespace-nowrap">Global Barracks</h2>
+          <h2 className="text-4xl md:text-6xl font-black font-brand-header uppercase text-[#f78121] tracking-wider whitespace-nowrap">Global Community</h2>
           <button onClick={() => setShowLesson(true)} className="text-[#f78121] hover:text-white cursor-pointer transition-colors" aria-label="Warrior Lesson">
             <Info size={24} />
           </button>
         </div>
-        <p className="text-xs md:text-sm text-[#45d0d0] font-black uppercase tracking-[0.2em] mt-2">Base of Operations</p>
+        <p className="text-xs md:text-sm text-[#45d0d0] font-black uppercase tracking-[0.2em] mt-2">Community Hub</p>
       </header>
 
       {/* RANK & XP DASHBOARD */}
@@ -169,7 +169,7 @@ const CommunityView: React.FC<Props> = ({ data, update }) => {
           onClick={() => setActiveTab('Hub')}
           className={`flex-1 min-w-[100px] py-4 text-[10px] font-black uppercase tracking-[0.2em] rounded-warrior transition-all duration-500 flex items-center justify-center gap-2 whitespace-nowrap ${activeTab === 'Hub' ? 'bg-[#f78121] text-white shadow-lg' : 'text-white/50 hover:text-white'}`}
         >
-          <Swords size={14} /> Intel Exchange
+          <Swords size={14} /> Insights Exchange
         </button>
         <button 
           onClick={() => setActiveTab('Leaderboard')}
@@ -186,7 +186,7 @@ const CommunityView: React.FC<Props> = ({ data, update }) => {
             <textarea 
               value={newPostText}
               onChange={(e) => setNewPostText(e.target.value)}
-              placeholder="Sitrep / Intel Share..."
+              placeholder="Share an update..."
               className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-4 text-sm text-[#595b61] font-bold focus:outline-none focus:border-[#f78121] transition-all min-h-[80px] placeholder:text-[#595b61]/70"
             />
             {newPostImage && (
@@ -294,7 +294,7 @@ const CommunityView: React.FC<Props> = ({ data, update }) => {
                   <th className="pb-4 px-4 text-[10px] font-black uppercase tracking-widest text-white/50">Rank</th>
                   <th className="pb-4 px-4 text-[10px] font-black uppercase tracking-widest text-white/50">Warrior</th>
                   <th className="pb-4 px-4 text-[10px] font-black uppercase tracking-widest text-white/50 text-center">Class</th>
-                  <th className="pb-4 px-4 text-[10px] font-black uppercase tracking-widest text-white/50 text-center">Missions</th>
+                  <th className="pb-4 px-4 text-[10px] font-black uppercase tracking-widest text-white/50 text-center">Goals</th>
                   <th className="pb-4 px-4 text-[10px] font-black uppercase tracking-widest text-white/50 text-right">XP</th>
                 </tr>
               </thead>

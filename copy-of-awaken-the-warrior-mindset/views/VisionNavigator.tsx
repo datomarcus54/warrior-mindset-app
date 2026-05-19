@@ -18,11 +18,11 @@ const LESSONS = {
   },
   'RADAR': {
     title: "Antifragile Diagnostic",
-    text: "A warrior without a target is just a casualty waiting to happen. Scan the perimeter. Identify the weak points. Reinforce them."
+    text: "A warrior without a clear goal drifts. Look honestly at where you are. Identify what needs work. Strengthen it."
   },
   'VISION': {
     title: "Clarity of Purpose",
-    text: "Vague visions produce vague results. Define the target with lethal precision. If you cannot see it, you cannot kill it."
+    text: "Vague visions produce vague results. Define your goal with precision. If you cannot see it clearly, you cannot reach it."
   }
 };
 

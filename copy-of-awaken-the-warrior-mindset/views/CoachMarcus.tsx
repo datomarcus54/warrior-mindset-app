@@ -42,7 +42,7 @@ const CoachMarcus: React.FC<Props> = ({ data }) => {
     setIsLoading(true);
 
     const response = await getCoachMarcusResponse(textToSend);
-    setMessages(prev => [...prev, { role: 'bot' as const, text: response || "The transmission was jammed by fear. Try again, warrior." }]);
+    setMessages(prev => [...prev, { role: 'bot' as const, text: response || "Something went wrong. Try again, warrior." }]);
     setIsLoading(false);
   };
 
@@ -63,7 +63,7 @@ const CoachMarcus: React.FC<Props> = ({ data }) => {
             <h2 className="text-xl md:text-2xl font-black font-brand-header uppercase text-white leading-none tracking-wider">Coach Marcus</h2>
             <div className="flex items-center text-[10px] md:text-xs text-[#45d0d0] font-black uppercase tracking-[0.2em] mt-1 md:mt-2">
               <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-[#45d0d0] rounded-full mr-2 animate-pulse" />
-              Active Protocol
+              Active Session
             </div>
           </div>
         </div>
@@ -113,7 +113,7 @@ const CoachMarcus: React.FC<Props> = ({ data }) => {
       <div className="space-y-3 md:space-y-5 pt-3 md:pt-4 border-t border-[#f78121]/30">
         {messages.length === 1 && (
           <div className="flex flex-col space-y-2 md:space-y-3">
-            <p className="text-[10px] md:text-xs text-white/50 font-black uppercase tracking-[0.3em] px-2 md:px-3">Mission Selection</p>
+            <p className="text-[10px] md:text-xs text-white/50 font-black uppercase tracking-[0.3em] px-2 md:px-3">Quick Start</p>
             <div className="flex overflow-x-auto space-x-3 md:space-x-4 pb-2 md:pb-4 px-1 md:px-2 no-scrollbar">
               {STARTER_PROMPTS.map((p, idx) => (
                 <button
@@ -134,7 +134,7 @@ const CoachMarcus: React.FC<Props> = ({ data }) => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Request Tactical Guidance..."
+            placeholder="Ask your coach..."
             className="w-full bg-[#eef1f1] border border-[#45d0d0]/30 rounded-2xl pl-4 md:pl-8 pr-14 md:pr-20 py-4 md:py-6 text-base md:text-lg text-[#595b61] focus:outline-none focus:border-[#f78121] shadow-inner transition-all placeholder:text-[#595b61]/70 font-medium"
           />
           <button 

@@ -125,7 +125,7 @@ const HabitLaboratory: React.FC<Props> = ({ data, update }) => {
             value={newHabitName}
             onChange={(e) => setNewHabitName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && addHabit()}
-            placeholder="Install New Protocol..."
+            placeholder="Add new habit..."
             className="flex-1 bg-[#eef1f1] rounded-lg px-4 md:px-8 py-4 md:py-5 text-base md:text-lg text-[#595b61] font-bold focus:outline-none focus:ring-2 focus:ring-[#f78121] transition-all placeholder:text-[#595b61]/70"
           />
           <button onClick={addHabit} className="bg-[#f78121] text-[#001b3d] p-4 md:p-5 rounded-lg hover:bg-[#ff9545] transition-all active:scale-95 shadow-lg font-black">
