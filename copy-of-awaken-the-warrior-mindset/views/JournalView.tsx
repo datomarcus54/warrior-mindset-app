@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { UserData, DailyWorkflow } from '../types';
 import { Check, Lock, Info, X, Flame, Save } from 'lucide-react';
+import EmptyState from './EmptyState';
 
 interface Props {
   data: UserData;
@@ -13,6 +14,7 @@ interface Props {
 
 const JournalView: React.FC<Props> = ({ data, update, isGuest, onRestricted, isMobileMode }) => {
   const [showLesson, setShowLesson] = useState(false);
+  const [showForm, setShowForm] = useState((data.dailyWorkflows || []).length > 0);
   const today = new Date().toISOString().split('T')[0];
 
   const currentWorkflow = useMemo(() => {
@@ -195,6 +197,8 @@ const JournalView: React.FC<Props> = ({ data, update, isGuest, onRestricted, isM
         </div>
       </section>
 
+      {showForm || (data.dailyWorkflows || []).length > 0 ? (
+        <>
       {/* I. DAILY INTENTION */}
       <section className="glass-card p-6 md:p-8 transition-all duration-300 ease-in-out hover:-translate-y-1">
         <h3 className="text-lg font-black uppercase tracking-widest text-[#f78121] mb-6">I. Daily Intention</h3>
@@ -342,6 +346,15 @@ const JournalView: React.FC<Props> = ({ data, update, isGuest, onRestricted, isM
             Save Journal
           </button>
         </div>
+      )}
+        </>
+      ) : (
+        <EmptyState
+          heading="Your Journal Awaits"
+          message="Reflection is where transformation begins. Write your first entry today."
+          buttonLabel="Write Your First Entry"
+          onButtonClick={() => setShowForm(true)}
+        />
       )}
 
     </div>
