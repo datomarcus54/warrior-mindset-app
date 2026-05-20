@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Plus, Target, CheckCircle2, Circle, Trash2, Trophy, Bot, X, Calendar, BarChart3, Info, Flag } from 'lucide-react';
+import { Plus, Target, CheckCircle2, Circle, Trash2, Trophy, X, Calendar, BarChart3, Info, Pencil, Check } from 'lucide-react';
 import { UserData, Goal, Milestone } from '../types';
 
 interface Props {
@@ -30,6 +30,10 @@ const GoalMaster: React.FC<Props> = ({ data, update }) => {
   const [showLesson, setShowLesson] = useState(false);
   const [milestoneInputs, setMilestoneInputs] = useState<{[key: string]: string}>({});
   const [celebration, setCelebration] = useState<{show: boolean, text: string, coachMsg?: string}>({ show: false, text: '' });
+  const [editingGoalId, setEditingGoalId] = useState<string | null>(null);
+  const [editGoalText, setEditGoalText] = useState('');
+  const [editingMsKey, setEditingMsKey] = useState<string | null>(null);
+  const [editMsText, setEditMsText] = useState('');
 
   const addGoal = () => {
     if (!newGoalText.trim()) return;
@@ -52,7 +56,21 @@ const GoalMaster: React.FC<Props> = ({ data, update }) => {
   };
 
   const deleteGoal = (id: string) => {
+    if (!window.confirm('Delete this goal?')) return;
     update({ goals: data.goals.filter(g => g.id !== id) });
+  };
+
+  const startEditGoal = (goal: Goal) => { setEditingGoalId(goal.id); setEditGoalText(goal.text); };
+  const saveGoalEdit = (id: string) => {
+    if (!editGoalText.trim()) return;
+    update({ goals: data.goals.map(g => g.id === id ? { ...g, text: editGoalText } : g) });
+    setEditingGoalId(null);
+  };
+  const startEditMs = (goalId: string, ms: Milestone) => { setEditingMsKey(`${goalId}_${ms.id}`); setEditMsText(ms.text); };
+  const saveMsEdit = (goalId: string, msId: string) => {
+    if (!editMsText.trim()) return;
+    update({ goals: data.goals.map(g => g.id === goalId ? { ...g, milestones: g.milestones.map(m => m.id === msId ? { ...m, text: editMsText } : m) } : g) });
+    setEditingMsKey(null);
   };
 
   const addMilestone = (goalId: string) => {
@@ -90,6 +108,7 @@ const GoalMaster: React.FC<Props> = ({ data, update }) => {
   };
 
   const deleteMilestone = (goalId: string, milestoneId: string) => {
+    if (!window.confirm('Delete this milestone?')) return;
     const newGoals = data.goals.map(g => {
       if (g.id === goalId) return { ...g, milestones: g.milestones.filter(m => m.id !== milestoneId) };
       return g;
@@ -201,19 +220,30 @@ const GoalMaster: React.FC<Props> = ({ data, update }) => {
          {filteredGoals.map(goal => (
             <div key={goal.id} className={`glass-card p-6 md:p-8 transition-all duration-500 ease-in-out hover:-translate-y-1 ${goal.completed ? 'border-[#f78121] bg-[#f78121]/5' : ''}`}>
                <div className="flex items-start justify-between mb-6">
-                  <div className="flex items-start gap-4">
-                     <button onClick={() => toggleGoal(goal.id)} className={`mt-1 transition-all ${goal.completed ? 'text-[#f78121] scale-110' : 'text-white/20 hover:text-[#f78121]'}`}>
+                  <div className="flex items-start gap-4 flex-1">
+                     <button onClick={() => toggleGoal(goal.id)} className={`mt-1 transition-all flex-shrink-0 ${goal.completed ? 'text-[#f78121] scale-110' : 'text-white/20 hover:text-[#f78121]'}`}>
                         {goal.completed ? <CheckCircle2 size={28} /> : <Circle size={28} />}
                      </button>
-                     <div>
-                        <h4 className={`text-base md:text-xl font-bold ${goal.completed ? 'text-[#f78121] line-through decoration-2' : 'text-white'}`}>{goal.text}</h4>
+                     <div className="flex-1 min-w-0">
+                        {editingGoalId === goal.id ? (
+                          <div className="flex items-center gap-2">
+                            <input value={editGoalText} onChange={(e) => setEditGoalText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && saveGoalEdit(goal.id)} autoFocus className="flex-1 bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl px-4 py-2 text-sm text-[#595b61] font-bold focus:border-[#f78121] outline-none" />
+                            <button onClick={() => saveGoalEdit(goal.id)} className="text-[#45d0d0] hover:text-white transition-colors"><Check size={18}/></button>
+                            <button onClick={() => setEditingGoalId(null)} className="text-white/40 hover:text-white transition-colors"><X size={16}/></button>
+                          </div>
+                        ) : (
+                          <h4 className={`text-base md:text-xl font-bold ${goal.completed ? 'text-[#f78121] line-through decoration-2' : 'text-white'}`}>{goal.text}</h4>
+                        )}
                         <div className="flex items-center gap-2 mt-2">
                            <span className="text-[10px] font-black uppercase tracking-widest text-[#45d0d0] bg-[#45d0d0]/10 px-2 py-0.5 rounded">{goal.category}</span>
                            {goal.completed && <span className="text-[10px] font-black uppercase tracking-widest text-[#f78121] flex items-center gap-1"><Trophy size={10} /> Secured</span>}
                         </div>
                      </div>
                   </div>
-                  <button onClick={() => deleteGoal(goal.id)} className="text-white/20 hover:text-red-500 transition-colors"><Trash2 size={18} /></button>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {editingGoalId !== goal.id && <button onClick={() => startEditGoal(goal)} className="text-white/20 hover:text-[#45d0d0] transition-colors"><Pencil size={16}/></button>}
+                    <button onClick={() => deleteGoal(goal.id)} className="text-white/20 hover:text-red-500 transition-colors"><Trash2 size={18} /></button>
+                  </div>
                </div>
 
                {/* Milestones */}
@@ -221,8 +251,19 @@ const GoalMaster: React.FC<Props> = ({ data, update }) => {
                   {goal.milestones?.map(ms => (
                      <div key={ms.id} className="bg-black/20 rounded-lg p-3 border border-white/5">
                         <div className="flex justify-between items-center mb-2">
-                           <span className="text-xs font-bold text-white/80">{ms.text}</span>
-                           <button onClick={() => deleteMilestone(goal.id, ms.id)} className="text-white/20 hover:text-red-400"><X size={12} /></button>
+                           {editingMsKey === `${goal.id}_${ms.id}` ? (
+                             <div className="flex items-center gap-2 flex-1">
+                               <input value={editMsText} onChange={(e) => setEditMsText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && saveMsEdit(goal.id, ms.id)} autoFocus className="flex-1 bg-transparent border-b border-[#f78121] text-xs text-white outline-none" />
+                               <button onClick={() => saveMsEdit(goal.id, ms.id)} className="text-[#45d0d0] hover:text-white"><Check size={12}/></button>
+                               <button onClick={() => setEditingMsKey(null)} className="text-white/40 hover:text-white"><X size={11}/></button>
+                             </div>
+                           ) : (
+                             <span className="text-xs font-bold text-white/80 flex-1">{ms.text}</span>
+                           )}
+                           <div className="flex items-center gap-1 ml-2">
+                             {editingMsKey !== `${goal.id}_${ms.id}` && <button onClick={() => startEditMs(goal.id, ms)} className="text-white/20 hover:text-[#45d0d0]"><Pencil size={10}/></button>}
+                             <button onClick={() => deleteMilestone(goal.id, ms.id)} className="text-white/20 hover:text-red-400"><X size={12} /></button>
+                           </div>
                         </div>
                         <div className="flex items-center gap-3">
                            <input 

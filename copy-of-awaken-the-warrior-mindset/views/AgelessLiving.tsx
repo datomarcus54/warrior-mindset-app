@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { UserData, HealthMetrics, MealAnalysis, MealType, WorkoutCategory, WorkoutSession, DailyHealthLog } from '../types';
 import {
-  Activity, Moon, Clock, Droplet, Camera, Plus, Trash2, Pencil,
+  Activity, Moon, Clock, Droplet, Camera, Plus, Trash2, Pencil, Check,
   Flame, Wind, Dumbbell, Move, Calendar as CalendarIcon,
   ChevronLeft, ChevronRight, Scale, Info, X, Zap, Pill, BarChart2, Save
 } from 'lucide-react';
@@ -30,6 +30,10 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
   const [isMounted, setIsMounted] = useState(false);
   
   const [newMedicine, setNewMedicine] = useState('');
+  const [editingSupIdx, setEditingSupIdx] = useState<number | null>(null);
+  const [editSupName, setEditSupName] = useState('');
+  const [editingMedIdx, setEditingMedIdx] = useState<number | null>(null);
+  const [editMedName, setEditMedName] = useState('');
   const [showManualMeal, setShowManualMeal] = useState(false);
   const [manualDesc, setManualDesc] = useState('');
   const [isEstimating, setIsEstimating] = useState(false);
@@ -273,6 +277,17 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
   const startEditMeal = (meal: MealAnalysis) => {
     setEditingMealTimestamp(meal.timestamp);
     setEditFields({ description: meal.description, calories: meal.calories, protein: meal.protein || 0, carbs: meal.carbs || 0, fats: meal.fats || 0 });
+  };
+
+  const deleteSleepLog = (date: string) => {
+    if (!window.confirm('Clear sleep data for this date?')) return;
+    const newLogs = (data.health.dailyLogs || []).map(l =>
+      l.date === date
+        ? { ...l, sleepScore: 0, timeAsleepHours: 0, timeAsleepMinutes: 0, timeInBedHours: 0, timeInBedMinutes: 0, deepSleepHours: 0, deepSleepMinutes: 0, remSleepHours: 0, remSleepMinutes: 0 }
+        : l
+    );
+    updateMetric({ dailyLogs: newLogs });
+    setSelectedDate(todayStr);
   };
 
   const saveEditedMeal = (timestamp: string) => {
@@ -836,7 +851,8 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
 
                 {selectedLog && (selectedLog.sleepScore || 0) > 0 ? (
                   <div className="space-y-4 mb-8">
-                    <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-2xl p-6 text-center">
+                    <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-2xl p-6 text-center relative">
+                      <button onClick={() => deleteSleepLog(selectedDate)} className="absolute top-3 right-3 text-white/30 hover:text-red-400 transition-colors"><Trash2 size={14}/></button>
                       <div className="text-6xl font-black text-indigo-400 mb-1">{selectedLog.sleepScore}</div>
                       <div className="text-xs font-black uppercase tracking-widest text-white/50">Sleep Score</div>
                     </div>
@@ -911,13 +927,23 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
               }} className="p-4 md:p-6 bg-[#f78121] text-white rounded-2xl shadow-lg"><Plus size={24} className="md:w-7 md:h-7" /></button>
             </div>
             <div className="grid grid-cols-1 gap-4">
-              {data.health.supplementsList.map(sup => (
-                <div key={sup} className="flex items-center justify-between p-4 md:p-6 bg-black/20 border border-white/10 rounded-2xl shadow-sm">
-                  <span className="text-sm md:text-base font-bold text-white">{sup}</span>
-                  <button onClick={() => {
-                      if (isGuest) { onRestricted(); return; }
-                      updateMetric({ supplementsList: data.health.supplementsList.filter(s => s !== sup) })
-                  }} className="text-white/50 hover:text-[#f78121] transition-colors"><Trash2 size={20} /></button>
+              {data.health.supplementsList.map((sup, idx) => (
+                <div key={idx} className="flex items-center justify-between p-4 md:p-6 bg-black/20 border border-white/10 rounded-2xl shadow-sm">
+                  {editingSupIdx === idx ? (
+                    <div className="flex items-center gap-2 flex-1">
+                      <input value={editSupName} onChange={(e) => setEditSupName(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { updateMetric({ supplementsList: data.health.supplementsList.map((s, i) => i === idx ? editSupName : s) }); setEditingSupIdx(null); } }} autoFocus className="flex-1 bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl px-3 py-2 text-sm text-[#595b61] font-bold focus:border-[#f78121] outline-none" />
+                      <button onClick={() => { updateMetric({ supplementsList: data.health.supplementsList.map((s, i) => i === idx ? editSupName : s) }); setEditingSupIdx(null); }} className="text-[#45d0d0] hover:text-white transition-colors"><Check size={18}/></button>
+                      <button onClick={() => setEditingSupIdx(null)} className="text-white/40 hover:text-white transition-colors"><X size={16}/></button>
+                    </div>
+                  ) : (
+                    <span className="text-sm md:text-base font-bold text-white">{sup}</span>
+                  )}
+                  {editingSupIdx !== idx && (
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => { setEditingSupIdx(idx); setEditSupName(sup); }} className="text-white/30 hover:text-[#45d0d0] transition-colors"><Pencil size={16}/></button>
+                      <button onClick={() => { if (isGuest) { onRestricted(); return; } if (!window.confirm('Remove this supplement?')) return; updateMetric({ supplementsList: data.health.supplementsList.filter((_, i) => i !== idx) }); }} className="text-white/50 hover:text-[#f78121] transition-colors"><Trash2 size={20} /></button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -945,8 +971,21 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
             <div className="grid grid-cols-1 gap-4">
               {(data.health.medicines || []).map((med, idx) => (
                 <div key={idx} className="flex items-center justify-between p-4 md:p-6 bg-black/20 border border-white/10 rounded-2xl shadow-sm">
-                  <span className="text-sm md:text-base font-bold text-white">{med}</span>
-                  <button onClick={() => updateMetric({ medicines: (data.health.medicines || []).filter((_, i) => i !== idx) })} className="text-white/50 hover:text-[#f78121] transition-colors"><Trash2 size={20} /></button>
+                  {editingMedIdx === idx ? (
+                    <div className="flex items-center gap-2 flex-1">
+                      <input value={editMedName} onChange={(e) => setEditMedName(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { updateMetric({ medicines: (data.health.medicines || []).map((m, i) => i === idx ? editMedName : m) }); setEditingMedIdx(null); } }} autoFocus className="flex-1 bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl px-3 py-2 text-sm text-[#595b61] font-bold focus:border-[#f78121] outline-none" />
+                      <button onClick={() => { updateMetric({ medicines: (data.health.medicines || []).map((m, i) => i === idx ? editMedName : m) }); setEditingMedIdx(null); }} className="text-[#45d0d0] hover:text-white transition-colors"><Check size={18}/></button>
+                      <button onClick={() => setEditingMedIdx(null)} className="text-white/40 hover:text-white transition-colors"><X size={16}/></button>
+                    </div>
+                  ) : (
+                    <span className="text-sm md:text-base font-bold text-white">{med}</span>
+                  )}
+                  {editingMedIdx !== idx && (
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => { setEditingMedIdx(idx); setEditMedName(med); }} className="text-white/30 hover:text-[#45d0d0] transition-colors"><Pencil size={16}/></button>
+                      <button onClick={() => { if (!window.confirm('Remove this medicine?')) return; updateMetric({ medicines: (data.health.medicines || []).filter((_, i) => i !== idx) }); }} className="text-white/50 hover:text-[#f78121] transition-colors"><Trash2 size={20} /></button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

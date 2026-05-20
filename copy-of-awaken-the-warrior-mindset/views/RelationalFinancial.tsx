@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { UserData, Relationship } from '../types';
-import { Shield, Users, DollarSign, Wallet, PiggyBank, Briefcase, Plus, Heart, Target, UserPlus, Info } from 'lucide-react';
+import { Shield, Users, DollarSign, Wallet, PiggyBank, Briefcase, Plus, Heart, Target, UserPlus, Info, Pencil, Trash2, Check, X } from 'lucide-react';
 import EmptyState from './EmptyState';
 
 interface Props {
@@ -12,12 +12,32 @@ const RelationalFinancial: React.FC<Props> = ({ data, update }) => {
   const [activeTab, setActiveTab] = useState<'Relational' | 'Financial'>('Relational');
   const [newRelName, setNewRelName] = useState('');
   const [newRelTier, setNewRelTier] = useState<Relationship['tier']>('Inner Circle');
+  const [editingRelIdx, setEditingRelIdx] = useState<number | null>(null);
+  const [editRelName, setEditRelName] = useState('');
+  const [editRelTier, setEditRelTier] = useState<Relationship['tier']>('Inner Circle');
 
   const hasWealthData =
     (data.financialData?.assets?.liquid?.length || 0) > 0 ||
     (data.financialData?.assets?.fixed?.length || 0) > 0 ||
     (data.financialData?.liabilities?.shortTerm?.length || 0) > 0 ||
     (data.financialData?.liabilities?.longTerm?.length || 0) > 0;
+
+  const deleteRelationship = (idx: number) => {
+    if (!window.confirm('Remove this person from your tribe?')) return;
+    update({ relationships: data.relationships.filter((_, i) => i !== idx) });
+  };
+
+  const startEditRel = (idx: number) => {
+    setEditingRelIdx(idx);
+    setEditRelName(data.relationships[idx].name);
+    setEditRelTier(data.relationships[idx].tier);
+  };
+
+  const saveRelEdit = () => {
+    if (editingRelIdx === null || !editRelName.trim()) return;
+    update({ relationships: data.relationships.map((r, i) => i === editingRelIdx ? { ...r, name: editRelName, tier: editRelTier } : r) });
+    setEditingRelIdx(null);
+  };
 
   const addRelationship = () => {
     if (!newRelName.trim()) return;
@@ -94,11 +114,24 @@ const RelationalFinancial: React.FC<Props> = ({ data, update }) => {
                       {tier}
                     </h3>
                     <div className="flex flex-wrap gap-3">
-                      {data.relationships.filter(r => r.tier === tier).map((r, idx) => (
-                        <div key={idx} className="glass-card px-6 py-3 rounded-2xl text-[11px] font-bold text-off-white flex items-center space-x-3 transition-all hover:bg-white/10">
-                          <div className="w-2 h-2 bg-growth-green rounded-full shadow-[0_0_8px_rgba(46,204,113,0.5)]" />
-                          <span>{r.name}</span>
-                        </div>
+                      {data.relationships.map((r, gIdx) => ({ r, gIdx })).filter(({ r }) => r.tier === tier).map(({ r, gIdx }) => (
+                        editingRelIdx === gIdx ? (
+                          <div key={gIdx} className="glass-card p-3 rounded-2xl flex items-center gap-2">
+                            <input value={editRelName} onChange={(e) => setEditRelName(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && saveRelEdit()} className="bg-white/5 border border-resilience-gold/40 rounded-lg px-3 py-1.5 text-[11px] text-off-white outline-none w-28 focus:border-resilience-gold" />
+                            <select value={editRelTier} onChange={(e) => setEditRelTier(e.target.value as Relationship['tier'])} className="bg-dark-charcoal border border-white/10 rounded-lg px-1 py-1 text-[10px] text-slate-400 outline-none">
+                              <option>Inner Circle</option><option>Tribe</option><option>Extended</option>
+                            </select>
+                            <button onClick={saveRelEdit} className="text-green-400 hover:text-white transition-colors"><Check size={14}/></button>
+                            <button onClick={() => setEditingRelIdx(null)} className="text-white/40 hover:text-white transition-colors"><X size={12}/></button>
+                          </div>
+                        ) : (
+                          <div key={gIdx} className="glass-card px-4 py-3 rounded-2xl text-[11px] font-bold text-off-white flex items-center gap-2 transition-all hover:bg-white/10 group">
+                            <div className="w-2 h-2 bg-growth-green rounded-full shadow-[0_0_8px_rgba(46,204,113,0.5)]" />
+                            <span>{r.name}</span>
+                            <button onClick={() => startEditRel(gIdx)} className="text-white/20 hover:text-resilience-gold transition-colors opacity-0 group-hover:opacity-100"><Pencil size={11}/></button>
+                            <button onClick={() => deleteRelationship(gIdx)} className="text-white/20 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"><Trash2 size={11}/></button>
+                          </div>
+                        )
                       ))}
                       {data.relationships.filter(r => r.tier === tier).length === 0 && (
                         <p className="text-[10px] text-slate-600 italic font-medium px-2">No allies mapped in this sector.</p>

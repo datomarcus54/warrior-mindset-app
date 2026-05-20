@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react'
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts';
 import { UserData } from '../types';
 import { DAILY_AFFIRMATIONS } from '../constants';
-import { Sparkles, Quote, Info, X, Save } from 'lucide-react';
+import { Sparkles, Quote, Info, X, Save, Trash2 } from 'lucide-react';
 
 interface Props {
   data: UserData;
@@ -254,7 +254,12 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
             { label: '5 Years', value: localVision5Year, set: setLocalVision5Year, key: 'vision5Year' as const, placeholder: 'Dictate the 5-year future state. Be lethal.' },
           ].map(({ label, value, set, key, placeholder }) => (
             <div key={key}>
-              <label className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-[#45d0d0] block mb-3">{label}</label>
+              <div className="flex items-center justify-between mb-3">
+                <label className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-[#45d0d0]">{label}</label>
+                {value && !isGuest && (
+                  <button onClick={() => { if (!window.confirm(`Clear your ${label} vision?`)) return; set(''); update({ [key]: '' }); }} className="text-white/30 hover:text-red-400 transition-colors"><Trash2 size={13}/></button>
+                )}
+              </div>
               <textarea
                 value={value}
                 onChange={(e) => { if (isGuest) { onRestricted(); return; } set(e.target.value); }}

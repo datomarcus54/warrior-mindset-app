@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { UserData, DailyWorkflow } from '../types';
-import { Check, Lock, Info, X, Flame, Save } from 'lucide-react';
+import { Check, Lock, Info, X, Flame, Save, Trash2 } from 'lucide-react';
 import EmptyState from './EmptyState';
 
 interface Props {
@@ -95,6 +95,15 @@ const JournalView: React.FC<Props> = ({ data, update, isGuest, onRestricted, isM
     const newWorkflow = { ...currentWorkflow, ...updates };
     const otherWorkflows = data.dailyWorkflows?.filter(w => w.date !== today) || [];
     update({ dailyWorkflows: [newWorkflow, ...otherWorkflows] });
+  };
+
+  const deleteWorkflow = (date: string) => {
+    if (!window.confirm("Delete this journal entry? This cannot be undone.")) return;
+    update({ dailyWorkflows: (data.dailyWorkflows || []).filter(w => w.date !== date) });
+    if (date === today) {
+      setShowForm(false);
+      setLocalWorkflow({ mindsetLog: '', priorityTexts: ['', '', ''], definitionOfDone: '', afternoonMomentum: '', afternoonPriority: '', eveningWin: '', eveningDrain: '', eveningAdjustment: '', eveningGratitude: '', brainDumpText: '' });
+    }
   };
 
   const handleSave = () => {
@@ -338,13 +347,20 @@ const JournalView: React.FC<Props> = ({ data, update, isGuest, onRestricted, isM
               <span className="text-[10px] text-white/40 uppercase font-bold tracking-widest">Last saved: {lastSaveFormatted}</span>
             )}
           </div>
-          <button
-            onClick={handleSave}
-            className="flex items-center gap-2 px-5 py-2.5 bg-[#f78121] text-white font-black uppercase tracking-widest text-xs rounded-lg hover:bg-white hover:text-[#0A3762] transition-all self-start sm:self-auto"
-          >
-            <Save size={14} />
-            Save Journal
-          </button>
+          <div className="flex items-center gap-3">
+            {data.dailyWorkflows?.find(w => w.date === today) && (
+              <button onClick={() => deleteWorkflow(today)} className="flex items-center gap-2 px-5 py-2.5 border border-red-500/30 text-red-400 font-black uppercase tracking-widest text-xs rounded-lg hover:bg-red-500/10 transition-all">
+                <Trash2 size={14} /> Delete Entry
+              </button>
+            )}
+            <button
+              onClick={handleSave}
+              className="flex items-center gap-2 px-5 py-2.5 bg-[#f78121] text-white font-black uppercase tracking-widest text-xs rounded-lg hover:bg-white hover:text-[#0A3762] transition-all self-start sm:self-auto"
+            >
+              <Save size={14} />
+              Save Journal
+            </button>
+          </div>
         </div>
       )}
         </>

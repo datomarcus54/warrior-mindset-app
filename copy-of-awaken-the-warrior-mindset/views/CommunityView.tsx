@@ -4,7 +4,7 @@ import { UserData, CommunityPost } from '../types';
 import { getRank } from '../constants';
 import {
   Trophy, Flame, Swords, Camera, Send,
-  HandMetal, Award, Info, X
+  HandMetal, Award, Info, X, Pencil, Trash2
 } from 'lucide-react';
 import EmptyState from './EmptyState';
 
@@ -21,6 +21,8 @@ const CommunityView: React.FC<Props> = ({ data, update }) => {
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const postTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
+  const [editPostText, setEditPostText] = useState('');
 
   const currentRank = getRank(data.warriorCodePoints);
 
@@ -54,6 +56,18 @@ const CommunityView: React.FC<Props> = ({ data, update }) => {
     });
     setNewPostText('');
     setNewPostImage(null);
+  };
+
+  const deletePost = (id: string) => {
+    if (!window.confirm('Delete this post?')) return;
+    update({ communityPosts: data.communityPosts.filter(p => p.id !== id) });
+  };
+
+  const startEditPost = (post: CommunityPost) => { setEditingPostId(post.id); setEditPostText(post.content); };
+  const savePostEdit = (id: string) => {
+    if (!editPostText.trim()) return;
+    update({ communityPosts: data.communityPosts.map(p => p.id === id ? { ...p, content: editPostText } : p) });
+    setEditingPostId(null);
   };
 
   const handleReaction = (postId: string, type: 'fire' | 'muscle' | 'trophy' | 'salute') => {
@@ -241,10 +255,25 @@ const CommunityView: React.FC<Props> = ({ data, update }) => {
                       <span className="text-[10px] text-white/50 font-bold uppercase tracking-widest">{post.rank} Class</span>
                     </div>
                   </div>
-                  <span className="text-[10px] text-white/40 font-bold uppercase">{new Date(post.timestamp).toLocaleDateString()}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[10px] text-white/40 font-bold uppercase">{new Date(post.timestamp).toLocaleDateString()}</span>
+                    {post.author === 'You' && editingPostId !== post.id && (
+                      <>
+                        <button onClick={() => startEditPost(post)} className="text-white/30 hover:text-[#45d0d0] transition-colors"><Pencil size={14}/></button>
+                        <button onClick={() => deletePost(post.id)} className="text-white/30 hover:text-red-400 transition-colors"><Trash2 size={14}/></button>
+                      </>
+                    )}
+                  </div>
                 </div>
-                
-                <p className="text-sm md:text-base text-white/90 leading-relaxed mb-4 font-medium">"{post.content}"</p>
+
+                {editingPostId === post.id ? (
+                  <div className="space-y-3 mb-4">
+                    <textarea value={editPostText} onChange={(e) => setEditPostText(e.target.value)} className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-4 text-sm text-[#595b61] font-bold focus:border-[#f78121] outline-none min-h-[80px]"/>
+                    <div className="flex gap-3"><button onClick={() => setEditingPostId(null)} className="flex-1 py-2 bg-white/10 text-white/60 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-white/20 transition-all">Cancel</button><button onClick={() => savePostEdit(post.id)} className="flex-1 py-2 bg-[#f78121] text-white rounded-xl font-black uppercase tracking-widest text-xs hover:bg-orange-600 transition-all">Save</button></div>
+                  </div>
+                ) : (
+                  <p className="text-sm md:text-base text-white/90 leading-relaxed mb-4 font-medium">"{post.content}"</p>
+                )}
                 
                 {post.image && (
                   <div className="mb-6 rounded-xl overflow-hidden border border-white/20 shadow-lg">

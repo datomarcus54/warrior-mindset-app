@@ -1,12 +1,28 @@
 
 import React, { useState } from 'react';
 import { UserData, Relationship } from '../types';
-import { Shield, UserPlus, Info, X, Lock } from 'lucide-react';
+import { Shield, UserPlus, Info, X, Lock, Pencil, Trash2, Check } from 'lucide-react';
 
 const TribeView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => void; isGuest: boolean; onRestricted: () => void; isMobileMode: boolean; }> = ({ data, update, isMobileMode }) => {
   const [name, setName] = useState('');
   const [tier, setTier] = useState<Relationship['tier']>('Inner Circle');
   const [showLesson, setShowLesson] = useState(false);
+  const [editingRelIdx, setEditingRelIdx] = useState<number | null>(null);
+  const [editRelName, setEditRelName] = useState('');
+  const [editRelTier, setEditRelTier] = useState<Relationship['tier']>('Inner Circle');
+
+  const deleteRel = (idx: number) => {
+    if (!window.confirm('Remove this person from your circle?')) return;
+    update({ relationships: data.relationships.filter((_, i) => i !== idx) });
+  };
+  const startEditRel = (idx: number) => {
+    setEditingRelIdx(idx); setEditRelName(data.relationships[idx].name); setEditRelTier(data.relationships[idx].tier);
+  };
+  const saveRelEdit = () => {
+    if (editingRelIdx === null || !editRelName.trim()) return;
+    update({ relationships: data.relationships.map((r, i) => i === editingRelIdx ? { ...r, name: editRelName, tier: editRelTier } : r) });
+    setEditingRelIdx(null);
+  };
 
   const addRelationship = () => {
     if (!name.trim()) return;
@@ -103,11 +119,21 @@ const TribeView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => vo
                 <span className="text-[10px] md:text-xs text-white/50 font-black uppercase tracking-widest">{data.relationships.filter(r => r.tier === currentTier).length} ACTIVE</span>
               </div>
               <div className="flex flex-wrap gap-3 md:gap-4">
-                {data.relationships.filter(r => r.tier === currentTier).map((r, i) => (
-                  <div key={i} className="px-5 py-3 md:px-8 md:py-4 rounded-2xl text-xs md:text-sm font-bold text-white flex items-center space-x-3 md:space-x-4 bg-white/10 border border-white/20 hover:bg-white/20 transition-all">
-                    <div className="w-2 h-2 md:w-3 md:h-3 bg-[#f78121] rounded-full" />
-                    <span className="uppercase tracking-tight">{r.name}</span>
-                  </div>
+                {data.relationships.map((r, gIdx) => ({ r, gIdx })).filter(({ r }) => r.tier === currentTier).map(({ r, gIdx }) => (
+                  editingRelIdx === gIdx ? (
+                    <div key={gIdx} className="px-4 py-3 rounded-2xl bg-white/10 border border-[#f78121]/30 flex items-center gap-2">
+                      <input value={editRelName} onChange={(e) => setEditRelName(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && saveRelEdit()} className="bg-[#eef1f1] border border-[#45d0d0]/20 rounded-lg px-3 py-1 text-xs text-[#595b61] font-bold outline-none w-28 focus:border-[#f78121]"/>
+                      <button onClick={saveRelEdit} className="text-[#45d0d0] hover:text-white transition-colors"><Check size={14}/></button>
+                      <button onClick={() => setEditingRelIdx(null)} className="text-white/40 hover:text-white transition-colors"><X size={12}/></button>
+                    </div>
+                  ) : (
+                    <div key={gIdx} className="px-5 py-3 md:px-6 md:py-4 rounded-2xl text-xs md:text-sm font-bold text-white flex items-center gap-3 bg-white/10 border border-white/20 hover:bg-white/20 transition-all group">
+                      <div className="w-2 h-2 md:w-3 md:h-3 bg-[#f78121] rounded-full flex-shrink-0" />
+                      <span className="uppercase tracking-tight">{r.name}</span>
+                      <button onClick={() => startEditRel(gIdx)} className="text-white/20 hover:text-[#45d0d0] transition-colors opacity-0 group-hover:opacity-100 ml-auto"><Pencil size={12}/></button>
+                      <button onClick={() => deleteRel(gIdx)} className="text-white/20 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"><Trash2 size={12}/></button>
+                    </div>
+                  )
                 ))}
                 {data.relationships.filter(r => r.tier === currentTier).length === 0 && (
                   <p className="text-[10px] md:text-xs text-white/30 italic font-medium px-4">None added yet.</p>

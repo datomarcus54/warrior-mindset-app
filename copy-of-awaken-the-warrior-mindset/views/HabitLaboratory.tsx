@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Flame, Zap, ListChecks, Info, X, Check, BarChart3 } from 'lucide-react';
+import { Plus, Trash2, Flame, Zap, ListChecks, Info, X, Check, BarChart3, Pencil } from 'lucide-react';
 import { UserData, Habit } from '../types';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid } from 'recharts';
 
@@ -12,6 +12,8 @@ interface Props {
 const HabitLaboratory: React.FC<Props> = ({ data, update }) => {
   const [newHabitName, setNewHabitName] = useState('');
   const [showLesson, setShowLesson] = useState(false);
+  const [editingHabitId, setEditingHabitId] = useState<string | null>(null);
+  const [editHabitName, setEditHabitName] = useState('');
   
   // --- SAFETY CHECK START ---
   const [isMounted, setIsMounted] = useState(false);
@@ -32,7 +34,15 @@ const HabitLaboratory: React.FC<Props> = ({ data, update }) => {
   };
 
   const deleteHabit = (id: string) => {
+    if (!window.confirm('Delete this habit?')) return;
     update({ habits: data.habits.filter(h => h.id !== id) });
+  };
+
+  const startEditHabit = (habit: Habit) => { setEditingHabitId(habit.id); setEditHabitName(habit.name); };
+  const saveHabitEdit = (id: string) => {
+    if (!editHabitName.trim()) return;
+    update({ habits: data.habits.map(h => h.id === id ? { ...h, name: editHabitName } : h) });
+    setEditingHabitId(null);
   };
 
   const toggleHabit = (id: string) => {
@@ -145,22 +155,33 @@ const HabitLaboratory: React.FC<Props> = ({ data, update }) => {
                 const isCompletedToday = habit.lastCompleted === today;
                 return (
                   <div key={habit.id} className={`bg-white/5 border transition-all duration-300 rounded-xl p-4 md:p-6 flex items-center justify-between group ${isCompletedToday ? 'border-[#45d0d0] bg-[#45d0d0]/10' : 'border-transparent hover:border-[#f78121]/30 hover:bg-white/10'}`}>
-                     <div className="flex items-center space-x-4">
-                        <button 
+                     <div className="flex items-center space-x-4 flex-1 min-w-0">
+                        <button
                           onClick={() => toggleHabit(habit.id)}
-                          className={`w-10 h-10 md:w-12 md:h-12 rounded-lg flex items-center justify-center transition-all ${isCompletedToday ? 'bg-[#45d0d0] text-[#001b3d] shadow-lg scale-110' : 'bg-black/20 text-white/30 hover:text-white hover:bg-[#f78121]'}`}
+                          className={`w-10 h-10 md:w-12 md:h-12 rounded-lg flex items-center justify-center transition-all flex-shrink-0 ${isCompletedToday ? 'bg-[#45d0d0] text-[#001b3d] shadow-lg scale-110' : 'bg-black/20 text-white/30 hover:text-white hover:bg-[#f78121]'}`}
                         >
                            {isCompletedToday ? <Check size={24} strokeWidth={3} /> : <Zap size={20} />}
                         </button>
-                        <div>
-                           <h4 className={`text-sm md:text-base font-black uppercase tracking-wide ${isCompletedToday ? 'text-[#45d0d0]' : 'text-white'}`}>{habit.name}</h4>
+                        <div className="flex-1 min-w-0">
+                           {editingHabitId === habit.id ? (
+                             <div className="flex items-center gap-2">
+                               <input value={editHabitName} onChange={(e) => setEditHabitName(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && saveHabitEdit(habit.id)} autoFocus className="flex-1 bg-[#eef1f1] border border-[#45d0d0]/20 rounded-lg px-3 py-1.5 text-sm text-[#595b61] font-bold focus:border-[#f78121] outline-none" />
+                               <button onClick={() => saveHabitEdit(habit.id)} className="text-[#45d0d0] hover:text-white transition-colors"><Check size={16}/></button>
+                               <button onClick={() => setEditingHabitId(null)} className="text-white/40 hover:text-white transition-colors"><X size={14}/></button>
+                             </div>
+                           ) : (
+                             <h4 className={`text-sm md:text-base font-black uppercase tracking-wide ${isCompletedToday ? 'text-[#45d0d0]' : 'text-white'}`}>{habit.name}</h4>
+                           )}
                            <div className="flex items-center space-x-1 text-xs font-bold text-white/50 mt-1">
                               <Flame size={12} className={habit.streak > 0 ? 'text-[#f78121]' : 'text-white/20'} />
                               <span className={habit.streak > 0 ? 'text-[#f78121]' : ''}>{habit.streak} Day Streak</span>
                            </div>
                         </div>
                      </div>
-                     <button onClick={() => deleteHabit(habit.id)} className="text-white/20 hover:text-red-400 transition-colors p-2 opacity-0 group-hover:opacity-100"><Trash2 size={18} /></button>
+                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                       {editingHabitId !== habit.id && <button onClick={() => startEditHabit(habit)} className="text-white/20 hover:text-[#45d0d0] transition-colors p-2"><Pencil size={16}/></button>}
+                       <button onClick={() => deleteHabit(habit.id)} className="text-white/20 hover:text-red-400 transition-colors p-2"><Trash2 size={18} /></button>
+                     </div>
                   </div>
                 )
               })}
