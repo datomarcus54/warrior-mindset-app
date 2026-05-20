@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { UserData, HealthMetrics, MealAnalysis, MealType, WorkoutCategory, WorkoutSession, DailyHealthLog } from '../types';
 import {
-  Activity, Moon, Clock, Droplet, Camera, Plus, Trash2,
+  Activity, Moon, Clock, Droplet, Camera, Plus, Trash2, Pencil,
   Flame, Wind, Dumbbell, Move, Calendar as CalendarIcon,
   ChevronLeft, ChevronRight, Scale, Info, X, Zap, Pill, BarChart2, Save
 } from 'lucide-react';
@@ -33,6 +33,8 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
   const [showManualMeal, setShowManualMeal] = useState(false);
   const [manualDesc, setManualDesc] = useState('');
   const [isEstimating, setIsEstimating] = useState(false);
+  const [editingMealTimestamp, setEditingMealTimestamp] = useState<string | null>(null);
+  const [editFields, setEditFields] = useState({ description: '', calories: 0, protein: 0, carbs: 0, fats: 0 });
   const [mealType, setMealType] = useState<MealType>(() => {
     const h = new Date().getHours();
     if (h < 10) return 'Breakfast';
@@ -263,6 +265,27 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
     setShowManualMeal(false);
   };
 
+  const deleteMeal = (timestamp: string) => {
+    if (!window.confirm('Remove this meal from your log?')) return;
+    updateMetric({ mealLogs: data.health.mealLogs.filter(m => m.timestamp !== timestamp) });
+  };
+
+  const startEditMeal = (meal: MealAnalysis) => {
+    setEditingMealTimestamp(meal.timestamp);
+    setEditFields({ description: meal.description, calories: meal.calories, protein: meal.protein || 0, carbs: meal.carbs || 0, fats: meal.fats || 0 });
+  };
+
+  const saveEditedMeal = (timestamp: string) => {
+    updateMetric({
+      mealLogs: data.health.mealLogs.map(m =>
+        m.timestamp === timestamp
+          ? { ...m, description: editFields.description, calories: editFields.calories, protein: editFields.protein, carbs: editFields.carbs, fats: editFields.fats }
+          : m
+      )
+    });
+    setEditingMealTimestamp(null);
+  };
+
   const lastUpdatedFormatted = useMemo(() => {
     const date = new Date(data.health.lastUpdated || new Date());
     return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(date);
@@ -486,16 +509,20 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
              )}
            </section>
 
-           <label
-             className={`w-full glass-card p-6 md:p-8 border-2 border-[#f78121]/40 hover:border-[#f78121] transition-all duration-300 flex flex-col items-center justify-center gap-3 group cursor-pointer${isAnalyzing ? ' opacity-60 pointer-events-none' : ''}`}
+           <button
+             type="button"
+             onClick={() => {
+               if (isGuest) { onRestricted(); return; }
+               if (!isAnalyzing) fileInputRef.current?.click();
+             }}
+             className={`w-full glass-card p-6 md:p-8 border-2 border-[#f78121]/40 hover:border-[#f78121] transition-all duration-300 flex flex-col items-center justify-center gap-3 group cursor-pointer${isAnalyzing ? ' opacity-60' : ''}`}
            >
              <input
                type="file"
                accept="image/*"
-               className="hidden"
+               style={{ position: 'absolute', opacity: 0, width: 0, height: 0, pointerEvents: 'none' }}
                ref={fileInputRef}
                onChange={handleImageCapture}
-               disabled={isAnalyzing}
              />
              <div className="p-4 bg-[#f78121]/10 rounded-full border border-[#f78121]/30 group-hover:bg-[#f78121]/20 transition-colors">
                <Camera size={28} className="text-[#f78121]" />
@@ -508,7 +535,7 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
                  <span className="text-xs text-white/50 font-bold">Take or upload a photo — AI analyses the nutrition</span>
                </>
              )}
-           </label>
+           </button>
 
            {/* Meal Cards + Daily Totals */}
            <section className="glass-card p-6 md:p-8 transition-all duration-300 ease-in-out hover:-translate-y-1">
@@ -531,7 +558,7 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
                 )
               ) : (
                 <div className="space-y-4">
-                  {selectedMeals.map((meal, i) => {
+                  {selectedMeals.map((meal) => {
                     const timeStr = new Intl.DateTimeFormat('en-US', { hour: '2-digit', minute: '2-digit' }).format(new Date(meal.timestamp));
                     const typeColors: Record<string, string> = {
                       Breakfast: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
@@ -540,30 +567,71 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
                       Supper:    'bg-purple-500/20 text-purple-400 border-purple-500/30',
                     };
                     const badgeClass = meal.mealType ? typeColors[meal.mealType] : 'bg-white/10 text-white/50 border-white/20';
+                    const isEditing = editingMealTimestamp === meal.timestamp;
                     return (
-                      <div key={i} className="bg-black/20 border border-white/10 rounded-2xl p-5 shadow-sm">
-                        <div className="flex items-center justify-between mb-3">
-                          <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border ${badgeClass}`}>
-                            {meal.mealType || 'Meal'}
-                          </span>
-                          <span className="text-[10px] text-white/40 font-bold">{isViewingToday ? 'Today' : selectedDate}, {timeStr}</span>
-                        </div>
-                        <div className="text-sm font-bold text-white mb-3">{meal.description}</div>
-                        <div className="text-3xl font-black text-[#45d0d0] mb-4">
-                          {meal.calories} <span className="text-sm font-bold text-white/40">kcal</span>
-                        </div>
-                        <div className="grid grid-cols-3 gap-3">
-                          {[
-                            { label: 'Protein', val: meal.protein },
-                            { label: 'Carbs',   val: meal.carbs },
-                            { label: 'Fats',    val: meal.fats },
-                          ].map(({ label, val }) => (
-                            <div key={label} className="bg-white/5 rounded-xl p-3 text-center">
-                              <div className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">{label}</div>
-                              <div className="text-base font-black text-white">{val}g</div>
+                      <div key={meal.timestamp} className="bg-black/20 border border-white/10 rounded-2xl p-5 shadow-sm">
+                        {isEditing ? (
+                          <div className="space-y-3">
+                            <input
+                              type="text"
+                              value={editFields.description}
+                              onChange={(e) => setEditFields(prev => ({ ...prev, description: e.target.value }))}
+                              className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl px-4 py-2 text-sm text-[#595b61] font-bold focus:border-[#f78121] outline-none"
+                              placeholder="Description"
+                            />
+                            <div className="grid grid-cols-2 gap-3">
+                              {[
+                                { label: 'Calories', key: 'calories' },
+                                { label: 'Protein g', key: 'protein' },
+                                { label: 'Carbs g',   key: 'carbs' },
+                                { label: 'Fats g',    key: 'fats' },
+                              ].map(({ label, key }) => (
+                                <div key={key}>
+                                  <div className="text-[10px] font-black uppercase tracking-widest text-white/50 mb-1">{label}</div>
+                                  <input
+                                    type="number"
+                                    value={editFields[key as keyof typeof editFields] || ''}
+                                    onChange={(e) => setEditFields(prev => ({ ...prev, [key]: parseFloat(e.target.value) || 0 }))}
+                                    className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-2 text-center text-sm text-[#595b61] font-bold focus:border-[#f78121] outline-none"
+                                  />
+                                </div>
+                              ))}
                             </div>
-                          ))}
-                        </div>
+                            <div className="flex gap-3 pt-1">
+                              <button onClick={() => setEditingMealTimestamp(null)} className="flex-1 py-2 bg-white/10 text-white/60 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-white/20 transition-all">Cancel</button>
+                              <button onClick={() => saveEditedMeal(meal.timestamp)} className="flex-1 py-2 bg-[#f78121] text-white rounded-xl font-black uppercase tracking-widest text-xs hover:bg-orange-600 transition-all">Save</button>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="flex items-center justify-between mb-3">
+                              <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border ${badgeClass}`}>
+                                {meal.mealType || 'Meal'}
+                              </span>
+                              <div className="flex items-center gap-3">
+                                <span className="text-[10px] text-white/40 font-bold">{isViewingToday ? 'Today' : selectedDate}, {timeStr}</span>
+                                <button onClick={() => startEditMeal(meal)} className="text-white/30 hover:text-[#45d0d0] transition-colors" aria-label="Edit meal"><Pencil size={13} /></button>
+                                <button onClick={() => deleteMeal(meal.timestamp)} className="text-white/30 hover:text-red-400 transition-colors" aria-label="Delete meal"><Trash2 size={13} /></button>
+                              </div>
+                            </div>
+                            <div className="text-sm font-bold text-white mb-3">{meal.description}</div>
+                            <div className="text-3xl font-black text-[#45d0d0] mb-4">
+                              {meal.calories} <span className="text-sm font-bold text-white/40">kcal</span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-3">
+                              {[
+                                { label: 'Protein', val: meal.protein },
+                                { label: 'Carbs',   val: meal.carbs },
+                                { label: 'Fats',    val: meal.fats },
+                              ].map(({ label, val }) => (
+                                <div key={label} className="bg-white/5 rounded-xl p-3 text-center">
+                                  <div className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">{label}</div>
+                                  <div className="text-base font-black text-white">{val}g</div>
+                                </div>
+                              ))}
+                            </div>
+                          </>
+                        )}
                       </div>
                     );
                   })}
