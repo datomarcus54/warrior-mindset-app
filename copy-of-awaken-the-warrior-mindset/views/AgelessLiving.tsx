@@ -180,6 +180,9 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
 
   const isViewingToday = selectedDate === todayStr;
   const selectedLog = (data.health.dailyLogs || []).find(l => l.date === selectedDate);
+  const viewLog = isViewingToday ? todayLog : (selectedLog || { date: selectedDate, workouts: [], fastingHours: 0, fastingCompleted: false });
+  const viewTotalMins = (viewLog.workouts || []).reduce((acc, curr) => acc + curr.minutes, 0);
+  const viewTotalBurned = (viewLog.workouts || []).reduce((acc, curr) => acc + curr.calories, 0);
   const selectedMeals = data.health.mealLogs.filter(log => log.timestamp.startsWith(selectedDate));
   const selectedConsumedCals = selectedMeals.reduce((acc, curr) => acc + curr.calories, 0);
   const selectedTotalProtein = selectedMeals.reduce((acc, curr) => acc + (curr.protein || 0), 0);
@@ -189,7 +192,7 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
   const selectedNetCalories = selectedConsumedCals - selectedBurned;
 
   const getCategoryTotal = (cat: WorkoutCategory) => {
-    const sessions = todayLog.workouts.filter(w => w.category === cat);
+    const sessions = (viewLog.workouts || []).filter(w => w.category === cat);
     return { mins: sessions.reduce((a, c) => a + c.minutes, 0), cals: sessions.reduce((a, c) => a + c.calories, 0) };
   };
 
@@ -372,15 +375,21 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
       {/* --- MOVEMENT TAB --- */}
       {activeTab === 'Movement' && (
         <div className="space-y-8 animate-in fade-in slide-in-from-right-4">
+          {!isViewingToday && (
+            <div className="flex items-center justify-between px-1">
+              <p className="text-xs font-black uppercase tracking-widest text-white/50">{selectedDate}</p>
+              <button onClick={() => setSelectedDate(todayStr)} className="text-xs font-black uppercase tracking-widest text-[#f78121] border border-[#f78121]/30 px-3 py-1 rounded-lg hover:bg-[#f78121]/10 transition-all">Back to Today</button>
+            </div>
+          )}
           <section className="glass-card p-6 md:p-8 flex justify-between items-center relative overflow-hidden transition-all duration-300 ease-in-out hover:-translate-y-1">
              <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none"><Activity size={120} /></div>
              <div className="relative z-10 flex-1 text-center border-r border-white/20">
                 <div className="text-xs md:text-sm text-white font-black uppercase tracking-widest mb-1">Active Time</div>
-                <div className="text-4xl md:text-6xl font-black text-[#0A3762] font-brand-header">{todayTotalMins}<span className="text-sm md:text-xl text-white/50 ml-1">min</span></div>
+                <div className="text-4xl md:text-6xl font-black text-[#0A3762] font-brand-header">{viewTotalMins}<span className="text-sm md:text-xl text-white/50 ml-1">min</span></div>
              </div>
              <div className="relative z-10 flex-1 text-center">
                 <div className="text-xs md:text-sm text-white font-black uppercase tracking-widest mb-1">Calories Burned</div>
-                <div className="text-4xl md:text-6xl font-black text-[#f78121] font-brand-header">{todayTotalBurned}<span className="text-sm md:text-xl text-white/50 ml-1">kcal</span></div>
+                <div className="text-4xl md:text-6xl font-black text-[#f78121] font-brand-header">{viewTotalBurned}<span className="text-sm md:text-xl text-white/50 ml-1">kcal</span></div>
              </div>
           </section>
 
@@ -393,7 +402,7 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
              ].map((cat) => {
                const totals = getCategoryTotal(cat.id as WorkoutCategory);
                return (
-                 <button key={cat.id} onClick={() => setSelectedCategory(cat.id as WorkoutCategory)} className={`glass-card p-6 flex flex-col items-center justify-center transition-all duration-300 border-2 ${selectedCategory === cat.id ? 'border-[#f78121] bg-white/5' : 'border-white/10 hover:border-[#f78121]/30'}`}>
+                 <button key={cat.id} onClick={() => isViewingToday && setSelectedCategory(cat.id as WorkoutCategory)} className={`glass-card p-6 flex flex-col items-center justify-center transition-all duration-300 border-2 ${selectedCategory === cat.id ? 'border-[#f78121] bg-white/5' : 'border-white/10 hover:border-[#f78121]/30'} ${!isViewingToday ? 'cursor-default' : ''}`}>
                     <cat.icon size={32} className={`${cat.color} mb-3`} />
                     <span className="text-xs md:text-sm font-black uppercase tracking-widest text-white mb-2">{cat.label}</span>
                     <div className="flex space-x-3 text-[10px] text-white/70 font-bold">
@@ -405,7 +414,7 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
              })}
           </div>
 
-          {selectedCategory && (
+          {isViewingToday && selectedCategory && (
             <section className="glass-card p-6 md:p-8 animate-in fade-in slide-in-from-top-4 border-2 border-[#f78121]">
                <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg md:text-xl font-black uppercase tracking-tight text-[#f78121]">Log {selectedCategory} Session</h3>
@@ -679,25 +688,47 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
       {/* --- FASTING TAB --- */}
       {activeTab === 'Fasting' && (
          <div className="glass-card p-6 md:p-12 flex flex-col items-center justify-center text-center animate-in fade-in slide-in-from-right-4 transition-all duration-300 ease-in-out hover:-translate-y-1">
-            <div className="relative mb-8">
-               <div className="absolute inset-0 bg-[#f78121]/10 blur-xl rounded-full" />
-               <Clock size={48} className="text-[#f78121] relative z-10" />
-            </div>
-            <h3 className="text-5xl md:text-7xl font-black text-[#f78121] font-brand-header tracking-tighter mb-4">{timeLeft || 'READY'}</h3>
-            <p className="text-xs md:text-sm text-white font-black uppercase tracking-[0.2em] mb-8">Fasting Window: {data.health.fastingWindowHours} Hours</p>
-            
-            <div className="flex space-x-4 w-full max-w-md">
-               {!data.health.fastingStart ? (
-                  <button onClick={() => updateMetric({ fastingStart: new Date().toISOString() })} className="flex-1 py-5 bg-[#f78121] text-white rounded-xl font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all">Initiate Fast</button>
-               ) : (
-                  <>
-                    <button onClick={() => updateMetric({ fastingStart: null })} className="flex-1 py-5 bg-white/10 border border-white/20 text-white rounded-xl font-black uppercase tracking-widest hover:bg-white/20 transition-all">Abort</button>
-                    {timeLeft === 'COMPLETE' && (
-                      <button onClick={handleCompleteFast} className="flex-1 py-5 bg-[#45d0d0] text-white rounded-xl font-black uppercase tracking-widest shadow-lg animate-pulse">Log Success</button>
-                    )}
-                  </>
-               )}
-            </div>
+            {!isViewingToday ? (
+              <>
+                <div className="flex items-center justify-between w-full mb-8">
+                  <p className="text-xs font-black uppercase tracking-widest text-white/50">{selectedDate}</p>
+                  <button onClick={() => setSelectedDate(todayStr)} className="text-xs font-black uppercase tracking-widest text-[#f78121] border border-[#f78121]/30 px-3 py-1 rounded-lg hover:bg-[#f78121]/10 transition-all">Back to Today</button>
+                </div>
+                <div className="relative mb-8">
+                  <div className="absolute inset-0 bg-[#45d0d0]/10 blur-xl rounded-full" />
+                  <Clock size={48} className="text-[#45d0d0] relative z-10" />
+                </div>
+                {viewLog.fastingCompleted ? (
+                  <h3 className="text-3xl md:text-5xl font-black text-[#45d0d0] font-brand-header tracking-tighter mb-4">FAST COMPLETED</h3>
+                ) : (
+                  <h3 className="text-3xl md:text-5xl font-black text-white/40 font-brand-header tracking-tighter mb-4">NO FAST LOGGED</h3>
+                )}
+                <p className="text-xs md:text-sm text-white/60 font-black uppercase tracking-[0.2em]">
+                  {viewLog.fastingCompleted ? `${viewLog.fastingHours}h fast completed` : 'No fasting data for this date'}
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="relative mb-8">
+                   <div className="absolute inset-0 bg-[#f78121]/10 blur-xl rounded-full" />
+                   <Clock size={48} className="text-[#f78121] relative z-10" />
+                </div>
+                <h3 className="text-5xl md:text-7xl font-black text-[#f78121] font-brand-header tracking-tighter mb-4">{timeLeft || 'READY'}</h3>
+                <p className="text-xs md:text-sm text-white font-black uppercase tracking-[0.2em] mb-8">Fasting Window: {data.health.fastingWindowHours} Hours</p>
+                <div className="flex space-x-4 w-full max-w-md">
+                   {!data.health.fastingStart ? (
+                      <button onClick={() => updateMetric({ fastingStart: new Date().toISOString() })} className="flex-1 py-5 bg-[#f78121] text-white rounded-xl font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all">Initiate Fast</button>
+                   ) : (
+                      <>
+                        <button onClick={() => updateMetric({ fastingStart: null })} className="flex-1 py-5 bg-white/10 border border-white/20 text-white rounded-xl font-black uppercase tracking-widest hover:bg-white/20 transition-all">Abort</button>
+                        {timeLeft === 'COMPLETE' && (
+                          <button onClick={handleCompleteFast} className="flex-1 py-5 bg-[#45d0d0] text-white rounded-xl font-black uppercase tracking-widest shadow-lg animate-pulse">Log Success</button>
+                        )}
+                      </>
+                   )}
+                </div>
+              </>
+            )}
          </div>
       )}
 

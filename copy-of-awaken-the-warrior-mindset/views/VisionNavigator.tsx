@@ -186,7 +186,7 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
           <p className="text-xs md:text-sm text-white/70 font-black uppercase tracking-widest">How You're Scoring Each Area (1-10)</p>
         </div>
         
-        <div className="w-full h-[350px] min-h-[350px] relative">
+        <div className="w-full h-[350px] min-h-[350px] relative overflow-hidden">
           {isMounted ? (
             <ResponsiveContainer width="100%" height="100%">
               {/* FIX: Reduced outerRadius on mobile from 75% to 60% to prevent label clipping */}
@@ -217,7 +217,7 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
           {displayData.map((domain, idx) => (
             <div key={domain.name} className="bg-white/10 border border-white/20 rounded-xl flex flex-col items-center justify-center p-4 md:p-5 gap-3 shadow-sm">
               <span className="text-[10px] md:text-xs text-white uppercase font-black tracking-widest text-center leading-tight">{domain.displayName}</span>
-              <div className="flex items-center gap-1.5" onClick={isGuest ? onRestricted : undefined}>
+              <div className="flex items-center gap-1.5">
                 <input
                   type="text"
                   inputMode="numeric"
@@ -225,8 +225,10 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
                   value={scoreInputs[idx] !== undefined ? scoreInputs[idx] : String(domain.value)}
                   onChange={(e) => handleScoreChange(idx, e.target.value)}
                   onBlur={() => handleScoreBlur(idx, domain.value)}
-                  disabled={isGuest}
-                  className={`w-14 bg-[#0A3762] border rounded-lg px-2 py-1.5 text-center font-black text-base outline-none disabled:opacity-50 transition-colors ${
+                  onClick={() => { if (isGuest) onRestricted(); }}
+                  readOnly={isGuest}
+                  className={`w-14 bg-[#0A3762] border rounded-lg px-2 py-1.5 text-center font-black text-base focus:outline-none transition-colors cursor-text ${
+                    isGuest ? 'opacity-50 cursor-default' :
                     scoreErrors.has(idx)
                       ? 'border-red-500 text-red-400'
                       : 'border-[#f78121]/40 text-[#f78121] focus:border-[#f78121]'

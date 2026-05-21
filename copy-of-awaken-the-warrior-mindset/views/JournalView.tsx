@@ -186,7 +186,7 @@ const JournalView: React.FC<Props> = ({ data, update, isGuest, onRestricted, isM
             <Info size={24} />
           </button>
         </div>
-        <p className="text-xs md:text-sm text-[#45d0d0] font-black uppercase tracking-[0.2em] mt-2">Daily Execution System</p>
+        <p className="text-xs md:text-sm text-[#45d0d0] font-black uppercase tracking-[0.2em] mt-2">Daily Practice</p>
       </header>
 
       {/* Streak Card */}
@@ -220,9 +220,9 @@ const JournalView: React.FC<Props> = ({ data, update, isGuest, onRestricted, isM
         />
       </section>
 
-      {/* II. MORNING PRIORITY BLOCK */}
+      {/* II. MORNING FOCUS */}
       <section className="glass-card p-6 md:p-8 transition-all duration-300 ease-in-out hover:-translate-y-1">
-         <h3 className="text-lg font-black uppercase tracking-widest text-[#f78121] mb-6">II. Morning Priority Block</h3>
+         <h3 className="text-lg font-black uppercase tracking-widest text-[#f78121] mb-6">II. Morning Focus</h3>
         <div className="space-y-4 mb-6">
           {currentWorkflow.priorities.map((p, idx) => (
              <div key={idx} className="flex items-center space-x-3">
@@ -237,7 +237,7 @@ const JournalView: React.FC<Props> = ({ data, update, isGuest, onRestricted, isM
                   value={localWorkflow.priorityTexts[idx] ?? ''}
                   onChange={(e) => setPriorityText(idx, e.target.value)}
                   onBlur={() => updateWorkflow({ priorities: currentWorkflow.priorities.map((pr, i) => ({ ...pr, text: localWorkflow.priorityTexts[i] ?? pr.text })) })}
-                  placeholder={`Primary Objective ${idx + 1}`}
+                  placeholder={`Focus Area ${idx + 1}`}
                   className={`flex-1 bg-[#eef1f1] border-b border-transparent focus:border-[#f78121] py-2 px-3 text-sm text-[#595b61] font-bold transition-all rounded ${p.completed ? 'line-through text-slate-400' : ''}`}
                 />
              </div>
@@ -310,8 +310,8 @@ const JournalView: React.FC<Props> = ({ data, update, isGuest, onRestricted, isM
            <h4 className="text-xs font-black uppercase tracking-widest text-[#45d0d0] mb-4">End of Day</h4>
            <div className="space-y-3">
               {[
-                { label: 'Strategic Stop (No New Inputs)', key: 'strategicStop' },
-                { label: 'Brain Dump Completed', key: 'brainDump' },
+                { label: 'End of Day Review', key: 'strategicStop' },
+                { label: 'Mind Clearing Completed', key: 'brainDump' },
                 { label: 'Screens Dimmed', key: 'screensDimmed' }
               ].map((item) => (
                  <button 
@@ -329,7 +329,7 @@ const JournalView: React.FC<Props> = ({ data, update, isGuest, onRestricted, isM
         </div>
 
         <div className="relative">
-           <label className="text-[10px] font-black uppercase tracking-widest text-[#45d0d0] mb-2 block">Tomorrow's Brain Dump</label>
+           <label className="text-[10px] font-black uppercase tracking-widest text-[#45d0d0] mb-2 block">Tomorrow's Mind Clearing</label>
            <textarea
              value={localWorkflow.brainDumpText}
              onChange={(e) => setLocalWorkflow(prev => ({ ...prev, brainDumpText: e.target.value }))}
