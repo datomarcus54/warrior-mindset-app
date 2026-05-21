@@ -156,7 +156,7 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
         </div>
       </section>
 
-      {/* Life Wheel Radar */}
+      {/* Life Wheel Radar — chart only, no inputs inside this glass-card */}
       <section className="glass-card p-6 md:p-10">
         <div className="mb-6 md:mb-8">
           <div className="flex items-center gap-[10px] mb-1">
@@ -168,8 +168,7 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
           <p className="text-xs md:text-sm text-white/70 font-black uppercase tracking-widest">How You're Scoring Each Area (1-10)</p>
         </div>
 
-        {/* Chart — pointer-events disabled so the SVG never intercepts clicks on the inputs below */}
-        <div className="w-full h-[350px] min-h-[350px]" style={{ pointerEvents: 'none' }}>
+        <div style={{ width: '100%', height: '350px', pointerEvents: 'none', userSelect: 'none' }}>
           {isMounted ? (
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart cx="50%" cy="50%" outerRadius={isMobile ? '60%' : '72%'} data={displayData}>
@@ -189,38 +188,44 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
               </RadarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="w-full h-full bg-[#595b61]/50 animate-pulse rounded-xl border border-white/5 flex items-center justify-center">
-              <span className="text-xs font-black uppercase tracking-widest text-white/30">Calibrating Radar...</span>
+            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(89,91,97,0.5)', borderRadius: '12px' }}>
+              <span style={{ fontSize: '12px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.3)' }}>Calibrating Radar...</span>
             </div>
           )}
         </div>
-
-        {/* Score inputs — positioned above chart layer with explicit z-index */}
-        <div
-          className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6 mt-8 md:mt-12"
-          style={{ position: 'relative', zIndex: 10 }}
-        >
-          {displayData.map((domain, idx) => (
-            <div key={domain.name} className="bg-white/10 border border-white/20 rounded-xl flex flex-col items-center justify-center p-4 md:p-5 gap-3 shadow-sm">
-              <span className="text-[10px] md:text-xs text-white uppercase font-black tracking-widest text-center leading-tight">{domain.displayName}</span>
-              <div className="flex items-center gap-1.5">
-                <input
-                  type="number"
-                  min="1"
-                  max="10"
-                  step="1"
-                  value={domain.value}
-                  onChange={(e) => handleScoreChange(idx, e.target.value)}
-                  disabled={isGuest}
-                  style={{ position: 'relative', zIndex: 20 }}
-                  className="w-14 bg-[#0A3762] border border-[#f78121]/40 rounded-lg px-2 py-1.5 text-center font-black text-base text-[#f78121] focus:border-[#f78121] focus:outline-none disabled:opacity-50 cursor-text"
-                />
-                <span className="text-white/50 text-xs font-black">/10</span>
-              </div>
-            </div>
-          ))}
-        </div>
       </section>
+
+      {/*
+        Score inputs live in a plain div that is a sibling of — not a child of —
+        the glass-card above. This eliminates backdrop-filter as a parent, which
+        was creating a GPU compositing layer on older WebKit/Blink that made all
+        descendant inputs unreachable by pointer events.
+        All styles are inline; no Tailwind, no transforms, no position tricks.
+      */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '12px' }}>
+        {displayData.map((domain, idx) => (
+          <div
+            key={domain.name}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '12px', padding: '16px 12px' }}
+          >
+            <span style={{ fontSize: '10px', color: 'white', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.1em', textAlign: 'center', lineHeight: 1.3 }}>
+              {domain.displayName}
+            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <input
+                type="number"
+                min="1"
+                max="10"
+                value={domain.value}
+                onChange={(e) => handleScoreChange(idx, e.target.value)}
+                disabled={isGuest}
+                style={{ width: '52px', background: '#0A3762', border: '1px solid rgba(247,129,33,0.5)', borderRadius: '8px', padding: '6px 4px', textAlign: 'center', fontWeight: '900', fontSize: '16px', color: '#f78121', outline: 'none', cursor: isGuest ? 'default' : 'text', opacity: isGuest ? 0.5 : 1 }}
+              />
+              <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', fontWeight: '900' }}>/10</span>
+            </div>
+          </div>
+        ))}
+      </div>
 
       {/* VIVID Vision Statement */}
       <section className="glass-card p-6 md:p-10 transition-all duration-300 ease-in-out hover:-translate-y-1">
