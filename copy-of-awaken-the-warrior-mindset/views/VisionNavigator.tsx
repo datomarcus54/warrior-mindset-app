@@ -126,8 +126,8 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
 
       {/* Header */}
       <header className="mb-8">
-        <div className="flex items-center gap-3">
-           <h2 className="text-4xl md:text-6xl font-black font-brand-header uppercase text-[#f78121] tracking-wider whitespace-nowrap">Foundation</h2>
+        <div className="flex items-center">
+           <h2 className="text-4xl md:text-6xl font-black font-brand-header uppercase text-[#f78121] tracking-wider whitespace-nowrap" style={{ marginRight: '12px' }}>Foundation</h2>
            <button onClick={() => setActiveLesson('FOUNDATION')} className="text-[#f78121] hover:text-white cursor-pointer transition-colors" aria-label="Warrior Lesson">
               <Info size={24} />
            </button>
@@ -152,8 +152,8 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
       {/* Life Wheel Radar — chart only, no inputs inside this glass-card */}
       <section className="glass-card p-6 md:p-10">
         <div className="mb-6 md:mb-8">
-          <div className="flex items-center gap-[10px] mb-1">
-            <h2 className="text-xl md:text-2xl font-black font-brand-header uppercase tracking-widest text-[#f78121]">Your Life Circle</h2>
+          <div className="flex items-center mb-1">
+            <h2 className="text-xl md:text-2xl font-black font-brand-header uppercase tracking-widest text-[#f78121]" style={{ marginRight: '10px' }}>Your Life Circle</h2>
             <button onClick={() => setActiveLesson('RADAR')} className="text-[#f78121] hover:text-[#001b3d] cursor-pointer transition-colors" aria-label="Warrior Lesson">
                 <Info size={20} />
             </button>
@@ -189,22 +189,22 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
       </section>
 
       {/* +/- stepper cards — pure button onClick, no input elements, works on every browser */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '12px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: '12px' }}>
         {displayData.map((domain, idx) => (
           <div
             key={domain.name}
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '12px', padding: '16px 12px' }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '12px', padding: '16px 12px' }}
           >
-            <span style={{ fontSize: '10px', color: 'white', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.1em', textAlign: 'center', lineHeight: 1.3 }}>
+            <span style={{ fontSize: '10px', color: 'white', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.1em', textAlign: 'center', lineHeight: 1.3, marginBottom: '10px' }}>
               {domain.displayName}
             </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
               <button
                 onClick={() => { if (isGuest) { onRestricted(); return; } handleDomainChange(idx, domain.value - 1); }}
                 disabled={domain.value <= 1 || isGuest}
-                style={{ width: '32px', height: '32px', borderRadius: '8px', background: domain.value <= 1 ? 'rgba(255,255,255,0.05)' : 'rgba(247,129,33,0.2)', border: '1px solid rgba(247,129,33,0.4)', color: domain.value <= 1 ? 'rgba(255,255,255,0.2)' : '#f78121', fontSize: '20px', fontWeight: '900', cursor: domain.value <= 1 || isGuest ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}
+                style={{ width: '32px', height: '32px', borderRadius: '8px', background: domain.value <= 1 ? 'rgba(255,255,255,0.05)' : 'rgba(247,129,33,0.2)', border: '1px solid rgba(247,129,33,0.4)', color: domain.value <= 1 ? 'rgba(255,255,255,0.2)' : '#f78121', fontSize: '20px', fontWeight: '900', cursor: domain.value <= 1 || isGuest ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, marginRight: '8px' }}
               >−</button>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '36px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '36px', marginRight: '8px' }}>
                 <span style={{ fontSize: '22px', fontWeight: '900', color: '#f78121', lineHeight: 1 }}>{domain.value}</span>
                 <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', fontWeight: '700' }}>/10</span>
               </div>
@@ -219,9 +219,9 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
       </div>
 
       {/* VIVID Vision Statement */}
-      <section className="glass-card p-6 md:p-10 transition-all duration-300 ease-in-out hover:-translate-y-1">
-        <div className="flex items-center gap-[10px] mb-6 md:mb-8">
-            <h2 className="text-xl md:text-2xl font-black font-brand-header uppercase tracking-widest text-[#f78121]">Your Vision</h2>
+      <section className="glass-card p-6 md:p-10 transition-all duration-300 ease-in-out">
+        <div className="flex items-center mb-6 md:mb-8">
+            <h2 className="text-xl md:text-2xl font-black font-brand-header uppercase tracking-widest text-[#f78121]" style={{ marginRight: '10px' }}>Your Vision</h2>
             <button onClick={() => setActiveLesson('VISION')} className="text-[#f78121] hover:text-[#001b3d] cursor-pointer transition-colors" aria-label="Warrior Lesson">
                 <Info size={20} />
             </button>
@@ -250,8 +250,8 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
             </div>
           ))}
         </div>
-        <div className="mt-6 md:mt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="flex flex-col gap-1">
+        <div className="mt-6 md:mt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between" style={{ gap: '12px' }}>
+          <div className="flex flex-col">
             {lastSaveFormatted && (
               <span className="text-[10px] text-white/40 uppercase font-bold tracking-widest">Last saved: {lastSaveFormatted}</span>
             )}
@@ -259,7 +259,7 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
           {!isGuest && (
             <button
               onClick={handleSave}
-              className="flex items-center gap-2 px-5 py-2.5 bg-[#f78121] text-white font-black uppercase tracking-widest text-xs rounded-lg hover:bg-white hover:text-[#0A3762] transition-all self-start sm:self-auto"
+              className="flex items-center space-x-2 px-5 py-2.5 bg-[#f78121] text-white font-black uppercase tracking-widest text-xs rounded-lg hover:bg-white hover:text-[#0A3762] transition-all self-start sm:self-auto"
             >
               <Save size={14} />
               Save Foundation
