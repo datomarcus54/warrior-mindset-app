@@ -34,13 +34,6 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
   const [localVision3Year, setLocalVision3Year] = useState(data.vision3Year || '');
   const [localVision5Year, setLocalVision5Year] = useState(data.vision5Year || '');
 
-  // One ref per life-wheel input so the card can programmatically focus it
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-  // Local string state allows intermediate values while typing (e.g. "" before "7")
-  const [localScores, setLocalScores] = useState<string[]>(() =>
-    data.lifeWheel.map(d => String(d.value))
-  );
-
   const flushRef = useRef<() => void>(() => {});
   flushRef.current = () => {
     if (isGuest) return;
@@ -87,36 +80,6 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
     update({ lifeWheel: newWheel });
   };
 
-  // Focus + select the input for a given domain card (called by card click/touch)
-  const focusInput = (idx: number) => {
-    if (isGuest) { onRestricted(); return; }
-    const el = inputRefs.current[idx];
-    if (el) { el.focus(); el.select(); }
-  };
-
-  // Live update: store raw string locally and push valid values to the chart immediately
-  const handleScoreInput = (idx: number, raw: string) => {
-    if (isGuest) { onRestricted(); return; }
-    const digits = raw.replace(/[^0-9]/g, '');
-    setLocalScores(prev => { const next = [...prev]; next[idx] = digits; return next; });
-    const num = parseInt(digits, 10);
-    if (!isNaN(num) && num >= 1 && num <= 10) {
-      handleDomainChange(idx, num);
-    }
-  };
-
-  // On blur: if the field is empty or out of range, restore the last valid value
-  const handleScoreBlur = (idx: number) => {
-    const raw = localScores[idx] ?? '';
-    const num = parseInt(raw, 10);
-    if (isNaN(num) || num < 1 || num > 10) {
-      setLocalScores(prev => {
-        const next = [...prev];
-        next[idx] = String(data.lifeWheel[idx]?.value ?? 5);
-        return next;
-      });
-    }
-  };
   
 
   const affirmation = useMemo(() => {
@@ -225,63 +188,31 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
         </div>
       </section>
 
-      {/*
-        Inputs are siblings of the glass-card — not children — so backdrop-filter
-        on the card cannot create a compositing layer above them.
-        All styles inline. touch-action:manipulation removes the 300ms tap delay
-        on mobile without needing preventDefault.
-      */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '12px' }}>
+      {/* +/- stepper cards — pure button onClick, no input elements, works on every browser */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '12px' }}>
         {displayData.map((domain, idx) => (
           <div
             key={domain.name}
-            onClick={() => focusInput(idx)}
-            onTouchEnd={() => focusInput(idx)}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '8px',
-              background: 'rgba(255,255,255,0.1)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              borderRadius: '12px',
-              padding: '16px 12px',
-              cursor: isGuest ? 'default' : 'pointer',
-              touchAction: 'manipulation',
-            }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '12px', padding: '16px 12px' }}
           >
-            <span style={{ fontSize: '10px', color: 'white', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.1em', textAlign: 'center', lineHeight: 1.3, pointerEvents: 'none' }}>
+            <span style={{ fontSize: '10px', color: 'white', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.1em', textAlign: 'center', lineHeight: 1.3 }}>
               {domain.displayName}
             </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <input
-                ref={(el) => { inputRefs.current[idx] = el; }}
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                value={localScores[idx] ?? String(domain.value)}
-                onChange={(e) => handleScoreInput(idx, e.target.value)}
-                onFocus={(e) => e.target.select()}
-                onBlur={() => handleScoreBlur(idx)}
-                onClick={(e) => e.stopPropagation()}
-                readOnly={isGuest}
-                style={{
-                  width: '52px',
-                  background: '#0A3762',
-                  border: '1px solid rgba(247,129,33,0.5)',
-                  borderRadius: '8px',
-                  padding: '6px 4px',
-                  textAlign: 'center',
-                  fontWeight: '900',
-                  fontSize: '16px',
-                  color: '#f78121',
-                  outline: 'none',
-                  cursor: isGuest ? 'default' : 'text',
-                  opacity: isGuest ? 0.5 : 1,
-                  touchAction: 'manipulation',
-                }}
-              />
-              <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', fontWeight: '900', pointerEvents: 'none' }}>/10</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <button
+                onClick={() => { if (isGuest) { onRestricted(); return; } handleDomainChange(idx, domain.value - 1); }}
+                disabled={domain.value <= 1 || isGuest}
+                style={{ width: '32px', height: '32px', borderRadius: '8px', background: domain.value <= 1 ? 'rgba(255,255,255,0.05)' : 'rgba(247,129,33,0.2)', border: '1px solid rgba(247,129,33,0.4)', color: domain.value <= 1 ? 'rgba(255,255,255,0.2)' : '#f78121', fontSize: '20px', fontWeight: '900', cursor: domain.value <= 1 || isGuest ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}
+              >−</button>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '36px' }}>
+                <span style={{ fontSize: '22px', fontWeight: '900', color: '#f78121', lineHeight: 1 }}>{domain.value}</span>
+                <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', fontWeight: '700' }}>/10</span>
+              </div>
+              <button
+                onClick={() => { if (isGuest) { onRestricted(); return; } handleDomainChange(idx, domain.value + 1); }}
+                disabled={domain.value >= 10 || isGuest}
+                style={{ width: '32px', height: '32px', borderRadius: '8px', background: domain.value >= 10 ? 'rgba(255,255,255,0.05)' : 'rgba(247,129,33,0.2)', border: '1px solid rgba(247,129,33,0.4)', color: domain.value >= 10 ? 'rgba(255,255,255,0.2)' : '#f78121', fontSize: '20px', fontWeight: '900', cursor: domain.value >= 10 || isGuest ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}
+              >+</button>
             </div>
           </div>
         ))}
@@ -299,7 +230,7 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
           {[
             { label: '1 Year', value: localVision1Year, set: setLocalVision1Year, key: 'vision1Year' as const, placeholder: 'Where will you be in 12 months? Be specific.' },
             { label: '3 Years', value: localVision3Year, set: setLocalVision3Year, key: 'vision3Year' as const, placeholder: 'What does victory look like in 3 years?' },
-            { label: '5 Years', value: localVision5Year, set: setLocalVision5Year, key: 'vision5Year' as const, placeholder: 'Dictate the 5-year future state. Be lethal.' },
+            { label: '5 Years', value: localVision5Year, set: setLocalVision5Year, key: 'vision5Year' as const, placeholder: 'Describe your life in 5 years. Be specific.' },
           ].map(({ label, value, set, key, placeholder }) => (
             <div key={key}>
               <div className="flex items-center justify-between mb-3">
