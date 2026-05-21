@@ -33,10 +33,6 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
   const [localVision1Year, setLocalVision1Year] = useState(data.vision1Year || '');
   const [localVision3Year, setLocalVision3Year] = useState(data.vision3Year || '');
   const [localVision5Year, setLocalVision5Year] = useState(data.vision5Year || '');
-  // Raw string values while the user is typing into a score input
-  const [scoreInputs, setScoreInputs] = useState<Record<number, string>>({});
-  // Indices whose current raw value failed 1-10 validation
-  const [scoreErrors, setScoreErrors] = useState<Set<number>>(new Set());
 
   const flushRef = useRef<() => void>(() => {});
   flushRef.current = () => {
@@ -84,27 +80,13 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
     update({ lifeWheel: newWheel });
   };
 
-  const handleScoreChange = (idx: number, raw: string) => {
+  const handleScoreChange = (idx: number, val: string) => {
     if (isGuest) { onRestricted(); return; }
-    const digitsOnly = raw.replace(/[^0-9]/g, '');
-    setScoreInputs(prev => ({ ...prev, [idx]: digitsOnly }));
-    setScoreErrors(prev => { const s = new Set(prev); s.delete(idx); return s; });
-  };
-
-  const handleScoreBlur = (idx: number, currentValue: number) => {
-    const raw = scoreInputs[idx];
-    if (raw === undefined) return;
-    const num = parseInt(raw, 10);
-    const valid = raw !== '' && !isNaN(num) && num >= 1 && num <= 10;
-    if (valid) {
-      setScoreErrors(prev => { const s = new Set(prev); s.delete(idx); return s; });
-      setScoreInputs(prev => { const next = { ...prev }; delete next[idx]; return next; });
+    const num = parseInt(val, 10);
+    if (!isNaN(num) && num >= 1 && num <= 10) {
       handleDomainChange(idx, num);
-    } else {
-      setScoreErrors(prev => new Set(prev).add(idx));
-      setScoreInputs(prev => { const next = { ...prev }; delete next[idx]; return next; });
     }
-  };;
+  };
   
 
   const affirmation = useMemo(() => {
@@ -175,7 +157,7 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
       </section>
 
       {/* Life Wheel Radar */}
-      <section className="glass-card p-6 md:p-10 transition-all duration-300 ease-in-out hover:-translate-y-1">
+      <section className="glass-card p-6 md:p-10">
         <div className="mb-6 md:mb-8">
           <div className="flex items-center gap-[10px] mb-1">
             <h2 className="text-xl md:text-2xl font-black font-brand-header uppercase tracking-widest text-[#f78121]">Your Life Circle</h2>
@@ -185,16 +167,16 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
           </div>
           <p className="text-xs md:text-sm text-white/70 font-black uppercase tracking-widest">How You're Scoring Each Area (1-10)</p>
         </div>
-        
-        <div className="w-full h-[350px] min-h-[350px] relative overflow-hidden">
+
+        {/* Chart — pointer-events disabled so the SVG never intercepts clicks on the inputs below */}
+        <div className="w-full h-[350px] min-h-[350px]" style={{ pointerEvents: 'none' }}>
           {isMounted ? (
             <ResponsiveContainer width="100%" height="100%">
-              {/* FIX: Reduced outerRadius on mobile from 75% to 60% to prevent label clipping */}
-              <RadarChart cx="50%" cy="50%" outerRadius={isMobile ? "60%" : "75%"} data={displayData}>
+              <RadarChart cx="50%" cy="50%" outerRadius={isMobile ? '60%' : '72%'} data={displayData}>
                 <PolarGrid stroke="#e5e7eb" strokeWidth={2} strokeOpacity={0.4} />
-                <PolarAngleAxis 
-                  dataKey="displayName" 
-                  tick={{ fill: 'white', fontSize: isMobile ? 12 : 14, fontWeight: '700' }} 
+                <PolarAngleAxis
+                  dataKey="displayName"
+                  tick={{ fill: 'white', fontSize: isMobile ? 12 : 13, fontWeight: '700' }}
                 />
                 <Radar
                   name="Current State"
@@ -207,32 +189,31 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
               </RadarChart>
             </ResponsiveContainer>
           ) : (
-             <div className="w-full h-full bg-[#595b61]/50 animate-pulse rounded-xl border border-white/5 flex items-center justify-center">
-                <span className="text-xs font-black uppercase tracking-widest text-white/30">Calibrating Radar...</span>
-             </div>
+            <div className="w-full h-full bg-[#595b61]/50 animate-pulse rounded-xl border border-white/5 flex items-center justify-center">
+              <span className="text-xs font-black uppercase tracking-widest text-white/30">Calibrating Radar...</span>
+            </div>
           )}
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-4 md:gap-6 mt-8 md:mt-12">
+        {/* Score inputs — positioned above chart layer with explicit z-index */}
+        <div
+          className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6 mt-8 md:mt-12"
+          style={{ position: 'relative', zIndex: 10 }}
+        >
           {displayData.map((domain, idx) => (
             <div key={domain.name} className="bg-white/10 border border-white/20 rounded-xl flex flex-col items-center justify-center p-4 md:p-5 gap-3 shadow-sm">
               <span className="text-[10px] md:text-xs text-white uppercase font-black tracking-widest text-center leading-tight">{domain.displayName}</span>
               <div className="flex items-center gap-1.5">
                 <input
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  value={scoreInputs[idx] !== undefined ? scoreInputs[idx] : String(domain.value)}
+                  type="number"
+                  min="1"
+                  max="10"
+                  step="1"
+                  value={domain.value}
                   onChange={(e) => handleScoreChange(idx, e.target.value)}
-                  onBlur={() => handleScoreBlur(idx, domain.value)}
-                  onClick={() => { if (isGuest) onRestricted(); }}
-                  readOnly={isGuest}
-                  className={`w-14 bg-[#0A3762] border rounded-lg px-2 py-1.5 text-center font-black text-base focus:outline-none transition-colors cursor-text ${
-                    isGuest ? 'opacity-50 cursor-default' :
-                    scoreErrors.has(idx)
-                      ? 'border-red-500 text-red-400'
-                      : 'border-[#f78121]/40 text-[#f78121] focus:border-[#f78121]'
-                  }`}
+                  disabled={isGuest}
+                  style={{ position: 'relative', zIndex: 20 }}
+                  className="w-14 bg-[#0A3762] border border-[#f78121]/40 rounded-lg px-2 py-1.5 text-center font-black text-base text-[#f78121] focus:border-[#f78121] focus:outline-none disabled:opacity-50 cursor-text"
                 />
                 <span className="text-white/50 text-xs font-black">/10</span>
               </div>
