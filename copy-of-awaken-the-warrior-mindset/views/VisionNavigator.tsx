@@ -34,6 +34,13 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
   const [localVision3Year, setLocalVision3Year] = useState(data.vision3Year || '');
   const [localVision5Year, setLocalVision5Year] = useState(data.vision5Year || '');
 
+  // One ref per life-wheel input so the card can programmatically focus it
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  // Local string state allows intermediate values while typing (e.g. "" before "7")
+  const [localScores, setLocalScores] = useState<string[]>(() =>
+    data.lifeWheel.map(d => String(d.value))
+  );
+
   const flushRef = useRef<() => void>(() => {});
   flushRef.current = () => {
     if (isGuest) return;
@@ -80,11 +87,34 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
     update({ lifeWheel: newWheel });
   };
 
-  const handleScoreChange = (idx: number, val: string) => {
+  // Focus + select the input for a given domain card (called by card click/touch)
+  const focusInput = (idx: number) => {
     if (isGuest) { onRestricted(); return; }
-    const num = parseInt(val, 10);
+    const el = inputRefs.current[idx];
+    if (el) { el.focus(); el.select(); }
+  };
+
+  // Live update: store raw string locally and push valid values to the chart immediately
+  const handleScoreInput = (idx: number, raw: string) => {
+    if (isGuest) { onRestricted(); return; }
+    const digits = raw.replace(/[^0-9]/g, '');
+    setLocalScores(prev => { const next = [...prev]; next[idx] = digits; return next; });
+    const num = parseInt(digits, 10);
     if (!isNaN(num) && num >= 1 && num <= 10) {
       handleDomainChange(idx, num);
+    }
+  };
+
+  // On blur: if the field is empty or out of range, restore the last valid value
+  const handleScoreBlur = (idx: number) => {
+    const raw = localScores[idx] ?? '';
+    const num = parseInt(raw, 10);
+    if (isNaN(num) || num < 1 || num > 10) {
+      setLocalScores(prev => {
+        const next = [...prev];
+        next[idx] = String(data.lifeWheel[idx]?.value ?? 5);
+        return next;
+      });
     }
   };
   
@@ -196,32 +226,62 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
       </section>
 
       {/*
-        Score inputs live in a plain div that is a sibling of — not a child of —
-        the glass-card above. This eliminates backdrop-filter as a parent, which
-        was creating a GPU compositing layer on older WebKit/Blink that made all
-        descendant inputs unreachable by pointer events.
-        All styles are inline; no Tailwind, no transforms, no position tricks.
+        Inputs are siblings of the glass-card — not children — so backdrop-filter
+        on the card cannot create a compositing layer above them.
+        All styles inline. touch-action:manipulation removes the 300ms tap delay
+        on mobile without needing preventDefault.
       */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '12px' }}>
         {displayData.map((domain, idx) => (
           <div
             key={domain.name}
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '12px', padding: '16px 12px' }}
+            onClick={() => focusInput(idx)}
+            onTouchEnd={() => focusInput(idx)}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '8px',
+              background: 'rgba(255,255,255,0.1)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: '12px',
+              padding: '16px 12px',
+              cursor: isGuest ? 'default' : 'pointer',
+              touchAction: 'manipulation',
+            }}
           >
-            <span style={{ fontSize: '10px', color: 'white', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.1em', textAlign: 'center', lineHeight: 1.3 }}>
+            <span style={{ fontSize: '10px', color: 'white', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.1em', textAlign: 'center', lineHeight: 1.3, pointerEvents: 'none' }}>
               {domain.displayName}
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <input
-                type="number"
-                min="1"
-                max="10"
-                value={domain.value}
-                onChange={(e) => handleScoreChange(idx, e.target.value)}
-                disabled={isGuest}
-                style={{ width: '52px', background: '#0A3762', border: '1px solid rgba(247,129,33,0.5)', borderRadius: '8px', padding: '6px 4px', textAlign: 'center', fontWeight: '900', fontSize: '16px', color: '#f78121', outline: 'none', cursor: isGuest ? 'default' : 'text', opacity: isGuest ? 0.5 : 1 }}
+                ref={(el) => { inputRefs.current[idx] = el; }}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={localScores[idx] ?? String(domain.value)}
+                onChange={(e) => handleScoreInput(idx, e.target.value)}
+                onFocus={(e) => e.target.select()}
+                onBlur={() => handleScoreBlur(idx)}
+                onClick={(e) => e.stopPropagation()}
+                readOnly={isGuest}
+                style={{
+                  width: '52px',
+                  background: '#0A3762',
+                  border: '1px solid rgba(247,129,33,0.5)',
+                  borderRadius: '8px',
+                  padding: '6px 4px',
+                  textAlign: 'center',
+                  fontWeight: '900',
+                  fontSize: '16px',
+                  color: '#f78121',
+                  outline: 'none',
+                  cursor: isGuest ? 'default' : 'text',
+                  opacity: isGuest ? 0.5 : 1,
+                  touchAction: 'manipulation',
+                }}
               />
-              <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', fontWeight: '900' }}>/10</span>
+              <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', fontWeight: '900', pointerEvents: 'none' }}>/10</span>
             </div>
           </div>
         ))}
