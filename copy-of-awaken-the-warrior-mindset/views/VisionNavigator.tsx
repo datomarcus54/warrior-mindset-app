@@ -108,7 +108,7 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
     <div className="space-y-8 md:space-y-10 relative">
       
       {activeLesson && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-[#001b3d]/90 backdrop-blur-sm animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-[#001b3d]/90 animate-in fade-in duration-300">
            <div className="relative w-full max-w-md bg-[#595b61] p-8 md:p-10 border-4 border-[#001b3d] rounded-2xl shadow-2xl">
               <button onClick={() => setActiveLesson(null)} className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors"><X size={24}/></button>
               <div className="mb-6">
@@ -136,7 +136,7 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
       </header>
 
       {/* Daily Creed */}
-      <section className="glass-card p-6 md:p-8 relative overflow-hidden group transition-all duration-300 ease-in-out hover:-translate-y-1">
+      <section className="p-6 md:p-8 relative overflow-hidden group transition-all duration-300 ease-in-out hover:-translate-y-1" style={{ background: 'rgba(30, 40, 60, 0.95)', border: '1px solid #f78121', borderRadius: '16px' }}>
         <div className="absolute -top-4 -right-4 opacity-10">
           <Quote size={80} className="text-[#f78121] md:w-24 md:h-24" />
         </div>
@@ -149,8 +149,8 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
         </div>
       </section>
 
-      {/* Life Wheel Radar — chart only, no inputs inside this glass-card */}
-      <section className="glass-card p-6 md:p-10">
+      {/* Life Wheel Radar — chart only, no inputs */}
+      <section className="p-6 md:p-10" style={{ background: 'rgba(30, 40, 60, 0.95)', border: '1px solid #f78121', borderRadius: '16px' }}>
         <div className="mb-6 md:mb-8">
           <div className="flex items-center mb-1">
             <h2 className="text-xl md:text-2xl font-black font-brand-header uppercase tracking-widest text-[#f78121]" style={{ marginRight: '10px' }}>Your Life Circle</h2>
@@ -219,7 +219,7 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
       </div>
 
       {/* VIVID Vision Statement */}
-      <section className="glass-card p-6 md:p-10 transition-all duration-300 ease-in-out">
+      <section className="p-6 md:p-10 transition-all duration-300 ease-in-out" style={{ background: 'rgba(30, 40, 60, 0.95)', border: '1px solid #f78121', borderRadius: '16px' }}>
         <div className="flex items-center mb-6 md:mb-8">
             <h2 className="text-xl md:text-2xl font-black font-brand-header uppercase tracking-widest text-[#f78121]" style={{ marginRight: '10px' }}>Your Vision</h2>
             <button onClick={() => setActiveLesson('VISION')} className="text-[#f78121] hover:text-[#001b3d] cursor-pointer transition-colors" aria-label="Warrior Lesson">
