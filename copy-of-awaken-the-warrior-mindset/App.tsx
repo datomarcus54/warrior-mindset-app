@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import type { User } from '@supabase/supabase-js';
 import {
   Trophy, Sparkles, Bot, X, Menu, LifeBuoy, BookOpen, LogOut, User, BarChart3, Lock, Shield, Compass
 } from 'lucide-react';
 import { UserData, ViewType } from './types';
 import { INITIAL_USER_DATA, getRank, WARRIOR_RANKS } from './constants';
+import { supabase } from './services/supabase';
 
 // Views
 import FoundationView from './views/FoundationView';
@@ -19,6 +21,7 @@ import TribeView from './views/TribeView';
 import JournalView from './views/JournalView';
 import SubscriptionView from './views/SubscriptionView';
 import OnboardingModal from './views/OnboardingModal';
+import AuthView from './views/AuthView';
 
 // --- CONSOLE SILENCER ---
 // This suppresses the harmless "width(-1)" warning from Recharts during animations
@@ -65,7 +68,8 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewType>('Foundation');
   const [showAffirmation, setShowAffirmation] = useState(false);
   const [showScoringRules, setShowScoringRules] = useState(false);
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [authReady, setAuthReady] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem('onboardingComplete'));
   const [onboardingFromMenu, setOnboardingFromMenu] = useState(false);
@@ -77,23 +81,15 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const w = window as any;
-    if (w.netlifyIdentity) {
-      try {
-        w.netlifyIdentity.init(); 
-        const user = w.netlifyIdentity.currentUser();
-        setCurrentUser(user);
-        w.netlifyIdentity.on('login', (user: any) => {
-          setCurrentUser(user);
-          w.netlifyIdentity.close();
-          window.location.reload(); 
-        });
-        w.netlifyIdentity.on('logout', () => {
-          setCurrentUser(null);
-          window.location.reload();
-        });
-      } catch (e) { console.warn(e); }
-    }
+    supabase.auth.getSession().then(({ data }) => {
+      setCurrentUser(data.session?.user ?? null);
+      setAuthReady(true);
+    });
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setCurrentUser(session?.user ?? null);
+      setAuthReady(true);
+    });
 
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
@@ -114,10 +110,14 @@ const App: React.FC = () => {
         if (parsed.lastAffirmationSeen !== today) setShowAffirmation(true);
       } catch (e) { setShowAffirmation(true); }
     } else { setShowAffirmation(true); }
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
-    if (currentUser && GOD_MODE_EMAILS.includes(currentUser.email)) {
+    if (currentUser?.email && GOD_MODE_EMAILS.includes(currentUser.email)) {
       setUserData(prev => {
         if (prev.tier !== 'Legend' || prev.warriorCodePoints < 5000) {
           return { ...prev, tier: 'Legend', warriorCodePoints: Math.max(prev.warriorCodePoints, 5000) };
@@ -154,9 +154,8 @@ const App: React.FC = () => {
     setShowOnboarding(true);
     setIsMenuOpen(false);
   };
-  const openAuth = (mode: 'login' | 'signup') => { const w = window as any; if (w.netlifyIdentity) w.netlifyIdentity.open(mode); };
   const onRestrictedAction = () => { setCurrentView('Subscription'); };
-  const isGuest = !currentUser;
+  const isGuest = false;
 
   const renderView = () => {
     const props = { data: userData, update: updateData, isGuest, onRestricted: onRestrictedAction, isMobileMode };
@@ -193,6 +192,18 @@ const App: React.FC = () => {
     );
   };
 
+  if (!authReady) {
+    return (
+      <div className="min-h-[100dvh] flex items-center justify-center bg-[#0A3762] text-white font-brand-body">
+        <p className="text-xs uppercase tracking-widest text-[#45d0d0]">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return <AuthView />;
+  }
+
   return (
     <div className="flex flex-col h-[100dvh] overflow-hidden bg-[#0A3762] text-white font-brand-body selection:bg-[#f78121] selection:text-white">
       {/* Onboarding */}
@@ -223,10 +234,6 @@ const App: React.FC = () => {
             <button onClick={handleAcceptMission} className="w-full py-5 bg-[#f78121] text-white font-black uppercase tracking-widest rounded-xl hover:bg-orange-600 transition-all active:scale-95 text-sm md:text-base flex items-center justify-center space-x-2 shadow-lg"><span>Begin Today's Step</span><span className="bg-[#001b3d]/20 px-2 py-0.5 rounded text-[10px] text-white">+15 Steps</span></button>
             {isGuest && (
               <div className="flex flex-col items-center mt-6 space-y-4">
-                <div className="flex justify-center space-x-6">
-                  <button onClick={() => openAuth('login')} className="text-[10px] md:text-xs font-black uppercase tracking-widest text-[#7f91aa] hover:text-white">Log In</button>
-                  <button onClick={() => openAuth('signup')} className="text-[10px] md:text-xs font-black uppercase tracking-widest text-[#7f91aa] hover:text-white">Register</button>
-                </div>
                 <button onClick={handleGuestEntry} className="text-[10px] md:text-xs font-black uppercase tracking-widest text-[#f78121] hover:text-orange-600 border-b border-[#f78121]/30 pb-0.5">Guest Access</button>
               </div>
             )}
@@ -270,10 +277,10 @@ const App: React.FC = () => {
          </div>
          <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-[#45d0d0]/20 bg-[#001b3d]">
             {currentUser ? (
-               <button onClick={() => {const w=window as any; w.netlifyIdentity.logout()}} className="flex items-center space-x-2 text-slate-400 hover:text-red-500 text-xs font-black uppercase tracking-widest"><LogOut size={16} /> <span>Logout</span></button>
+               <button onClick={() => { void supabase.auth.signOut(); }} className="flex items-center space-x-2 text-slate-400 hover:text-red-500 text-xs font-black uppercase tracking-widest"><LogOut size={16} /> <span>Logout</span></button>
             ) : (
                <div className="space-y-3">
-                  <button onClick={() => openAuth('login')} className="w-full flex items-center justify-center space-x-2 bg-white/10 p-3 rounded text-[#f78121] hover:text-white hover:bg-white/20 text-xs font-black uppercase tracking-widest"><User size={16} /> <span>Login</span></button>
+                  <button className="w-full flex items-center justify-center space-x-2 bg-white/10 p-3 rounded text-[#f78121] text-xs font-black uppercase tracking-widest opacity-50 cursor-not-allowed"><User size={16} /> <span>Login</span></button>
                </div>
             )}
          </div>
@@ -292,9 +299,9 @@ const App: React.FC = () => {
           <div className="flex items-center space-x-3 z-20">
              {!currentUser ? (
                 <div className="hidden md:flex space-x-4 items-center">
-                   <button onClick={() => openAuth('login')} className="text-[10px] font-black uppercase tracking-widest text-[#7f91aa] hover:text-white">Log In</button>
+                   <button className="text-[10px] font-black uppercase tracking-widest text-[#7f91aa] opacity-50 cursor-not-allowed">Log In</button>
                    <span className="text-[#45d0d0] text-xs">|</span>
-                   <button onClick={() => openAuth('signup')} className="text-[10px] font-black uppercase tracking-widest text-[#7f91aa] hover:text-white">Register</button>
+                   <button className="text-[10px] font-black uppercase tracking-widest text-[#7f91aa] opacity-50 cursor-not-allowed">Register</button>
                 </div>
              ) : (
                 <div className="text-right hidden md:block">
