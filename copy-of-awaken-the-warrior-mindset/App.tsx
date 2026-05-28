@@ -249,7 +249,7 @@ const App: React.FC = () => {
             <span className="text-xl font-brand-header font-black uppercase text-[#f78121] tracking-widest">Main Menu</span>
             <button onClick={() => setIsMenuOpen(false)} className="text-[#45d0d0] hover:text-white"><X size={24}/></button>
          </div>
-         <div className="p-4 space-y-2">
+         <div className="p-4 pb-24 space-y-2">
             <button onClick={() => { setCurrentView('Subscription'); setIsMenuOpen(false); }} className="w-full p-4 flex items-center space-x-4 hover:bg-white/5 rounded-xl transition-all group border border-transparent hover:border-[#f78121]/30">
                <Shield className="text-[#f78121] group-hover:scale-110 transition-transform" />
                <div className="text-left"><span className="block text-sm font-black uppercase tracking-widest text-white">Warrior Rank</span><span className="block text-[10px] text-[#45d0d0]">Status & Tiers</span></div>
@@ -274,14 +274,12 @@ const App: React.FC = () => {
                <BookOpen className="text-slate-400 group-hover:text-white group-hover:scale-110 transition-transform" />
                <div className="text-left"><span className="block text-sm font-black uppercase tracking-widest text-white">How It Works</span><span className="block text-[10px] text-[#45d0d0]">Operating System</span></div>
             </button>
-         </div>
-         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-[#45d0d0]/20 bg-[#001b3d]">
             <button
               onClick={() => {
                 setIsMenuOpen(false);
                 void supabase.auth.signOut();
               }}
-              className="w-full p-4 flex items-center space-x-4 hover:bg-white/5 rounded-xl transition-all group border border-transparent hover:border-[#f78121]/30"
+              className="w-full p-4 flex items-center space-x-4 hover:bg-white/5 rounded-xl transition-all group border border-transparent hover:border-[#f78121]/30 mt-4"
             >
               <LogOut className="text-slate-400 group-hover:text-red-500 group-hover:scale-110 transition-transform" />
               <div className="text-left">
