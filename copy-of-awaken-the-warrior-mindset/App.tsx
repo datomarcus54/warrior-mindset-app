@@ -275,14 +275,20 @@ const App: React.FC = () => {
                <div className="text-left"><span className="block text-sm font-black uppercase tracking-widest text-white">How It Works</span><span className="block text-[10px] text-[#45d0d0]">Operating System</span></div>
             </button>
          </div>
-         <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-[#45d0d0]/20 bg-[#001b3d]">
-            {currentUser ? (
-               <button onClick={() => { void supabase.auth.signOut(); }} className="flex items-center space-x-2 text-slate-400 hover:text-red-500 text-xs font-black uppercase tracking-widest"><LogOut size={16} /> <span>Logout</span></button>
-            ) : (
-               <div className="space-y-3">
-                  <button className="w-full flex items-center justify-center space-x-2 bg-white/10 p-3 rounded text-[#f78121] text-xs font-black uppercase tracking-widest opacity-50 cursor-not-allowed"><User size={16} /> <span>Login</span></button>
-               </div>
-            )}
+         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-[#45d0d0]/20 bg-[#001b3d]">
+            <button
+              onClick={() => {
+                setIsMenuOpen(false);
+                void supabase.auth.signOut();
+              }}
+              className="w-full p-4 flex items-center space-x-4 hover:bg-white/5 rounded-xl transition-all group border border-transparent hover:border-[#f78121]/30"
+            >
+              <LogOut className="text-slate-400 group-hover:text-red-500 group-hover:scale-110 transition-transform" />
+              <div className="text-left">
+                <span className="block text-sm font-black uppercase tracking-widest text-white">Log Out</span>
+                <span className="block text-[10px] text-[#45d0d0]">End current session</span>
+              </div>
+            </button>
          </div>
       </aside>
 
