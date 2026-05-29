@@ -18,7 +18,7 @@ const normalizeMarkdown = (text: string): string =>
 const CoachMarcus: React.FC<Props> = ({ data }) => {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<{ role: 'user' | 'bot', text: string }[]>([
-    { role: 'bot', text: "Warrior. I am Coach Marcus AI. I am here to extract your potential, not validate your feelings. What is the specific target you are striking today? Report." }
+    { role: 'bot', text: "Warrior. I am Coach Marcus AI. I am here to extract your potential, not validate your feelings. What is on your mind today? Let's work through it." }
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);

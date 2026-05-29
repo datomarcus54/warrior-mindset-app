@@ -13,7 +13,7 @@ interface Props {
 const FAQS = [
   {
     question: "How do I track my Warrior Points (XP)?",
-    answer: "XP is currency. Earn it by executing Habits, securing Goals, and logging Journals. Your Rank reflects your discipline, not your intentions."
+    answer: "XP is currency. Earn it by completing Habits, reaching Goals, and logging Journals. Your Rank reflects your discipline, not your intentions."
   },
   {
     question: "How does the Vision Radar work?",
@@ -25,7 +25,7 @@ const FAQS = [
   },
   {
     question: "What is the purpose of Coach Marcus AI?",
-    answer: "Coach Marcus AI is not a friend. He is a strategic asset designed to break your excuses and force action. Use him when you are stuck or drifting."
+    answer: "Coach Marcus AI is not a friend. He is here to give you clarity and push you toward real action. Use him when you are stuck or drifting."
   },
   {
     question: "Is my data private?",
@@ -138,12 +138,12 @@ const SupportView: React.FC<Props> = ({ isGuest, onRestricted }) => {
       {/* Header */}
       <header className="mb-8">
         <div className="flex items-center gap-3">
-           <h2 className="text-4xl md:text-6xl font-black font-brand-header uppercase text-[#f78121] tracking-wider whitespace-nowrap">Command Uplink</h2>
+           <h2 className="text-4xl md:text-6xl font-black font-brand-header uppercase text-[#f78121] tracking-wider whitespace-nowrap">Support Centre</h2>
            <button onClick={() => setShowLesson(true)} className="text-[#f78121] hover:text-white cursor-pointer transition-colors" aria-label="Warrior Lesson">
              <Info size={24} />
            </button>
         </div>
-        <p className="text-xs md:text-base text-[#45d0d0] font-black uppercase tracking-[0.2em] mt-2">Support Logistics</p>
+        <p className="text-xs md:text-base text-[#45d0d0] font-black uppercase tracking-[0.2em] mt-2">Help & Guidance</p>
       </header>
 
       {/* FAQ Accordion */}

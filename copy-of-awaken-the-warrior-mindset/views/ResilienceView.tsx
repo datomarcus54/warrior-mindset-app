@@ -89,21 +89,21 @@ const ResilienceView: React.FC<{ data: UserData; update: (u: Partial<UserData>) 
 
       <section className="glass-card p-6 md:p-10 shadow-glass transition-all duration-300 ease-in-out hover:shadow-[0_0_25px_rgba(247,129,33,0.4)] hover:border-[#f78121]/50 hover:-translate-y-1">
         <div className="flex items-center gap-[10px] mb-8">
-            <h3 className="text-xl md:text-2xl font-black font-brand-header uppercase tracking-tight text-[#f78121]">Resilience Forge</h3>
+            <h3 className="text-xl md:text-2xl font-black font-brand-header uppercase tracking-tight text-[#f78121]">Resilience Builder</h3>
             <button onClick={() => setActiveLesson('MINDSET')} className="text-[#f78121] hover:text-white cursor-pointer transition-colors"><Info size={24} /></button>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8">
           <div className="space-y-3">
-            <label className="text-[10px] font-black uppercase tracking-widest text-[#f78121] flex items-center"><AlertTriangle size={12} className="mr-2" /> Mental Sabotage</label>
-            <textarea value={distorted} onChange={(e) => setDistorted(e.target.value)} placeholder="Locate the point of failure..." className="w-full h-32 bg-[#eef1f1] border border-[#45d0d0]/20 rounded-warrior p-4 text-sm text-[#595b61] font-bold focus:outline-none focus:border-[#f78121] transition-all placeholder:text-[#595b61]/70" />
+            <label className="text-[10px] font-black uppercase tracking-widest text-[#f78121] flex items-center"><AlertTriangle size={12} className="mr-2" /> Mental Block</label>
+            <textarea value={distorted} onChange={(e) => setDistorted(e.target.value)} placeholder="What is holding you back..." className="w-full h-32 bg-[#eef1f1] border border-[#45d0d0]/20 rounded-warrior p-4 text-sm text-[#595b61] font-bold focus:outline-none focus:border-[#f78121] transition-all placeholder:text-[#595b61]/70" />
           </div>
           <div className="space-y-3">
             <label className="text-[10px] font-black uppercase tracking-widest text-[#45d0d0] flex items-center"><Sparkles size={12} className="mr-2" /> Reframing</label>
             <textarea value={balanced} onChange={(e) => setBalanced(e.target.value)} placeholder="Re-engage with logic..." className="w-full h-32 bg-[#eef1f1] border border-[#45d0d0]/20 rounded-warrior p-4 text-sm text-[#595b61] font-bold focus:outline-none focus:border-[#45d0d0] transition-all placeholder:text-[#595b61]/70" />
           </div>
         </div>
-        <button onClick={addJournal} disabled={!distorted || !balanced} className="w-full py-4 bg-[#f78121] hover:bg-orange-600 text-white font-black uppercase tracking-[0.2em] rounded-warrior transition-all disabled:opacity-50 flex items-center justify-center space-x-2"><Brain size={18} /> <span>Lock Reframe</span></button>
+        <button onClick={addJournal} disabled={!distorted || !balanced} className="w-full py-4 bg-[#f78121] hover:bg-orange-600 text-white font-black uppercase tracking-[0.2em] rounded-warrior transition-all disabled:opacity-50 flex items-center justify-center space-x-2"><Brain size={18} /> <span>Save Reframe</span></button>
 
         <div className="mt-8 space-y-4">
           {data.journals.map(entry => (
