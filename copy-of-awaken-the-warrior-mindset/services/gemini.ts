@@ -181,7 +181,7 @@ export const getLegacyCoachResponse = async (
     Their defined Long-Term Vision is: "${vision || "Undefined"}".
 
     YOUR MISSION (Coach Marcus):
-    Conduct a "Legacy Alignment Audit" to ensure this principle actually serves their vision.
+    Conduct a "Legacy Alignment Check" to ensure this principle actually serves their vision.
 
     STRICT BEHAVIORAL PROTOCOLS:
     1. **NEVER DISAGREE**: Do not argue or tell the user they are wrong. Allow them to express their belief.
@@ -201,7 +201,7 @@ export const getLegacyCoachResponse = async (
     return await callChatFunction(contextPrompt, COACH_SYSTEM_PROMPT);
   } catch (error) {
     console.error("Legacy Coach error:", error);
-    return "The connection is weak. Re-engage.";
+    return "This connection needs attention.";
   }
 };
 

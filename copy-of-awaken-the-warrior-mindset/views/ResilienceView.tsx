@@ -6,7 +6,7 @@ import { Brain, Sparkles, Trash2, ArrowRight, AlertTriangle, Zap, History, Info,
 import EmptyState from './EmptyState';
 
 const LESSONS = {
-  'MINDSET': { title: "Cognitive Reconfiguration", text: "Master your internal command center. Your thoughts are your first battlefield; win there, and all else follows." },
+  'MINDSET': { title: "Mindset Reset", text: "Your thoughts shape everything. Learn to catch the ones that hold you back and replace them with ones that move you forward." },
   'FAILURE': { title: "Extracting Lethal Growth", text: "Every setback is a data point, not a defeat. Analyze, adapt, and become exponentially stronger from every challenge." }
 };
 
