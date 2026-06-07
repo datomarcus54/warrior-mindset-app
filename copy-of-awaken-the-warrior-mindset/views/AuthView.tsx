@@ -38,7 +38,7 @@ const AuthView: React.FC = () => {
 
   const handlePasswordReset = async () => {
     if (!supabase) return;
-    const redirectTo = `${window.location.origin}${window.location.pathname}`;
+    const redirectTo = 'https://warrior-mindset-app.netlify.app/';
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
     if (resetError) throw resetError;
     setNotice('Password reset email sent. Please check your inbox.');

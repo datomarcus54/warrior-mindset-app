@@ -22,6 +22,7 @@ import JournalView from './views/JournalView';
 import SubscriptionView from './views/SubscriptionView';
 import OnboardingModal from './views/OnboardingModal';
 import AuthView from './views/AuthView';
+import ResetPasswordView from './views/ResetPasswordView';
 
 // --- CONSOLE SILENCER ---
 // This suppresses the harmless "width(-1)" warning from Recharts during animations
@@ -71,6 +72,7 @@ const App: React.FC = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [showPasswordReset, setShowPasswordReset] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem('onboardingComplete'));
   const [onboardingFromMenu, setOnboardingFromMenu] = useState(false);
@@ -93,7 +95,10 @@ const App: React.FC = () => {
       setAuthLoading(false);
     });
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setShowPasswordReset(true);
+      }
       setSession(nextSession);
       setCurrentUser(nextSession?.user ?? null);
     });
@@ -207,6 +212,10 @@ const App: React.FC = () => {
 
   if (authLoading) {
     return <div className="min-h-screen bg-[#0A3762]" />;
+  }
+
+  if (showPasswordReset) {
+    return <ResetPasswordView onComplete={() => setShowPasswordReset(false)} />;
   }
 
   if (!session) {
