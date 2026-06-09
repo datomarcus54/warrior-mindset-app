@@ -10,7 +10,7 @@ exports.handler = async (event) => {
     }
 
     const resendApiKey = process.env.RESEND_API_KEY;
-    const fromEmail = process.env.RESET_EMAIL_FROM || 'onboarding@resend.dev';
+    const fromEmail = 'noreply@marveluzz.com';
 
     if (!resendApiKey) {
       return {
