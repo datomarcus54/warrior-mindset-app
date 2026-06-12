@@ -34,6 +34,37 @@ const VisionNavigator: React.FC<Props> = ({ data, update, isGuest, onRestricted 
   const [localVision3Year, setLocalVision3Year] = useState(data.vision3Year || '');
   const [localVision5Year, setLocalVision5Year] = useState(data.vision5Year || '');
 
+  // Sync local textarea state when the Vision props CHANGE externally — e.g. when
+  // App.tsx hydrates userData from Supabase after the async cloud load. The local
+  // state is only seeded once at mount, so without this the restored cloud values
+  // never appear in the textareas.
+  //
+  // Safe against clobbering active typing: while the user types, only local state
+  // changes (onChange) — the data prop is unchanged until onBlur/save, so the
+  // guard below (incoming !== previously-seen prop) does not fire mid-typing.
+  const prevVisionPropsRef = useRef({
+    v1: data.vision1Year || '',
+    v3: data.vision3Year || '',
+    v5: data.vision5Year || '',
+  });
+  useEffect(() => {
+    const incoming1 = data.vision1Year || '';
+    const incoming3 = data.vision3Year || '';
+    const incoming5 = data.vision5Year || '';
+    if (incoming1 !== prevVisionPropsRef.current.v1) {
+      prevVisionPropsRef.current.v1 = incoming1;
+      setLocalVision1Year(incoming1);
+    }
+    if (incoming3 !== prevVisionPropsRef.current.v3) {
+      prevVisionPropsRef.current.v3 = incoming3;
+      setLocalVision3Year(incoming3);
+    }
+    if (incoming5 !== prevVisionPropsRef.current.v5) {
+      prevVisionPropsRef.current.v5 = incoming5;
+      setLocalVision5Year(incoming5);
+    }
+  }, [data.vision1Year, data.vision3Year, data.vision5Year]);
+
   const flushRef = useRef<() => void>(() => {});
   flushRef.current = () => {
     if (isGuest) return;

@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 import {
   Trophy, Sparkles, Bot, X, Menu, LifeBuoy, BookOpen, LogOut, BarChart3, Shield, Compass
 } from 'lucide-react';
@@ -6,6 +7,7 @@ import { Session, User } from '@supabase/supabase-js';
 import { UserData, ViewType } from './types';
 import { INITIAL_USER_DATA, getRank, WARRIOR_RANKS } from './constants';
 import { supabase } from './services/supabase';
+import { loadUserAppState, migrateLocalStorageToCloud, saveUserAppState, clearLocalUserData } from './services/userAppStateService';
 
 // Views
 import FoundationView from './views/FoundationView';
@@ -22,7 +24,6 @@ import JournalView from './views/JournalView';
 import SubscriptionView from './views/SubscriptionView';
 import OnboardingModal from './views/OnboardingModal';
 import AuthView from './views/AuthView';
-import ResetPasswordView from './views/ResetPasswordView';
 
 // --- CONSOLE SILENCER ---
 // This suppresses the harmless "width(-1)" warning from Recharts during animations
@@ -40,6 +41,23 @@ console.error = (...args) => {
 
 const STORAGE_KEY = 'warrior_mindset_data_v3';
 const GOD_MODE_EMAILS = ['marcus@marveluzzglobal.com', 'roslankhalid54@gmail.com'];
+
+// Mirrors the existing localStorage hydration merge so cloud data is merged
+// with INITIAL_USER_DATA identically. Used ONLY by the cloud hydration step;
+// the existing localStorage block below is intentionally left unchanged.
+const mergeWithInitial = (parsed: any): UserData => {
+  const mergedHealth = { ...INITIAL_USER_DATA.health, ...(parsed.health || {}) };
+  const mergedPosts = parsed.communityPosts || INITIAL_USER_DATA.communityPosts;
+  const mergedWorkflows = parsed.dailyWorkflows || [];
+  const pf = parsed.financialData || {};
+  const mergedFinancialData = {
+    ...INITIAL_USER_DATA.financialData,
+    ...pf,
+    assets: { ...INITIAL_USER_DATA.financialData.assets, ...(pf.assets || {}) },
+    liabilities: { ...INITIAL_USER_DATA.financialData.liabilities, ...(pf.liabilities || {}) },
+  };
+  return { ...INITIAL_USER_DATA, ...parsed, health: mergedHealth, communityPosts: mergedPosts, dailyWorkflows: mergedWorkflows, financialData: mergedFinancialData };
+};
 
 class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean}> {
   constructor(props: {children: React.ReactNode}) {
@@ -69,14 +87,32 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewType>('Foundation');
   const [showAffirmation, setShowAffirmation] = useState(false);
   const [showScoringRules, setShowScoringRules] = useState(false);
-  const [session, setSession] = useState<Session | null>(null);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [authLoading, setAuthLoading] = useState(true);
-  const [showPasswordReset, setShowPasswordReset] = useState(false);
+  const [currentUser, setCurrentUser] = useState<SupabaseUser | null>(null);
+  const [authReady, setAuthReady] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem('onboardingComplete'));
   const [onboardingFromMenu, setOnboardingFromMenu] = useState(false);
   
+  // Guards the cloud hydration so it runs at most once per distinct user id
+  // (prevents repeat hydration/migration on token refresh re-renders).
+  const hydratedUserIdRef = useRef<string | null>(null);
+
+  // Phase B: debounced cloud-save guards.
+  // - hasCloudHydratedRef: cloud saving is disabled until hydration/migration completes.
+  // - isHydratingFromCloudRef: blocks the save triggered by the hydration setUserData.
+  // - cloudSaveTimeoutRef: holds the pending debounced save timer.
+  const hasCloudHydratedRef = useRef(false);
+  const isHydratingFromCloudRef = useRef(false);
+  const cloudSaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Serialized snapshot of the last data successfully written to the cloud.
+  // Used to skip redundant identical writes (e.g. auth re-renders).
+  const lastSavedSnapshotRef = useRef<string | null>(null);
+
+  // Stable user id. The Supabase user OBJECT gets a fresh reference on every
+  // auth event (token refresh, etc.), but the id string is stable per user.
+  // Depending on this string instead of the object stops spurious cloud saves.
+  const currentUserId = currentUser?.id ?? null;
+
   const isMobileMode = useMemo(() => {
     const ua = navigator.userAgent || '';
     const search = window.location.search || '';
@@ -84,10 +120,15 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (!supabase) {
-      setAuthLoading(false);
-      return;
-    }
+    supabase.auth.getSession().then(({ data }) => {
+      setCurrentUser(data.session?.user ?? null);
+      setAuthReady(true);
+    });
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setCurrentUser(session?.user ?? null);
+      setAuthReady(true);
+    });
 
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
@@ -128,6 +169,10 @@ const App: React.FC = () => {
         if (parsed.lastAffirmationSeen !== today) setShowAffirmation(true);
       } catch (e) { setShowAffirmation(true); }
     } else { setShowAffirmation(true); }
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -141,11 +186,159 @@ const App: React.FC = () => {
     }
   }, [currentUser]);
 
+  // --- Stage 1.2 Phase A: SAFE cloud LOAD flow (no auto-save yet) ---
+  // Runs AFTER the localStorage hydration above. Load-only: hydrates from the
+  // cloud if a row exists, otherwise migrates the local blob up once. On any
+  // failure the app keeps running on localStorage. Guarded to run once per
+  // user id so there are no loops or repeated migration/hydration calls.
+  useEffect(() => {
+    if (!currentUser) return;
+    if (hydratedUserIdRef.current === currentUser.id) return;
+    hydratedUserIdRef.current = currentUser.id;
+
+    const userId = currentUser.id;
+
+    const runCloudLoad = async () => {
+      // Block background cloud saves while we hydrate.
+      isHydratingFromCloudRef.current = true;
+      console.log('[Cloud Sync] Loading cloud state');
+      let cloudData: UserData | null;
+      try {
+        cloudData = await loadUserAppState(userId);
+      } catch (e) {
+        // Rule E: load failed -> continue normally on localStorage only.
+        // Leave hasCloudHydratedRef false so we do NOT auto-save (avoids clobbering cloud).
+        console.warn('[Cloud Sync] Cloud hydration failed', e);
+        isHydratingFromCloudRef.current = false;
+        return;
+      }
+
+      if (cloudData) {
+        // Rule C: cloud data exists -> hydrate, preserving INITIAL_USER_DATA merge.
+        console.log('[Cloud Sync] Cloud state found');
+        const mergedCloud = mergeWithInitial(cloudData);
+        // Record the hydrated blob as the last-saved snapshot BEFORE applying it.
+        // The save effect serializes userData and skips when it matches this ref,
+        // so the setUserData below cannot trigger an immediate re-save of the
+        // just-loaded cloud data — even if effect ordering consumes the hydration
+        // flag on a different render.
+        lastSavedSnapshotRef.current = JSON.stringify(mergedCloud);
+        setUserData(mergedCloud);
+        // Enable cloud saving. isHydratingFromCloudRef intentionally stays true as
+        // a second guard: the save effect triggered by THIS setUserData consumes
+        // the flag and skips, preventing an immediate re-save of hydrated data.
+        hasCloudHydratedRef.current = true;
+        return;
+      }
+
+      // Rule D: no cloud row -> migrate the local blob up (one time).
+      console.log('[Cloud Sync] No cloud state found');
+      console.log('[Cloud Sync] Migrating localStorage to cloud');
+      try {
+        await migrateLocalStorageToCloud(userId);
+      } catch (e) {
+        console.warn('[Cloud Sync] Cloud hydration failed', e);
+      }
+      // Migration does not change userData, so no save effect fires to consume
+      // the flag here — clear it directly and enable future debounced saves.
+      hasCloudHydratedRef.current = true;
+      isHydratingFromCloudRef.current = false;
+    };
+
+    void runCloudLoad();
+  }, [currentUser]);
+
   useEffect(() => { localStorage.setItem(STORAGE_KEY, JSON.stringify(userData)); }, [userData]);
+
+  // --- Stage 1.2 Phase B: debounced background cloud SAVE ---
+  // Runs in PARALLEL with the localStorage save above (which is unchanged).
+  // Only saves after cloud hydration/migration has completed, never during
+  // hydration, and debounced by 1000ms to avoid write storms.
+  useEffect(() => {
+    if (!currentUserId) return;
+    if (!hasCloudHydratedRef.current) return;
+
+    const snapshot = userData;
+    const serialized = JSON.stringify(snapshot);
+
+    if (isHydratingFromCloudRef.current) {
+      // This userData change is the just-hydrated cloud data; consume the flag
+      // and skip so we don't immediately re-save identical data to the cloud.
+      // Record it as the last saved snapshot so later identical changes also skip.
+      isHydratingFromCloudRef.current = false;
+      lastSavedSnapshotRef.current = serialized;
+      return;
+    }
+
+    // Skip redundant identical writes (e.g. an auth re-render that did not
+    // actually change the data). Real edits change the serialized string and
+    // fall through to schedule a save.
+    if (serialized === lastSavedSnapshotRef.current) return;
+
+    if (cloudSaveTimeoutRef.current) clearTimeout(cloudSaveTimeoutRef.current);
+
+    const userId = currentUserId;
+    cloudSaveTimeoutRef.current = setTimeout(async () => {
+      console.log('[Cloud Sync] Saving app state to cloud');
+      const ok = await saveUserAppState(userId, snapshot);
+      if (ok) {
+        lastSavedSnapshotRef.current = serialized;
+        console.log('[Cloud Sync] Cloud save complete');
+      } else {
+        console.warn('[Cloud Sync] Cloud save failed');
+      }
+    }, 1000);
+
+    return () => {
+      if (cloudSaveTimeoutRef.current) clearTimeout(cloudSaveTimeoutRef.current);
+    };
+  }, [userData, currentUserId]);
 
   const updateData = useCallback((updates: Partial<UserData>) => {
     setUserData(prev => ({ ...prev, ...updates }));
   }, []);
+
+  // --- Stage 1.2 Phase C: safe logout cleanup ---
+  // Saves the latest state to the cloud, signs out, then clears LOCAL browser
+  // data only (the Supabase row is never deleted). Resetting in-memory state +
+  // local storage prevents the previous user's data leaking to the next login.
+  const handleLogout = async () => {
+    setIsMenuOpen(false);
+
+    // 1. Best-effort final save to the cloud (never blocks logout).
+    if (currentUser) {
+      try {
+        console.log('[Cloud Sync] Saving before logout');
+        await saveUserAppState(currentUser.id, userData);
+      } catch (e) {
+        console.warn('[Cloud Sync] Cloud save failed', e);
+      }
+    }
+
+    // 2. Cancel any pending debounced cloud save.
+    if (cloudSaveTimeoutRef.current) {
+      clearTimeout(cloudSaveTimeoutRef.current);
+      cloudSaveTimeoutRef.current = null;
+    }
+
+    // 3. Sign out of Supabase (auth session cleared).
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      console.warn('[Cloud Sync] Sign out failed', e);
+    }
+
+    // 4. Clear LOCAL app data only (cloud row is preserved).
+    clearLocalUserData();
+    console.log('[Cloud Sync] Local user data cleared after logout');
+
+    // 5. Reset in-memory state + cloud-sync guards so the next user starts clean.
+    setUserData(INITIAL_USER_DATA);
+    hydratedUserIdRef.current = null;
+    hasCloudHydratedRef.current = false;
+    isHydratingFromCloudRef.current = false;
+    lastSavedSnapshotRef.current = null;
+  };
 
   const enterDashboard = (xpBonus: number) => {
     const today = new Date().toISOString().split('T')[0];
@@ -168,12 +361,8 @@ const App: React.FC = () => {
     setShowOnboarding(true);
     setIsMenuOpen(false);
   };
-  const logout = async () => {
-    if (!supabase) return;
-    await supabase.auth.signOut();
-  };
   const onRestrictedAction = () => { setCurrentView('Subscription'); };
-  const isGuest = !currentUser;
+  const isGuest = false;
 
   const renderView = () => {
     const props = { data: userData, update: updateData, isGuest, onRestricted: onRestrictedAction, isMobileMode };
@@ -210,15 +399,15 @@ const App: React.FC = () => {
     );
   };
 
-  if (authLoading) {
-    return <div className="min-h-screen bg-[#0A3762]" />;
+  if (!authReady) {
+    return (
+      <div className="min-h-[100dvh] flex items-center justify-center bg-[#0A3762] text-white font-brand-body">
+        <p className="text-xs uppercase tracking-widest text-[#45d0d0]">Loading...</p>
+      </div>
+    );
   }
 
-  if (showPasswordReset) {
-    return <ResetPasswordView onComplete={() => setShowPasswordReset(false)} />;
-  }
-
-  if (!session) {
+  if (!currentUser) {
     return <AuthView />;
   }
 
@@ -250,6 +439,11 @@ const App: React.FC = () => {
             <h2 className="text-xs md:text-sm font-black uppercase tracking-[0.3em] text-[#45d0d0] mb-6">Today's Reflection</h2>
             <div className="mb-10 relative px-4"><p className="text-xl md:text-3xl font-brand-quote italic font-bold leading-relaxed text-white">"I am relentless in the pursuit of my best self."</p></div>
             <button onClick={handleAcceptMission} className="w-full py-5 bg-[#f78121] text-white font-black uppercase tracking-widest rounded-xl hover:bg-orange-600 transition-all active:scale-95 text-sm md:text-base flex items-center justify-center space-x-2 shadow-lg"><span>Begin Today's Step</span><span className="bg-[#001b3d]/20 px-2 py-0.5 rounded text-[10px] text-white">+15 Steps</span></button>
+            {isGuest && (
+              <div className="flex flex-col items-center mt-6 space-y-4">
+                <button onClick={handleGuestEntry} className="text-[10px] md:text-xs font-black uppercase tracking-widest text-[#f78121] hover:text-orange-600 border-b border-[#f78121]/30 pb-0.5">Guest Access</button>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -262,7 +456,7 @@ const App: React.FC = () => {
             <span className="text-xl font-brand-header font-black uppercase text-[#f78121] tracking-widest">Main Menu</span>
             <button onClick={() => setIsMenuOpen(false)} className="text-[#45d0d0] hover:text-white"><X size={24}/></button>
          </div>
-         <div className="p-4 space-y-2">
+         <div className="p-4 pb-24 space-y-2">
             <button onClick={() => { setCurrentView('Subscription'); setIsMenuOpen(false); }} className="w-full p-4 flex items-center space-x-4 hover:bg-white/5 rounded-xl transition-all group border border-transparent hover:border-[#f78121]/30">
                <Shield className="text-[#f78121] group-hover:scale-110 transition-transform" />
                <div className="text-left"><span className="block text-sm font-black uppercase tracking-widest text-white">Warrior Rank</span><span className="block text-[10px] text-[#45d0d0]">Status & Tiers</span></div>
@@ -287,13 +481,16 @@ const App: React.FC = () => {
                <BookOpen className="text-slate-400 group-hover:text-white group-hover:scale-110 transition-transform" />
                <div className="text-left"><span className="block text-sm font-black uppercase tracking-widest text-white">How It Works</span><span className="block text-[10px] text-[#45d0d0]">Operating System</span></div>
             </button>
-         </div>
-         <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-[#45d0d0]/20 bg-[#001b3d]">
-            {currentUser ? (
-               <button onClick={logout} className="flex items-center space-x-2 text-slate-400 hover:text-red-500 text-xs font-black uppercase tracking-widest"><LogOut size={16} /> <span>Logout</span></button>
-            ) : (
-               <div className="text-xs uppercase tracking-widest font-black text-[#7f91aa]">Not logged in</div>
-            )}
+            <button
+              onClick={() => { void handleLogout(); }}
+              className="w-full p-4 flex items-center space-x-4 hover:bg-white/5 rounded-xl transition-all group border border-transparent hover:border-[#f78121]/30 mt-4"
+            >
+              <LogOut className="text-slate-400 group-hover:text-red-500 group-hover:scale-110 transition-transform" />
+              <div className="text-left">
+                <span className="block text-sm font-black uppercase tracking-widest text-white">Log Out</span>
+                <span className="block text-[10px] text-[#45d0d0]">End current session</span>
+              </div>
+            </button>
          </div>
       </aside>
 
@@ -308,10 +505,18 @@ const App: React.FC = () => {
           </div>
 
           <div className="flex items-center space-x-3 z-20">
-             <div className="text-right hidden md:block">
-               <div className="text-[10px] font-black uppercase tracking-widest text-[#45d0d0]">Rank</div>
-               <div className="text-xs font-bold text-[#f78121]">{currentRank.name}</div>
-             </div>
+             {!currentUser ? (
+                <div className="hidden md:flex space-x-4 items-center">
+                   <button className="text-[10px] font-black uppercase tracking-widest text-[#7f91aa] opacity-50 cursor-not-allowed">Log In</button>
+                   <span className="text-[#45d0d0] text-xs">|</span>
+                   <button className="text-[10px] font-black uppercase tracking-widest text-[#7f91aa] opacity-50 cursor-not-allowed">Register</button>
+                </div>
+             ) : (
+                <div className="text-right hidden md:block">
+                  <div className="text-[10px] font-black uppercase tracking-widest text-[#45d0d0]">Rank</div>
+                  <div className="text-xs font-bold text-[#f78121]">{currentRank.name}</div>
+                </div>
+             )}
              
              <div onClick={() => setCurrentView('Subscription')} className="w-8 h-8 rounded-full bg-[#f78121]/10 border border-[#f78121]/30 flex items-center justify-center cursor-pointer hover:bg-[#f78121]/20 transition-colors">
                 <Trophy size={14} className="text-[#f78121]" />

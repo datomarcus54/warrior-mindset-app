@@ -13,11 +13,11 @@ interface Props {
 const FAQS = [
   {
     question: "How do I track my Warrior Points (XP)?",
-    answer: "XP is currency. Earn it by executing Habits, securing Goals, and logging Journals. Your Rank reflects your discipline, not your intentions."
+    answer: "XP is currency. Earn it by completing Habits, reaching Goals, and logging Journals. Your Rank reflects your discipline, not your intentions."
   },
   {
-    question: "How does the Vision Radar work?",
-    answer: "The Radar scans 8 operational sectors. Adjust the sliders to reflect reality, not fantasy. A broken wheel cannot roll. Fix the gaps."
+    question: "How does the Life Circle work?",
+    answer: "The Life Circle covers 8 areas of your life. Adjust the sliders to reflect reality, not fantasy. A broken wheel cannot roll. Fix the gaps."
   },
   {
     question: "Can I reset my progress?",
@@ -25,7 +25,7 @@ const FAQS = [
   },
   {
     question: "What is the purpose of Coach Marcus AI?",
-    answer: "Coach Marcus AI is not a friend. He is a strategic asset designed to break your excuses and force action. Use him when you are stuck or drifting."
+    answer: "Coach Marcus AI is not a friend. He is here to give you clarity and push you toward real action. Use him when you are stuck or drifting."
   },
   {
     question: "Is my data private?",
@@ -138,12 +138,12 @@ const SupportView: React.FC<Props> = ({ isGuest, onRestricted }) => {
       {/* Header */}
       <header className="mb-8">
         <div className="flex items-center gap-3">
-           <h2 className="text-4xl md:text-6xl font-black font-brand-header uppercase text-[#f78121] tracking-wider whitespace-nowrap">Command Uplink</h2>
+           <h2 className="text-4xl md:text-6xl font-black font-brand-header uppercase text-[#f78121] tracking-wider whitespace-nowrap">Support Centre</h2>
            <button onClick={() => setShowLesson(true)} className="text-[#f78121] hover:text-white cursor-pointer transition-colors" aria-label="Warrior Lesson">
              <Info size={24} />
            </button>
         </div>
-        <p className="text-xs md:text-base text-[#45d0d0] font-black uppercase tracking-[0.2em] mt-2">Support Logistics</p>
+        <p className="text-xs md:text-base text-[#45d0d0] font-black uppercase tracking-[0.2em] mt-2">Help & Guidance</p>
       </header>
 
       {/* FAQ Accordion */}
@@ -188,10 +188,10 @@ const SupportView: React.FC<Props> = ({ isGuest, onRestricted }) => {
         
         <div className="relative z-10 flex flex-col md:flex-row gap-8 md:gap-12">
            <div className="flex-1">
-              <h3 className="text-xl md:text-2xl font-black font-brand-header uppercase text-[#f78121] mb-4">Request Reinforcements</h3>
+              <h3 className="text-xl md:text-2xl font-black font-brand-header uppercase text-[#f78121] mb-4">Contact Us</h3>
               <p className="text-sm text-white/80 mb-8 leading-relaxed font-medium">
                 Encountering a system error or have a suggestion? 
-                Transmit your message directly to us. Expect a response within 24 hours.
+                Send your message directly to us. Expect a response within 24 hours.
               </p>
               
               <div className="space-y-6">
@@ -212,17 +212,17 @@ const SupportView: React.FC<Props> = ({ isGuest, onRestricted }) => {
 
            <form onSubmit={handleSend} className="flex-1 space-y-4 md:space-y-6 bg-[#595b61] p-6 rounded-3xl border border-white/20 shadow-sm">
               <div>
-                 <label className="text-[10px] font-black uppercase tracking-widest text-[#f78121] mb-2 block">Warrior Name</label>
+                 <label className="text-[10px] font-black uppercase tracking-widest text-[#f78121] mb-2 block">Your Name</label>
                  <input 
                    type="text" 
                    value={form.name}
                    onChange={e => setForm({...form, name: e.target.value})}
                    className="w-full bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl p-4 text-sm text-[#595b61] font-bold focus:outline-none focus:border-[#f78121] transition-all placeholder:text-[#595b61]/70"
-                   placeholder="Enter identification..."
+                   placeholder="Enter your name..."
                  />
               </div>
               <div>
-                 <label className="text-[10px] font-black uppercase tracking-widest text-[#f78121] mb-2 block">Email Frequency</label>
+                 <label className="text-[10px] font-black uppercase tracking-widest text-[#f78121] mb-2 block">Your Email</label>
                  <input 
                    type="email" 
                    value={form.email}
@@ -249,7 +249,7 @@ const SupportView: React.FC<Props> = ({ isGuest, onRestricted }) => {
                  {sent ? (
                     <><span>Message Sent</span> <Send size={16} /></>
                  ) : (
-                    <><span>Transmit</span> <Send size={16} /></>
+                    <><span>Send</span> <Send size={16} /></>
                  )}
               </button>
            </form>

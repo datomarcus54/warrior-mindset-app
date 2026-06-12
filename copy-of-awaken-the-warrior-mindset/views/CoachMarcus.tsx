@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, Sparkles, Zap, ShieldAlert, X } from 'lucide-react';
+import { Send, Bot, Sparkles, Zap, ShieldAlert, X, Mic } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { UserData } from '../types';
 import { STARTER_PROMPTS } from '../constants';
@@ -18,10 +18,12 @@ const normalizeMarkdown = (text: string): string =>
 const CoachMarcus: React.FC<Props> = ({ data }) => {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<{ role: 'user' | 'bot', text: string }[]>([
-    { role: 'bot', text: "Warrior. I am Coach Marcus AI. I am here to extract your potential, not validate your feelings. What is the specific target you are striking today? Report." }
+    { role: 'bot', text: "Warrior. I am Coach Marcus AI. I am here to extract your potential, not validate your feelings. What is on your mind today? Let's work through it." }
   ]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -31,6 +33,45 @@ const CoachMarcus: React.FC<Props> = ({ data }) => {
       });
     }
   }, [messages, isLoading]);
+
+  useEffect(() => {
+    return () => {
+      recognitionRef.current?.stop();
+    };
+  }, []);
+
+  const toggleListening = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Voice input is not supported in this browser.');
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current?.stop();
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = true;
+    recognition.continuous = false;
+
+    recognition.onresult = (event: any) => {
+      let transcript = '';
+      for (let i = 0; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      setInput(transcript);
+    };
+
+    recognition.onend = () => setIsListening(false);
+    recognition.onerror = () => setIsListening(false);
+
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsListening(true);
+  };
 
   const handleSend = async (msgText?: string) => {
     const textToSend = msgText || input;
@@ -135,17 +176,30 @@ const CoachMarcus: React.FC<Props> = ({ data }) => {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
             placeholder="Ask your coach..."
-            className="w-full bg-[#eef1f1] border border-[#45d0d0]/30 rounded-2xl pl-4 md:pl-8 pr-14 md:pr-20 py-4 md:py-6 text-base md:text-lg text-[#595b61] focus:outline-none focus:border-[#f78121] shadow-inner transition-all placeholder:text-[#595b61]/70 font-medium"
+            className="w-full bg-[#eef1f1] border border-[#45d0d0]/30 rounded-2xl pl-4 md:pl-8 pr-28 md:pr-36 py-4 md:py-6 text-base md:text-lg text-[#595b61] focus:outline-none focus:border-[#f78121] shadow-inner transition-all placeholder:text-[#595b61]/70 font-medium"
           />
-          <button 
-            onClick={() => handleSend()}
-            disabled={isLoading || !input.trim()}
-            className={`absolute right-3 md:right-5 p-3 md:p-4 rounded-xl transition-all shadow-xl ${
-              isLoading || !input.trim() ? 'text-slate-400' : 'text-white bg-[#f78121] hover:bg-orange-600 active:scale-90'
-            }`}
-          >
-            <Send size={20} className="md:w-6 md:h-6" />
-          </button>
+          <div className="absolute right-3 md:right-5 flex items-center space-x-2 md:space-x-3">
+            <button
+              onClick={toggleListening}
+              aria-label={isListening ? 'Stop voice input' : 'Start voice input'}
+              className={`p-3 md:p-4 rounded-xl transition-all shadow-xl ${
+                isListening
+                  ? 'text-white bg-red-500 animate-pulse'
+                  : 'text-[#f78121] bg-[#001b3d] hover:bg-[#001b3d]/80 active:scale-90'
+              }`}
+            >
+              <Mic size={20} className="md:w-6 md:h-6" />
+            </button>
+            <button 
+              onClick={() => handleSend()}
+              disabled={isLoading || !input.trim()}
+              className={`p-3 md:p-4 rounded-xl transition-all shadow-xl ${
+                isLoading || !input.trim() ? 'text-slate-400' : 'text-white bg-[#f78121] hover:bg-orange-600 active:scale-90'
+              }`}
+            >
+              <Send size={20} className="md:w-6 md:h-6" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

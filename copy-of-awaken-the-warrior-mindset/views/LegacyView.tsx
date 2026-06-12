@@ -53,7 +53,7 @@ const LegacyView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => v
               <button onClick={() => setShowLesson(false)} className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors"><X size={24}/></button>
               <h3 className="text-xl font-black font-brand-header uppercase tracking-tight text-[#f78121] mb-4">Growth Over Comfort</h3>
               <p className="text-base text-white/70 font-medium leading-relaxed italic">
-                "Comfort is a slow death. Seek the crucible. Pain is the forge where your character is hammered into steel."
+                "Comfort keeps you small. Real growth comes from doing the hard thing, even when you don't feel ready."
               </p>
            </div>
         </div>
@@ -92,7 +92,7 @@ const LegacyView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => v
                      <Bot className="text-[#f78121] animate-pulse w-6 h-6" />
                    </div>
                    <div>
-                     <h4 className="text-sm font-black uppercase tracking-[0.2em] text-white">Alignment Audit</h4>
+                     <h4 className="text-sm font-black uppercase tracking-[0.2em] text-white">Alignment Check</h4>
                      <span className="text-xs text-white/50 font-bold uppercase tracking-widest">Principle: {activePrinciple}</span>
                    </div>
                  </div>
@@ -118,7 +118,7 @@ const LegacyView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => v
                  </div>
 
                  <div className="flex gap-3">
-                   <input type="text" value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleLegacyChat()} placeholder="Justify alignment..." className="flex-1 bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl px-4 py-4 text-sm text-[#595b61] focus:outline-none focus:border-[#f78121] transition-all placeholder:text-[#595b61]/70" />
+                   <input type="text" value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleLegacyChat()} placeholder="Describe your connection..." className="flex-1 bg-[#eef1f1] border border-[#45d0d0]/20 rounded-xl px-4 py-4 text-sm text-[#595b61] focus:outline-none focus:border-[#f78121] transition-all placeholder:text-[#595b61]/70" />
                    <button onClick={handleLegacyChat} disabled={isTyping || !chatInput} className="bg-[#f78121] text-white px-5 rounded-xl disabled:opacity-50 hover:bg-orange-600 transition-all shadow-lg active:scale-95"><Send size={20} /></button>
                  </div>
                </div>
