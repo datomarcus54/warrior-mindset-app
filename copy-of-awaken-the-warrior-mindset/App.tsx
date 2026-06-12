@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import {
-  Trophy, Sparkles, Bot, X, Menu, LifeBuoy, BookOpen, LogOut, User, BarChart3, Lock, Shield, Compass
+  Trophy, Sparkles, Bot, X, Menu, LifeBuoy, BookOpen, LogOut, BarChart3, Shield, Compass
 } from 'lucide-react';
+import { Session, User } from '@supabase/supabase-js';
 import { UserData, ViewType } from './types';
 import { INITIAL_USER_DATA, getRank, WARRIOR_RANKS } from './constants';
 import { supabase } from './services/supabase';
@@ -129,6 +130,26 @@ const App: React.FC = () => {
       setAuthReady(true);
     });
 
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+      setCurrentUser(data.session?.user ?? null);
+      setAuthLoading(false);
+    });
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setShowPasswordReset(true);
+      }
+      setSession(nextSession);
+      setCurrentUser(nextSession?.user ?? null);
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       try {
@@ -498,7 +519,7 @@ const App: React.FC = () => {
              )}
              
              <div onClick={() => setCurrentView('Subscription')} className="w-8 h-8 rounded-full bg-[#f78121]/10 border border-[#f78121]/30 flex items-center justify-center cursor-pointer hover:bg-[#f78121]/20 transition-colors">
-                {currentUser ? <Trophy size={14} className="text-[#f78121]" /> : <Lock size={14} className="text-[#f78121]" />}
+                <Trophy size={14} className="text-[#f78121]" />
              </div>
           </div>
         </div>
