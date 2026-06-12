@@ -24,6 +24,7 @@ import JournalView from './views/JournalView';
 import SubscriptionView from './views/SubscriptionView';
 import OnboardingModal from './views/OnboardingModal';
 import AuthView from './views/AuthView';
+import ResetPasswordView from './views/ResetPasswordView';
 
 // --- CONSOLE SILENCER ---
 // This suppresses the harmless "width(-1)" warning from Recharts during animations
@@ -89,6 +90,7 @@ const App: React.FC = () => {
   const [showScoringRules, setShowScoringRules] = useState(false);
   const [currentUser, setCurrentUser] = useState<SupabaseUser | null>(null);
   const [authReady, setAuthReady] = useState(false);
+  const [showPasswordReset, setShowPasswordReset] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem('onboardingComplete'));
   const [onboardingFromMenu, setOnboardingFromMenu] = useState(false);
@@ -125,23 +127,12 @@ const App: React.FC = () => {
       setAuthReady(true);
     });
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setCurrentUser(session?.user ?? null);
-      setAuthReady(true);
-    });
-
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setCurrentUser(data.session?.user ?? null);
-      setAuthLoading(false);
-    });
-
     const { data: authListener } = supabase.auth.onAuthStateChange((event, nextSession) => {
       if (event === 'PASSWORD_RECOVERY') {
         setShowPasswordReset(true);
       }
-      setSession(nextSession);
       setCurrentUser(nextSession?.user ?? null);
+      setAuthReady(true);
     });
 
     return () => {
@@ -169,10 +160,6 @@ const App: React.FC = () => {
         if (parsed.lastAffirmationSeen !== today) setShowAffirmation(true);
       } catch (e) { setShowAffirmation(true); }
     } else { setShowAffirmation(true); }
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
   }, []);
 
   useEffect(() => {
@@ -405,6 +392,10 @@ const App: React.FC = () => {
         <p className="text-xs uppercase tracking-widest text-[#45d0d0]">Loading...</p>
       </div>
     );
+  }
+
+  if (showPasswordReset) {
+    return <ResetPasswordView onComplete={() => setShowPasswordReset(false)} />;
   }
 
   if (!currentUser) {
