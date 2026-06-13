@@ -519,7 +519,7 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto px-6 md:px-12 pt-28 pb-[80px] custom-scrollbar bg-[#0A3762]">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden px-6 md:px-12 pt-28 pb-[80px] custom-scrollbar bg-[#0A3762]">
         <div className="max-w-3xl mx-auto w-full">{renderView()}</div>
       </main>
 
