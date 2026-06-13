@@ -22,6 +22,7 @@ const CoachMarcus: React.FC<Props> = ({ data }) => {
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [transcript, setTranscript] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
 
@@ -62,7 +63,7 @@ const CoachMarcus: React.FC<Props> = ({ data }) => {
       for (let i = 0; i < event.results.length; i++) {
         transcript += event.results[i][0].transcript;
       }
-      setInput(transcript);
+      setTranscript(transcript);
     };
 
     recognition.onend = () => setIsListening(false);
@@ -127,9 +128,9 @@ const CoachMarcus: React.FC<Props> = ({ data }) => {
                   components={{
                     p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
                     strong: ({ children }) => <strong className="font-bold text-white">{children}</strong>,
-                    ul: ({ children }) => <ul className="list-disc list-inside space-y-1 mb-2">{children}</ul>,
-                    ol: ({ children }) => <ol className="list-decimal list-inside space-y-1 mb-2">{children}</ol>,
-                    li: ({ children }) => <li className="leading-snug">{children}</li>,
+                    ul: ({ children }) => <ul className="list-disc list-inside space-y-3 mb-4">{children}</ul>,
+                    ol: ({ children }) => <ol className="list-decimal list-inside space-y-3 mb-4">{children}</ol>,
+                    li: ({ children }) => <li className="leading-relaxed mb-2">{children}</li>,
                     hr: () => <hr className="border-white/20 my-3" />,
                   }}
                 >
@@ -170,14 +171,50 @@ const CoachMarcus: React.FC<Props> = ({ data }) => {
         )}
 
         <div className="relative flex items-center p-1 md:p-2 group">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Ask your coach..."
-            className="w-full bg-[#eef1f1] border border-[#45d0d0]/30 rounded-2xl pl-4 md:pl-8 pr-28 md:pr-36 py-4 md:py-6 text-base md:text-lg text-[#595b61] focus:outline-none focus:border-[#f78121] shadow-inner transition-all placeholder:text-[#595b61]/70 font-medium"
-          />
+          {isListening ? (
+            <div className="w-full bg-[#001b3d] border border-[#f78121]/50 rounded-2xl px-6 py-5 flex items-center justify-between pr-20 md:pr-24">
+              <div className="flex items-end gap-1.5 h-7">
+                <div className="w-1 rounded-full bg-[#f78121] animate-pulse h-3 [animation-delay:0s]" />
+                <div className="w-1 rounded-full bg-[#f78121] animate-pulse h-5 [animation-delay:0.1s]" />
+                <div className="w-1 rounded-full bg-[#f78121] animate-pulse h-7 [animation-delay:0.2s]" />
+                <div className="w-1 rounded-full bg-[#f78121] animate-pulse h-4 [animation-delay:0.3s]" />
+                <div className="w-1 rounded-full bg-[#f78121] animate-pulse h-6 [animation-delay:0.4s]" />
+              </div>
+              <span className="text-white/70 text-sm font-medium">Listening...</span>
+            </div>
+          ) : transcript ? (
+            <div className="w-full pr-20 md:pr-24">
+              <div className="w-full bg-[#001b3d] border border-[#45d0d0]/30 rounded-2xl px-6 py-4 text-white text-sm font-medium mb-3">
+                {transcript}
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setTranscript('')}
+                  className="flex-1 px-4 py-3 rounded-xl bg-white/10 text-white font-bold text-sm transition-all hover:bg-white/20 active:scale-95"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { handleSend(transcript); setTranscript(''); }}
+                  disabled={isLoading}
+                  className="flex-1 px-4 py-3 rounded-xl bg-[#f78121] text-white font-bold text-sm transition-all hover:bg-orange-600 active:scale-95 disabled:opacity-50"
+                >
+                  Send
+                </button>
+              </div>
+            </div>
+          ) : (
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+              placeholder="Ask your coach..."
+              className="w-full bg-[#eef1f1] border border-[#45d0d0]/30 rounded-2xl pl-4 md:pl-8 pr-28 md:pr-36 py-4 md:py-6 text-base md:text-lg text-[#595b61] focus:outline-none focus:border-[#f78121] shadow-inner transition-all placeholder:text-[#595b61]/70 font-medium"
+            />
+          )}
           <div className="absolute right-3 md:right-5 flex items-center space-x-2 md:space-x-3">
             <button
               onClick={toggleListening}
@@ -190,15 +227,17 @@ const CoachMarcus: React.FC<Props> = ({ data }) => {
             >
               <Mic size={20} className="md:w-6 md:h-6" />
             </button>
-            <button 
-              onClick={() => handleSend()}
-              disabled={isLoading || !input.trim()}
-              className={`p-3 md:p-4 rounded-xl transition-all shadow-xl ${
-                isLoading || !input.trim() ? 'text-slate-400' : 'text-white bg-[#f78121] hover:bg-orange-600 active:scale-90'
-              }`}
-            >
-              <Send size={20} className="md:w-6 md:h-6" />
-            </button>
+            {!isListening && !transcript && (
+              <button 
+                onClick={() => handleSend()}
+                disabled={isLoading || !input.trim()}
+                className={`p-3 md:p-4 rounded-xl transition-all shadow-xl ${
+                  isLoading || !input.trim() ? 'text-slate-400' : 'text-white bg-[#f78121] hover:bg-orange-600 active:scale-90'
+                }`}
+              >
+                <Send size={20} className="md:w-6 md:h-6" />
+              </button>
+            )}
           </div>
         </div>
       </div>
