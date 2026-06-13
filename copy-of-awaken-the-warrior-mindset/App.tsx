@@ -379,7 +379,7 @@ const App: React.FC = () => {
     return (
       <button 
         onClick={() => { setCurrentView(view); setIsMenuOpen(false); }}
-        className={`flex items-center justify-center px-4 h-full transition-all duration-300 relative whitespace-nowrap border-t-2 min-w-0 ${isActive ? 'border-[#f78121] text-[#f78121] bg-[#001b3d]' : 'border-transparent text-[#7f91aa] hover:text-white bg-[#001b3d]'}`}
+        className={`flex items-center justify-center px-4 h-full transition-all duration-300 relative whitespace-nowrap border-t-2 min-w-[80px] ${isActive ? 'border-[#f78121] text-[#f78121] bg-[#001b3d]' : 'border-transparent text-[#7f91aa] hover:text-white bg-[#001b3d]'}`}
       >
         <span className={`text-[10px] md:text-xs font-black uppercase tracking-widest ${isActive ? 'drop-shadow-[0_0_5px_rgba(247,129,33,0.5)]' : ''}`}>{label}</span>
       </button>
