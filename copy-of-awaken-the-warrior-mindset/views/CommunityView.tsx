@@ -327,7 +327,7 @@ const CommunityView: React.FC<Props> = ({ data, update }) => {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left warrior-zebra min-w-[500px]">
+            <table className="w-full text-left warrior-zebra min-w-full">
               <thead>
                 <tr className="border-b border-white/20">
                   <th className="pb-4 px-4 text-[10px] font-black uppercase tracking-widest text-white/50">Rank</th>
