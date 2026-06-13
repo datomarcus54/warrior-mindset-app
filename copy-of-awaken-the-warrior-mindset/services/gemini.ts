@@ -1,4 +1,3 @@
-import { GoogleGenAI, Type } from "@google/genai";
 import { COACH_SYSTEM_PROMPT } from "../constants";
 import { MealAnalysis, UserData } from "../types";
 
@@ -133,16 +132,6 @@ const buildUserContext = (data: UserData): string => {
   );
 };
 
-// Used only by analyzeMealImage — chat functions route through the serverless function instead
-const getApiKey = () => {
-  const key = import.meta.env.VITE_GEMINI_API_KEY;
-  if (!key) {
-    console.error("API KEY MISSING: Check Netlify Environment Variables for 'VITE_GEMINI_API_KEY'");
-    throw new Error("API Key not found");
-  }
-  return key;
-};
-
 const callChatFunction = async (message: string, systemPrompt: string): Promise<string> => {
   const res = await fetch('/.netlify/functions/chat', {
     method: 'POST',
@@ -217,47 +206,18 @@ export const estimateMealFromDescription = async (description: string): Promise<
   }
 };
 
-export const analyzeMealImage = async (base64Data: string): Promise<Partial<MealAnalysis> | null> => {
+export const analyzeMealImage = async (base64Data: string, mimeType?: string): Promise<Partial<MealAnalysis> | null> => {
   try {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
-    const imagePart = {
-      inlineData: {
-        mimeType: 'image/jpeg',
-        data: base64Data,
-      },
-    };
-
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: [
-        {
-          parts: [
-            imagePart,
-            { text: "Analyze this meal photo. Provide estimated calories, protein (g), carbs (g), and fats (g). Respond in JSON format only." }
-          ]
-        }
-      ],
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            calories: { type: Type.NUMBER },
-            protein: { type: Type.NUMBER },
-            carbs: { type: Type.NUMBER },
-            fats: { type: Type.NUMBER },
-            description: { type: Type.STRING }
-          },
-          required: ["calories", "protein", "carbs", "fats", "description"]
-        }
-      }
+    const res = await fetch('/.netlify/functions/analyze-meal-image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ base64Data, mimeType: mimeType || 'image/jpeg' }),
     });
-
-    const text = response.text;
-    if (!text) return null;
-    return JSON.parse(text);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.result || null;
   } catch (error) {
-    console.error("Meal Analysis error:", error);
+    console.error('Meal Analysis error:', error);
     return null;
   }
 };
