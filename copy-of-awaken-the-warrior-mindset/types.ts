@@ -105,6 +105,14 @@ export interface DailyHealthLog {
   remSleepMinutes?: number;
 }
 
+export interface BodyStatEntry {
+  date: string;
+  weightKg: number;
+  bodyFatPercent: number;
+  leanMassKg: number;
+  fatMassKg: number;
+}
+
 export interface HealthMetrics {
   zone2MinutesWeekly: number; 
   lastUpdated: string; 
@@ -136,6 +144,7 @@ export interface HealthMetrics {
   weightKg?: number;
   weightUnit?: 'kg' | 'lbs';
   bodyFatPercent?: number;
+  bodyStatHistory?: BodyStatEntry[];
 }
 
 export interface Relationship {

@@ -304,6 +304,30 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
     setEditingMealTimestamp(null);
   };
 
+  const logTodayBodyStats = () => {
+    if (isGuest) { onRestricted(); return; }
+    const wKg = data.health.weightKg || 0;
+    const bfp = data.health.bodyFatPercent || 0;
+    if (wKg <= 0) return;
+    const fatMassKg = +(wKg * bfp / 100).toFixed(1);
+    const leanMassKg = +(wKg - fatMassKg).toFixed(1);
+    const today = new Date().toLocaleDateString('en-CA');
+    const entry = { date: today, weightKg: wKg, bodyFatPercent: bfp, leanMassKg, fatMassKg };
+    const history = data.health.bodyStatHistory || [];
+    const existingIdx = history.findIndex(e => e.date === today);
+    const newHistory = existingIdx >= 0
+      ? history.map((e, i) => (i === existingIdx ? entry : e))
+      : [entry, ...history];
+    updateMetric({ bodyStatHistory: newHistory });
+  };
+
+  const deleteBodyStat = (date: string) => {
+    if (!window.confirm('Remove this body stats entry?')) return;
+    updateMetric({
+      bodyStatHistory: (data.health.bodyStatHistory || []).filter(e => e.date !== date),
+    });
+  };
+
   const lastUpdatedFormatted = useMemo(() => {
     const date = new Date(data.health.lastUpdated || new Date());
     return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(date);
@@ -1080,6 +1104,68 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
                       </div>
                     ))}
                   </div>
+                </div>
+              );
+            })()}
+          </div>
+
+          {/* Body Stats History */}
+          <div className="mt-10 pt-10 border-t border-white/10">
+            <h3 className="text-xl md:text-2xl font-black uppercase tracking-tighter text-white mb-6 flex items-center gap-3">
+              <BarChart2 size={22} className="text-[#45d0d0]" /> Body Stats History
+            </h3>
+            <button
+              onClick={logTodayBodyStats}
+              disabled={!(data.health.weightKg && data.health.weightKg > 0)}
+              className="w-full py-4 mb-6 bg-[#f78121] text-white font-black uppercase tracking-[0.2em] rounded-xl shadow-lg hover:bg-orange-600 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Log Today's Stats
+            </button>
+            {(() => {
+              const unit = data.health.weightUnit || 'kg';
+              const toDisplay = (kg: number) => unit === 'lbs' ? +(kg * 2.20462).toFixed(1) : +kg.toFixed(1);
+              const sortedHistory = [...(data.health.bodyStatHistory || [])].sort((a, b) => b.date.localeCompare(a.date));
+              if (sortedHistory.length === 0) {
+                return (
+                  <p className="text-xs font-black uppercase tracking-widest text-white/40 text-center py-6">
+                    No body stats logged yet. Enter your weight above and tap Log Today's Stats.
+                  </p>
+                );
+              }
+              return (
+                <div className="space-y-3">
+                  {sortedHistory.map((entry) => (
+                    <div key={entry.date} className="flex items-center justify-between p-4 md:p-5 bg-black/20 border border-white/10 rounded-2xl shadow-sm">
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[10px] font-black uppercase tracking-widest text-[#45d0d0] mb-2">{entry.date}</div>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                          <div>
+                            <span className="text-white/50 font-bold uppercase tracking-wider">Weight </span>
+                            <span className="text-white font-black">{toDisplay(entry.weightKg)} {unit}</span>
+                          </div>
+                          <div>
+                            <span className="text-white/50 font-bold uppercase tracking-wider">Body Fat </span>
+                            <span className="text-[#f78121] font-black">{entry.bodyFatPercent}%</span>
+                          </div>
+                          <div>
+                            <span className="text-white/50 font-bold uppercase tracking-wider">Lean </span>
+                            <span className="text-[#45d0d0] font-black">{toDisplay(entry.leanMassKg)} {unit}</span>
+                          </div>
+                          <div>
+                            <span className="text-white/50 font-bold uppercase tracking-wider">Fat </span>
+                            <span className="text-[#f78121] font-black">{toDisplay(entry.fatMassKg)} {unit}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => deleteBodyStat(entry.date)}
+                        className="ml-4 text-white/30 hover:text-red-400 transition-colors flex-shrink-0"
+                        aria-label="Delete entry"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  ))}
                 </div>
               );
             })()}
