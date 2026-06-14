@@ -88,6 +88,7 @@ const CoachMarcus: React.FC<Props> = ({ data, userId }) => {
   };
 
   const handleSend = async (msgText?: string) => {
+    console.log('DEBUG userId:', userId);
     const textToSend = msgText || input;
     if (!textToSend.trim() || isLoading) return;
 
