@@ -364,7 +364,7 @@ const App: React.FC = () => {
       'Community': <CommunityView {...props} />,
       'Support': <SupportView {...props} />,
       'Codex': <CodexView {...props} />,
-      'Coach': <CoachMarcus data={userData} />,
+      'Coach': <CoachMarcus data={userData} userId={currentUserId ?? ''} />,
       'Subscription': <SubscriptionView data={userData} update={updateData} />,
     };
     return <ErrorBoundary>{views[currentView] || views['Foundation']}</ErrorBoundary>;

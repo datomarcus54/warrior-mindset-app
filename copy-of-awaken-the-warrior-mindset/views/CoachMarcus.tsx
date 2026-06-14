@@ -5,9 +5,11 @@ import ReactMarkdown from 'react-markdown';
 import { UserData } from '../types';
 import { STARTER_PROMPTS } from '../constants';
 import { getCoachMarcusResponse } from '../services/gemini';
+import { saveConversation, loadRecentConversations, ChatMessage } from '../services/coachConversationService';
 
 interface Props {
   data: UserData;
+  userId: string;
 }
 
 // Gemini sometimes emits inline bullets like " * item" inside a paragraph.
@@ -15,7 +17,7 @@ interface Props {
 const normalizeMarkdown = (text: string): string =>
   text.replace(/ \* /g, '\n* ');
 
-const CoachMarcus: React.FC<Props> = ({ data }) => {
+const CoachMarcus: React.FC<Props> = ({ data, userId }) => {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<{ role: 'user' | 'bot', text: string }[]>([
     { role: 'bot', text: "Warrior. I am Coach Marcus AI. I am here to extract your potential, not validate your feelings. What is on your mind today? Let's work through it." }
@@ -40,6 +42,17 @@ const CoachMarcus: React.FC<Props> = ({ data }) => {
       recognitionRef.current?.stop();
     };
   }, []);
+
+  useEffect(() => {
+    const loadHistory = async () => {
+      const history = await loadRecentConversations(userId);
+      if (history.length > 0) {
+        const flat = history.reverse().flat();
+        setMessages(prev => [...flat, ...prev]);
+      }
+    };
+    if (userId) loadHistory();
+  }, [userId]);
 
   const toggleListening = () => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -85,6 +98,7 @@ const CoachMarcus: React.FC<Props> = ({ data }) => {
 
     const response = await getCoachMarcusResponse(textToSend, data);
     setMessages(prev => [...prev, { role: 'bot' as const, text: response || "Something went wrong. Try again, warrior." }]);
+    await saveConversation(userId, [...newMessages, { role: 'bot' as const, text: response || "Something went wrong. Try again, warrior." }]);
     setIsLoading(false);
   };
 
@@ -118,7 +132,7 @@ const CoachMarcus: React.FC<Props> = ({ data }) => {
       >
         {messages.map((m, idx) => (
           <div key={idx} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2 duration-300`}>
-            <div className={`max-w-[90%] p-4 md:p-6 rounded-[1.25rem] md:rounded-[1.75rem] text-sm md:text-base leading-relaxed shadow-lg ${
+            <div className={`${m.role === 'user' ? 'max-w-[90%]' : 'max-w-[95%]'} p-4 md:p-6 rounded-[1.25rem] md:rounded-[1.75rem] text-sm md:text-base leading-relaxed shadow-lg ${
               m.role === 'user'
               ? 'bg-[#f78121] text-white font-bold rounded-tr-none shadow-md'
               : 'bg-[#001b3d] text-white rounded-tl-none font-medium border border-white/10'
