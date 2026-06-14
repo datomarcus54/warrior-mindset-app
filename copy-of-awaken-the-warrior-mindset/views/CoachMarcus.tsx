@@ -55,15 +55,15 @@ const CoachMarcus: React.FC<Props> = ({ data }) => {
 
     const recognition = new SpeechRecognition();
     recognition.lang = 'en-US';
-    recognition.interimResults = false;
+    recognition.interimResults = true;
     recognition.continuous = true;
 
     recognition.onresult = (event: any) => {
-      let transcript = '';
+      let fullTranscript = '';
       for (let i = 0; i < event.results.length; i++) {
-        transcript += event.results[i][0].transcript;
+        fullTranscript += event.results[i][0].transcript;
       }
-      setTranscript(transcript);
+      setTranscript(fullTranscript);
     };
 
     recognition.onend = () => setIsListening(false);
