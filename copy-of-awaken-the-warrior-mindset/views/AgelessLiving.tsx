@@ -242,7 +242,6 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
         try {
           const base64 = (reader.result as string).split(',')[1];
           const result = await analyzeMealImage(base64);
-          console.log('Meal analysis result:', result);
           if (result) {
             const newMeal: MealAnalysis = {
               timestamp: new Date().toISOString(),
@@ -256,7 +255,6 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
             const updatedMealLogs = [newMeal, ...data.health.mealLogs];
             const newHealth = { ...data.health, mealLogs: updatedMealLogs, lastUpdated: new Date().toISOString() };
             update({ health: newHealth, warriorCodePoints: data.warriorCodePoints + 20 });
-            console.log('Meal saved. New health mealLogs count:', newHealth.mealLogs.length);
           }
         } catch (err) {
           console.error('Meal save error:', err);
