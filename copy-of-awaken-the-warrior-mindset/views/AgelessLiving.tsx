@@ -253,8 +253,8 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
               mealType
             };
             const updatedMealLogs = [newMeal, ...data.health.mealLogs];
-            await updateMetric({ mealLogs: updatedMealLogs });
-            update({ warriorCodePoints: data.warriorCodePoints + 20 });
+            const newHealth = { ...data.health, mealLogs: updatedMealLogs, lastUpdated: new Date().toISOString() };
+            update({ health: newHealth, warriorCodePoints: data.warriorCodePoints + 20 });
           }
         } catch (err) {
           console.error('Meal save error:', err);
