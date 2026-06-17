@@ -236,19 +236,38 @@ const AgelessLiving: React.FC<Props> = ({ data, update, isGuest, onRestricted })
     const file = e.target.files?.[0];
     if (!file) return;
     setIsAnalyzing(true);
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const base64 = (reader.result as string).split(',')[1];
-      const result = await analyzeMealImage(base64);
-      if (result) {
-        const newMeal: MealAnalysis = { timestamp: new Date().toISOString(), calories: result.calories || 0, protein: result.protein || 0, carbs: result.carbs || 0, fats: result.fats || 0, description: result.description || 'Warrior Fuel', mealType };
-        updateMetric({ mealLogs: [newMeal, ...data.health.mealLogs] });
-        update({ warriorCodePoints: data.warriorCodePoints + 20 });
-      }
+    try {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          const base64 = (reader.result as string).split(',')[1];
+          const result = await analyzeMealImage(base64);
+          if (result) {
+            const newMeal: MealAnalysis = {
+              timestamp: new Date().toISOString(),
+              calories: result.calories || 0,
+              protein: result.protein || 0,
+              carbs: result.carbs || 0,
+              fats: result.fats || 0,
+              description: result.description || 'Warrior Fuel',
+              mealType
+            };
+            const updatedMealLogs = [newMeal, ...data.health.mealLogs];
+            await updateMetric({ mealLogs: updatedMealLogs });
+            update({ warriorCodePoints: data.warriorCodePoints + 20 });
+          }
+        } catch (err) {
+          console.error('Meal save error:', err);
+        } finally {
+          setIsAnalyzing(false);
+          if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      console.error('Image capture error:', err);
       setIsAnalyzing(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    };
-    reader.readAsDataURL(file);
+    }
   };
 
   const handleManualMealLog = async () => {
