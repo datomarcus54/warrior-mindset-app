@@ -11,6 +11,7 @@ import { loadUserAppState, migrateLocalStorageToCloud, saveUserAppState, clearLo
 
 // Views
 import FoundationView from './views/FoundationView';
+import MissionControl from './views/MissionControl';
 import ResilienceView from './views/ResilienceView';
 import AgelessLiving from './views/AgelessLiving';
 import MasteryView from './views/MasteryView';
@@ -355,6 +356,7 @@ const App: React.FC = () => {
     const props = { data: userData, update: updateData, isGuest, onRestricted: onRestrictedAction, isMobileMode };
     const views = {
       'Foundation': <FoundationView {...props} onNavigateToCoach={() => setCurrentView('Coach')} />,
+      'Mission': <MissionControl data={userData} update={updateData} userId={currentUserId ?? ''} />,
       'Journal': <JournalView {...props} />,
       'Resilience': <ResilienceView {...props} />,
       'Ageless': <AgelessLiving {...props} />,
@@ -526,6 +528,7 @@ const App: React.FC = () => {
       <nav className="fixed bottom-0 left-0 right-0 h-[70px] bg-[#001b3d] border-t border-[#45d0d0]/20 z-[100] flex items-center shadow-2xl">
         <div className="flex items-center w-full max-w-3xl mx-auto px-4 overflow-x-auto no-scrollbar gap-0 h-full">
           <NavItem view="Foundation" label="Foundation" />
+          <NavItem view="Mission" label="Mission" />
           <NavItem view="Journal" label="Journal" />
           <NavItem view="Ageless" label="Ageless" />
           <NavItem view="Wealth" label="Wealth" />
