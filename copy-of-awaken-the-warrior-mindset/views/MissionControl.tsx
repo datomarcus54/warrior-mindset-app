@@ -65,18 +65,20 @@ Rules:
   };
   const handleAnswer = async (answer: string) => {
     setCurrentInput('');
+    setError('');
     const updatedConversation = [...conversation, { question: currentQuestion, answer }];
     setConversation(updatedConversation);
     setIsThinking(true);
     if (updatedConversation.length >= maxQuestions) {
       setIsThinking(false);
+      setReadiness(100);
       await generatePlan(updatedConversation, '');
       return;
     }
     const assessment = await getNextQuestion(updatedConversation);
     setReadiness(assessment.readiness);
     setIsThinking(false);
-    if (assessment.sufficient || !assessment.nextQuestion) {
+    if (assessment.sufficient || !assessment.nextQuestion || assessment.readiness >= 70) {
       await generatePlan(updatedConversation, assessment.gaps);
     } else {
       setCurrentQuestion(assessment.nextQuestion);
