@@ -253,6 +253,44 @@ export interface UserData {
   warriorCodePoints: number;
   lastAffirmationSeen?: string;
   communityPosts: CommunityPost[];
+  missionPlan?: MissionPlan;
+}
+
+export interface MissionMilestone {
+  id: string;
+  weekNumber: number;
+  weekStartDate: string;
+  phase: string;
+  category: string;
+  milestone: string;
+  kpiTarget: string;
+  status: 'Pending' | 'Done' | 'Moved';
+  notes?: string;
+}
+export interface MissionPhase {
+  phaseNumber: number;
+  phaseName: string;
+  startDate: string;
+  endDate: string;
+  phaseGoal: string;
+  successMeasure: string;
+}
+export interface MissionPlan {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  tier: 1 | 2;
+  goalTitle: string;
+  goalDescription: string;
+  successDefinition: string;
+  startDate: string;
+  endDate: string;
+  revenueGoal?: string;
+  constraint1?: string;
+  constraint2?: string;
+  constraint3?: string;
+  phases: MissionPhase[];
+  milestones: MissionMilestone[];
 }
 
 export type ViewType = 'Foundation' | 'Journal' | 'Resilience' | 'Ageless' | 'Wealth' | 'Tribe' | 'Legacy' | 'Community' | 'Support' | 'Codex' | 'Coach' | 'Subscription';
