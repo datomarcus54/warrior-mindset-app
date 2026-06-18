@@ -54,7 +54,7 @@ Rules:
       const res = await fetch('/.netlify/functions/generate-mission-plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt })
+        body: JSON.stringify({ prompt, jsonMode: true })
       });
       const result = await res.json();
       const clean = (result.plan || '').replace(/```json|```/g, '').trim();
@@ -101,7 +101,7 @@ ${conversationText}
 ${gaps ? 'Information gaps identified: ' + gaps : ''}`;
     try {
       const [planRes, preRes] = await Promise.all([
-        fetch('/.netlify/functions/generate-mission-plan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: planPrompt }) }),
+        fetch('/.netlify/functions/generate-mission-plan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: planPrompt, jsonMode: true }) }),
         fetch('/.netlify/functions/generate-mission-plan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: prePrompt }) })
       ]);
       const planResult = await planRes.json();

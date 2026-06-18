@@ -170,7 +170,7 @@ Return exactly this structure:
         const response = await fetch('/.netlify/functions/generate-mission-plan', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt })
+          body: JSON.stringify({ prompt, jsonMode: true })
         });
         const result = await response.json();
         const planData = JSON.parse(result.plan);
