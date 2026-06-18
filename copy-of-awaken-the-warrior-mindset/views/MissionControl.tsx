@@ -78,7 +78,7 @@ Rules:
     const assessment = await getNextQuestion(updatedConversation);
     setReadiness(assessment.readiness);
     setIsThinking(false);
-    if (assessment.sufficient || !assessment.nextQuestion || assessment.readiness >= 70) {
+    if (assessment.readiness >= 70 || assessment.sufficient || !assessment.nextQuestion) {
       await generatePlan(updatedConversation, assessment.gaps);
     } else {
       setCurrentQuestion(assessment.nextQuestion);
@@ -120,8 +120,10 @@ ${gaps ? 'Information gaps identified: ' + gaps : ''}`;
       setPremortемNote(preResult.plan || '');
       if (gaps) setInsufficientInfo(gaps);
       setMode('dashboard');
-    } catch {
+    } catch (err) {
+      console.error('generatePlan error:', err);
       setError('Something went wrong. Please try again.');
+      setIsGenerating(false);
     }
     setIsGenerating(false);
   };
