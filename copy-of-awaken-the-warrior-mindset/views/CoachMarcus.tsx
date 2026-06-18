@@ -279,7 +279,7 @@ Return exactly this structure:
           </div>
         )}
 
-        {!missionSetupMode && !data.missionPlan && (
+        {!missionSetupMode && (!data.missionPlan || !data.missionPlan.goalTitle) && (
           <div className="px-1 md:px-2">
             <button
               key="mission-setup"
