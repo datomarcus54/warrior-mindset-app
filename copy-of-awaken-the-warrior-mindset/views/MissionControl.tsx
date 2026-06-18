@@ -44,7 +44,7 @@ Rules: if user mentions subscribers but no price ask price. If workshops but no 
       });
       const result = await res.json();
       const detected = (result.plan || '').trim();
-      return detected === 'NONE' ? '' : detected;
+      return detected.replace(/"/g, '').trim() === 'NONE' ? '' : detected.replace(/"/g, '').trim();
     } catch {
       return '';
     }
