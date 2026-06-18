@@ -293,4 +293,4 @@ export interface MissionPlan {
   milestones: MissionMilestone[];
 }
 
-export type ViewType = 'Foundation' | 'Journal' | 'Resilience' | 'Ageless' | 'Wealth' | 'Tribe' | 'Legacy' | 'Community' | 'Support' | 'Codex' | 'Coach' | 'Subscription';
+export type ViewType = 'Foundation' | 'Mission' | 'Journal' | 'Resilience' | 'Ageless' | 'Wealth' | 'Tribe' | 'Legacy' | 'Community' | 'Support' | 'Codex' | 'Coach' | 'Subscription';
