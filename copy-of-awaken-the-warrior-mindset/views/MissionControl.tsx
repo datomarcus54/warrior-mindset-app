@@ -25,6 +25,7 @@ const MissionControl: React.FC<Props> = ({ data, update, userId }) => {
   const [error, setError] = useState('');
   const [maxQuestions, setMaxQuestions] = useState(10);
   const [planType, setPlanType] = useState<'personal' | 'business' | null>(null);
+  const [fileInputKey, setFileInputKey] = useState(0);
   const plan = data.missionPlan;
   const completedCount = plan?.milestones.filter(m => m.status === 'Done').length || 0;
   const totalCount = plan?.milestones.length || 0;
@@ -241,6 +242,7 @@ ${gaps ? 'Information gaps identified: ' + gaps : ''}`;
             <p className="text-white text-sm font-black uppercase tracking-wider mb-2">Drag and drop or tap to upload</p>
             <p className="text-[#9BB0C8] text-xs mb-4">Supported format: PDF only</p>
             <input
+              key={fileInputKey}
               type="file"
               accept=".pdf"
               onChange={async (e) => {
@@ -352,7 +354,16 @@ ${gaps ? 'Information gaps identified: ' + gaps : ''}`;
           <p className="text-[#E0E8F0] text-sm leading-relaxed">{premortемNote}</p>
         </div>
       )}
-      <button onClick={() => { setMode('home'); update({ missionPlan: undefined }); setPremortемNote(''); setInsufficientInfo(''); }}
+      <button onClick={() => {
+        setMode('home');
+        update({ missionPlan: undefined });
+        setPremortемNote('');
+        setInsufficientInfo('');
+        setConversation([]);
+        setReadiness(0);
+        setError('');
+        setFileInputKey(k => k + 1);
+      }}
         className="w-full bg-[#1A3A5C] text-[#9BB0C8] font-black uppercase text-xs py-3 rounded-xl">
         Reset plan
       </button>
