@@ -279,22 +279,6 @@ Return exactly this structure:
           </div>
         )}
 
-        {!missionSetupMode && (!data.missionPlan || !data.missionPlan.goalTitle) && (
-          <div className="px-1 md:px-2">
-            <button
-              key="mission-setup"
-              onClick={() => {
-                setMissionSetupMode(true);
-                setMissionStep(0);
-                setMessages(prev => [...prev, { role: 'bot' as const, text: MISSION_QUESTIONS[0] }]);
-              }}
-              className="flex-shrink-0 text-[10px] md:text-xs bg-[#f78121] border border-white/10 text-white px-4 py-3 md:px-6 md:py-5 rounded-2xl max-w-[180px] md:max-w-[220px] text-left leading-tight transition-all active:scale-95 font-black uppercase tracking-widest shadow-sm"
-            >
-              Build my Mission Control plan
-            </button>
-          </div>
-        )}
-
         <div className="relative flex items-center p-1 md:p-2 group">
           {isListening ? (
             <div className="w-full bg-[#001b3d] border border-[#f78121]/50 rounded-2xl px-6 py-5 flex items-center justify-between pr-20 md:pr-24">
