@@ -302,8 +302,8 @@ const MasteryView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => 
             </div>
         </div>
         <div className="space-y-4">
-            <FinancialTable title="Liquid Assets" entries={data.financialData.assets.liquid} path={['assets', 'liquid']} showTarget={false} canAdd handleEntryChange={handleEntryChange} removeItem={handleRemoveItem} addNewItem={handleAddNewItem} {...props} />
-            <FinancialTable title="Fixed Assets" entries={data.financialData.assets.fixed} path={['assets', 'fixed']} showTarget={false} canAdd handleEntryChange={handleEntryChange} removeItem={handleRemoveItem} addNewItem={handleAddNewItem} {...props} />
+            <FinancialTable title="Liquid Assets (Cash, Savings, Investments)" entries={data.financialData.assets.liquid} path={['assets', 'liquid']} showTarget={false} canAdd handleEntryChange={handleEntryChange} removeItem={handleRemoveItem} addNewItem={handleAddNewItem} {...props} />
+            <FinancialTable title="Fixed Assets (Property, Vehicles, Equipment)" entries={data.financialData.assets.fixed} path={['assets', 'fixed']} showTarget={false} canAdd handleEntryChange={handleEntryChange} removeItem={handleRemoveItem} addNewItem={handleAddNewItem} {...props} />
         </div>
       </section>
 
@@ -316,8 +316,8 @@ const MasteryView: React.FC<{ data: UserData; update: (u: Partial<UserData>) => 
             </div>
         </div>
         <div className="space-y-4">
-            <FinancialTable title="Short-Term Debt" entries={data.financialData.liabilities.shortTerm} path={['liabilities', 'shortTerm']} showTarget={false} canAdd handleEntryChange={handleEntryChange} removeItem={handleRemoveItem} addNewItem={handleAddNewItem} {...props} />
-            <FinancialTable title="Long-Term Debt" entries={data.financialData.liabilities.longTerm} path={['liabilities', 'longTerm']} showTarget={false} canAdd handleEntryChange={handleEntryChange} removeItem={handleRemoveItem} addNewItem={handleAddNewItem} {...props} />
+            <FinancialTable title="Short Term Debt (Credit Cards, Personal Loans)" entries={data.financialData.liabilities.shortTerm} path={['liabilities', 'shortTerm']} showTarget={false} canAdd handleEntryChange={handleEntryChange} removeItem={handleRemoveItem} addNewItem={handleAddNewItem} {...props} />
+            <FinancialTable title="Long Term Debt (Mortgage, Business Loans)" entries={data.financialData.liabilities.longTerm} path={['liabilities', 'longTerm']} showTarget={false} canAdd handleEntryChange={handleEntryChange} removeItem={handleRemoveItem} addNewItem={handleAddNewItem} {...props} />
         </div>
       </section>
     </div>
