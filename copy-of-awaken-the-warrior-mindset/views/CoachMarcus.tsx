@@ -6,8 +6,6 @@ import { UserData } from '../types';
 import { STARTER_PROMPTS } from '../constants';
 import { getCoachMarcusResponse } from '../services/gemini';
 import { saveConversation, loadRecentConversations, ChatMessage } from '../services/coachConversationService';
-import { MissionPlan, MissionPhase, MissionMilestone } from '../types';
-import { saveMissionPlan } from '../services/missionPlanService';
 
 interface Props {
   data: UserData;
@@ -27,9 +25,6 @@ const CoachMarcus: React.FC<Props> = ({ data, userId }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
-  const [missionSetupMode, setMissionSetupMode] = useState(false);
-  const [missionStep, setMissionStep] = useState(0);
-  const [missionAnswers, setMissionAnswers] = useState<Record<string, string>>({});
   const scrollRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
 
@@ -94,11 +89,6 @@ const CoachMarcus: React.FC<Props> = ({ data, userId }) => {
 
   const handleSend = async (msgText?: string) => {
     const textToSend = msgText || input;
-    if (missionSetupMode) {
-      handleMissionAnswer(textToSend);
-      setInput('');
-      return;
-    }
     if (!textToSend.trim() || isLoading) return;
 
     const newMessages = [...messages, { role: 'user' as const, text: textToSend }];
@@ -110,91 +100,6 @@ const CoachMarcus: React.FC<Props> = ({ data, userId }) => {
     setMessages(prev => [...prev, { role: 'bot' as const, text: response || "Something went wrong. Try again, warrior." }]);
     await saveConversation(userId, [...newMessages, { role: 'bot' as const, text: response || "Something went wrong. Try again, warrior." }]);
     setIsLoading(false);
-  };
-
-  const MISSION_QUESTIONS = [
-    "What is your main goal for the next 12 months? Be specific — include a number and a date. For example: grow my tuition business to 30 students by December 2026.",
-    "What does success look like on the last day? Describe exactly what you want to have achieved — revenue, clients, lifestyle, or whatever matters most to you.",
-    "What is your biggest constraint right now? Be honest — budget, time, health, family pressure, or anything else holding you back.",
-    "What is the one number you will track every week to know if you are on track? For example: number of students, monthly revenue, videos posted, or clients signed.",
-    "What is your first milestone — the one thing you need to achieve in the next 30 days to know you are moving?"
-  ];
-
-  const handleMissionAnswer = async (answer: string) => {
-    const updatedAnswers = { ...missionAnswers, [missionStep]: answer };
-    setMissionAnswers(updatedAnswers);
-    if (missionStep < MISSION_QUESTIONS.length - 1) {
-      setMissionStep(prev => prev + 1);
-      setMessages(prev => [
-        ...prev,
-        { role: 'user' as const, text: answer },
-        { role: 'bot' as const, text: MISSION_QUESTIONS[missionStep + 1] }
-      ]);
-    } else {
-      setMessages(prev => [
-        ...prev,
-        { role: 'user' as const, text: answer },
-        { role: 'bot' as const, text: "Building your Mission Control plan now. Give me a moment..." }
-      ]);
-      setIsLoading(true);
-      const prompt = `Based on these answers, generate a Mission Control plan as JSON only. No markdown, no explanation, just valid JSON.
-Goal: ${updatedAnswers[0]}
-Success definition: ${updatedAnswers[1]}
-Main constraint: ${updatedAnswers[2]}
-Weekly tracking metric: ${updatedAnswers[3]}
-First 30-day milestone: ${updatedAnswers[4]}
-Return exactly this structure:
-{
-  "goalTitle": "short title",
-  "goalDescription": "one sentence",
-  "successDefinition": "what success looks like",
-  "startDate": "today YYYY-MM-DD",
-  "endDate": "12 months from today YYYY-MM-DD",
-  "revenueGoal": "if mentioned, else empty string",
-  "constraint1": "main constraint",
-  "phases": [
-    {"phaseNumber": 1, "phaseName": "Phase 1 name", "startDate": "YYYY-MM-DD", "endDate": "YYYY-MM-DD", "phaseGoal": "goal", "successMeasure": "measure"},
-    {"phaseNumber": 2, "phaseName": "Phase 2 name", "startDate": "YYYY-MM-DD", "endDate": "YYYY-MM-DD", "phaseGoal": "goal", "successMeasure": "measure"},
-    {"phaseNumber": 3, "phaseName": "Phase 3 name", "startDate": "YYYY-MM-DD", "endDate": "YYYY-MM-DD", "phaseGoal": "goal", "successMeasure": "measure"}
-  ],
-  "milestones": [
-    {"id": "1", "weekNumber": 1, "weekStartDate": "YYYY-MM-DD", "phase": "Phase 1 name", "category": "Operations", "milestone": "first 30-day milestone", "kpiTarget": "weekly metric target", "status": "Pending", "notes": ""},
-    {"id": "2", "weekNumber": 4, "weekStartDate": "YYYY-MM-DD", "phase": "Phase 1 name", "category": "Revenue", "milestone": "end of month 1 target", "kpiTarget": "measurable outcome", "status": "Pending", "notes": ""},
-    {"id": "3", "weekNumber": 8, "weekStartDate": "YYYY-MM-DD", "phase": "Phase 2 name", "category": "Revenue", "milestone": "end of month 2 target", "kpiTarget": "measurable outcome", "status": "Pending", "notes": ""},
-    {"id": "4", "weekNumber": 13, "weekStartDate": "YYYY-MM-DD", "phase": "Phase 2 name", "category": "Operations", "milestone": "quarter 1 review milestone", "kpiTarget": "measurable outcome", "status": "Pending", "notes": ""},
-    {"id": "5", "weekNumber": 26, "weekStartDate": "YYYY-MM-DD", "phase": "Phase 3 name", "category": "Revenue", "milestone": "6-month halfway target", "kpiTarget": "measurable outcome", "status": "Pending", "notes": ""},
-    {"id": "6", "weekNumber": 52, "weekStartDate": "YYYY-MM-DD", "phase": "Phase 3 name", "category": "Revenue", "milestone": "final 12-month goal achieved", "kpiTarget": "success definition met", "status": "Pending", "notes": ""}
-  ]
-}`;
-      try {
-        const response = await fetch('/.netlify/functions/generate-mission-plan', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt, jsonMode: true })
-        });
-        const result = await response.json();
-        const planData = JSON.parse(result.plan);
-        const newPlan: MissionPlan = {
-          id: crypto.randomUUID(),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          tier: 1,
-          ...planData
-        };
-        await saveMissionPlan(userId, newPlan);
-        setMissionSetupMode(false);
-        setMessages(prev => [...prev.slice(0, -1), {
-          role: 'bot' as const,
-          text: `Your Mission Control plan is ready. I have set up ${newPlan.phases.length} phases and ${newPlan.milestones.length} milestones based on what you shared. Go to Mission Control to see your plan. I will track your progress every time we speak.`
-        }]);
-      } catch {
-        setMessages(prev => [...prev.slice(0, -1), {
-          role: 'bot' as const,
-          text: "Something went wrong building your plan. Let us try again — tell me your main goal for the next 12 months."
-        }]);
-      }
-      setIsLoading(false);
-    }
   };
 
   return (
