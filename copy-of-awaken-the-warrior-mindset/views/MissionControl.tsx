@@ -235,14 +235,14 @@ ${gaps ? 'Information gaps identified: ' + gaps : ''}`;
       <div className="flex flex-col gap-4 p-2">
         <div className="bg-[#0D2A4A] rounded-2xl p-6">
           <h2 className="text-lg font-black text-white uppercase tracking-wider mb-2">Upload Your Plan</h2>
-          <p className="text-[#9BB0C8] text-sm mb-6">Upload your plan as a Word document (.docx) or PDF. Coach Marcus will read it, extract your goals and milestones, and build your Mission Control dashboard.</p>
+          <p className="text-[#9BB0C8] text-sm mb-6">Upload your plan as a PDF. Coach Marcus will read it, extract your goals and milestones, and build your Mission Control dashboard.</p>
           <div className="border-2 border-dashed border-[#45D0D0]/40 rounded-xl p-8 text-center mb-4">
             <p className="text-[#45D0D0] text-3xl mb-3">📄</p>
             <p className="text-white text-sm font-black uppercase tracking-wider mb-2">Drag and drop or tap to upload</p>
-            <p className="text-[#9BB0C8] text-xs mb-4">Supported formats: .docx, .pdf</p>
+            <p className="text-[#9BB0C8] text-xs mb-4">Supported format: PDF only</p>
             <input
               type="file"
-              accept=".docx,.pdf"
+              accept=".pdf"
               onChange={async (e) => {
                 const file = e.target.files?.[0];
                 if (!file) return;
