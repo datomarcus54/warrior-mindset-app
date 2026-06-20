@@ -257,7 +257,7 @@ ${gaps ? 'Information gaps identified: ' + gaps : ''}`;
                   });
                   const result = await res.json();
                   if (result.error) {
-                    setError(result.error);
+                    setError(result.error + (result.detail ? ' — ' + result.detail : ''));
                     setIsGenerating(false);
                     return;
                   }

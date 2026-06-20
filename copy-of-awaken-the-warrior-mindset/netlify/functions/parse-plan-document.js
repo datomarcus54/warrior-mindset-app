@@ -65,7 +65,11 @@ Return exactly this JSON:
     ]);
     if (!planRes.ok) {
       const errText = await planRes.text();
-      return { statusCode: 500, body: JSON.stringify({ error: 'Gemini API failed', detail: errText }) };
+      return { statusCode: 500, body: JSON.stringify({ error: 'Gemini API failed', detail: errText, status: planRes.status }) };
+    }
+    if (!preRes.ok) {
+      const errText = await preRes.text();
+      return { statusCode: 500, body: JSON.stringify({ error: 'Gemini premortem failed', detail: errText, status: preRes.status }) };
     }
     const planData = await planRes.json();
     const preData = await preRes.json();
@@ -79,6 +83,6 @@ Return exactly this JSON:
       body: JSON.stringify({ plan, premortem: preText })
     };
   } catch (error) {
-    return { statusCode: 500, body: JSON.stringify({ error: 'Internal server error', detail: error.message }) };
+    return { statusCode: 500, body: JSON.stringify({ error: 'Internal server error', detail: error.message, stack: error.stack }) };
   }
 };
