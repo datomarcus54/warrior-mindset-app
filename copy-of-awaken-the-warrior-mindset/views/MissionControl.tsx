@@ -23,11 +23,12 @@ const MissionControl: React.FC<Props> = ({ data, update, userId }) => {
   const [premortемNote, setPremortемNote] = useState('');
   const [insufficientInfo, setInsufficientInfo] = useState('');
   const [error, setError] = useState('');
+  const [maxQuestions, setMaxQuestions] = useState(10);
+  const [planType, setPlanType] = useState<'personal' | 'business' | null>(null);
   const plan = data.missionPlan;
   const completedCount = plan?.milestones.filter(m => m.status === 'Done').length || 0;
   const totalCount = plan?.milestones.length || 0;
   const progressPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
-  const maxQuestions = 10;
   const getNextQuestion = async (updatedConversation: QAPair[]): Promise<{ question: string; readiness: number; sufficient: boolean; gaps: string }> => {
     const conversationText = updatedConversation.map((qa, i) => `Q${i + 1}: ${qa.question}\nA${i + 1}: ${qa.answer}`).join('\n\n');
     const prompt = `You are Coach Marcus AI building a business or personal plan. Review this conversation and return JSON only.
@@ -140,13 +141,33 @@ ${gaps ? 'Information gaps identified: ' + gaps : ''}`;
           <h2 className="text-xl font-black text-white uppercase tracking-wider mb-2">Mission Control</h2>
           <p className="text-[#9BB0C8] text-sm mb-6">Your personal progress tracker. Set your goal, track your milestones, stay on course.</p>
           <div className="flex flex-col gap-3">
-            <button onClick={() => { setMode('ai-setup'); setConversation([]); setCurrentQuestion('What is your main goal for the next 12 months? Include a specific number and a target date.'); setReadiness(0); setError(''); }}
+            <button onClick={() => {
+                setMode('ai-setup');
+                setConversation([]);
+                setCurrentQuestion('What is your personal goal for the next 12 months? Include a specific number and a target date.');
+                setReadiness(0);
+                setError('');
+                setMaxQuestions(10);
+                setPlanType('personal');
+              }}
               className="w-full bg-[#f78121] text-white font-black uppercase tracking-widest text-sm py-4 rounded-xl">
-              Coach Marcus AI builds my plan
+              Personal Goal Plan
+            </button>
+            <button onClick={() => {
+                setMode('ai-setup');
+                setConversation([]);
+                setCurrentQuestion('What is your business or career goal for the next 12 months? Include a specific target — revenue, subscribers, clients, or income — and a deadline.');
+                setReadiness(0);
+                setError('');
+                setMaxQuestions(20);
+                setPlanType('business');
+              }}
+              className="w-full bg-[#1A3A5C] text-[#45D0D0] font-black uppercase tracking-widest text-sm py-4 rounded-xl border border-[#45D0D0]/30">
+              Business / Career Plan
             </button>
             <button onClick={() => setMode('upload')}
-              className="w-full bg-[#1A3A5C] text-[#45D0D0] font-black uppercase tracking-widest text-sm py-4 rounded-xl border border-[#45D0D0]/30">
-              I have a plan — upload it
+              className="w-full bg-[#0D2A4A] text-[#9BB0C8] font-black uppercase tracking-widest text-sm py-4 rounded-xl border border-[#9BB0C8]/30">
+              I Have My Own Plan
             </button>
           </div>
         </div>
@@ -212,11 +233,71 @@ ${gaps ? 'Information gaps identified: ' + gaps : ''}`;
   if (mode === 'upload') {
     return (
       <div className="flex flex-col gap-4 p-2">
-        <div className="bg-[#0D2A4A] rounded-2xl p-6 text-center">
-          <p className="text-white font-black uppercase tracking-wider mb-2">Upload your plan</p>
-          <p className="text-[#9BB0C8] text-sm mb-6">Download the Mission Control template, fill it in, and upload it here.</p>
-          <p className="text-[#45D0D0] text-sm mb-4">Upload feature coming soon. Use Coach Marcus AI to build your plan for now.</p>
-          <button onClick={() => setMode('home')} className="w-full bg-[#1A3A5C] text-white font-black uppercase text-sm py-4 rounded-xl">Back</button>
+        <div className="bg-[#0D2A4A] rounded-2xl p-6">
+          <h2 className="text-lg font-black text-white uppercase tracking-wider mb-2">Upload Your Plan</h2>
+          <p className="text-[#9BB0C8] text-sm mb-6">Upload your plan as a Word document (.docx) or PDF. Coach Marcus will read it, extract your goals and milestones, and build your Mission Control dashboard.</p>
+          <div className="border-2 border-dashed border-[#45D0D0]/40 rounded-xl p-8 text-center mb-4">
+            <p className="text-[#45D0D0] text-3xl mb-3">📄</p>
+            <p className="text-white text-sm font-black uppercase tracking-wider mb-2">Drag and drop or tap to upload</p>
+            <p className="text-[#9BB0C8] text-xs mb-4">Supported formats: .docx, .pdf</p>
+            <input
+              type="file"
+              accept=".docx,.pdf"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                setError('');
+                setIsGenerating(true);
+                const formData = new FormData();
+                formData.append('file', file);
+                try {
+                  const res = await fetch('/.netlify/functions/parse-plan-document', {
+                    method: 'POST',
+                    body: formData,
+                  });
+                  const result = await res.json();
+                  if (result.error) {
+                    setError(result.error);
+                    setIsGenerating(false);
+                    return;
+                  }
+                  const newPlan: MissionPlan = {
+                    id: crypto.randomUUID(),
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    tier: 1,
+                    ...result.plan
+                  };
+                  await saveMissionPlan(userId, newPlan);
+                  update({ missionPlan: newPlan });
+                  setPremortемNote(result.premortem || '');
+                  setMode('dashboard');
+                } catch {
+                  setError('Something went wrong reading your document. Please try again.');
+                  setIsGenerating(false);
+                }
+              }}
+              className="hidden"
+              id="plan-upload"
+            />
+            <label htmlFor="plan-upload" className="cursor-pointer inline-block bg-[#f78121] text-white font-black uppercase tracking-widest text-sm px-6 py-3 rounded-xl">
+              Choose File
+            </label>
+          </div>
+          {isGenerating && (
+            <div className="text-center py-4">
+              <div className="flex justify-center gap-2 mb-3">
+                <div className="w-2 h-2 bg-[#f78121] rounded-full animate-bounce" />
+                <div className="w-2 h-2 bg-[#f78121] rounded-full animate-bounce [animation-delay:0.2s]" />
+                <div className="w-2 h-2 bg-[#f78121] rounded-full animate-bounce [animation-delay:0.4s]" />
+              </div>
+              <p className="text-[#9BB0C8] text-sm">Coach Marcus is reading your plan...</p>
+            </div>
+          )}
+          {error && <p className="text-red-400 text-sm mb-3">{error}</p>}
+          <button onClick={() => setMode('home')} className="w-full bg-[#1A3A5C] text-[#9BB0C8] font-black uppercase text-xs py-3 rounded-xl mt-2">
+            Back
+          </button>
         </div>
       </div>
     );
