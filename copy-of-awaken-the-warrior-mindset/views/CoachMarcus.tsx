@@ -5,7 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import { UserData } from '../types';
 import { STARTER_PROMPTS } from '../constants';
 import { getCoachMarcusResponse } from '../services/gemini';
-import { saveConversation, loadRecentConversations, loadMemorySummary } from '../services/coachConversationService';
+import { saveConversation, loadMemorySummary } from '../services/coachConversationService';
 
 interface Props {
   data: UserData;
@@ -46,14 +46,7 @@ const CoachMarcus: React.FC<Props> = ({ data, userId }) => {
 
   useEffect(() => {
     const loadHistory = async () => {
-      const [history, summary] = await Promise.all([
-        loadRecentConversations(userId),
-        loadMemorySummary(userId),
-      ]);
-      if (history.length > 0) {
-        const flat = history.reverse().flat();
-        setMessages(prev => [...flat, ...prev]);
-      }
+      const summary = await loadMemorySummary(userId);
       if (summary) setMemorySummary(summary);
     };
     if (userId) loadHistory();
