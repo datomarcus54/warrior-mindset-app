@@ -4,13 +4,15 @@ export interface ChatMessage {
   text: string;
 }
 const TABLE = 'coach_conversations';
-export async function saveConversation(userId: string, messages: ChatMessage[]): Promise<void> {
-  if (!userId || messages.length <= 1) return;
-  await supabase.from(TABLE).insert({
+export async function saveConversation(userId: string, messages: ChatMessage[]): Promise<string | null> {
+  if (!userId || messages.length <= 1) return null;
+  const { data, error } = await supabase.from(TABLE).insert({
     user_id: userId,
     messages: messages,
     session_date: new Date().toISOString()
-  });
+  }).select('id').single();
+  if (error || !data) return null;
+  return data.id;
 }
 export async function loadRecentConversations(userId: string): Promise<ChatMessage[][]> {
   if (!userId) return [];
