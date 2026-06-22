@@ -25,3 +25,16 @@ export async function loadRecentConversations(userId: string): Promise<ChatMessa
   if (error || !data) return [];
   return data.map((row: any) => row.messages);
 }
+export async function loadMemorySummary(userId: string): Promise<string | null> {
+  if (!userId) return null;
+  const { data, error } = await supabase
+    .from(TABLE)
+    .select('memory_summary')
+    .eq('user_id', userId)
+    .not('memory_summary', 'is', null)
+    .order('session_date', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error || !data?.memory_summary) return null;
+  return data.memory_summary;
+}

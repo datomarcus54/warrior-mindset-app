@@ -5,7 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import { UserData } from '../types';
 import { STARTER_PROMPTS } from '../constants';
 import { getCoachMarcusResponse } from '../services/gemini';
-import { saveConversation, loadRecentConversations, ChatMessage } from '../services/coachConversationService';
+import { saveConversation, loadRecentConversations, loadMemorySummary } from '../services/coachConversationService';
 
 interface Props {
   data: UserData;
@@ -25,6 +25,7 @@ const CoachMarcus: React.FC<Props> = ({ data, userId }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
+  const [memorySummary, setMemorySummary] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
 
@@ -45,11 +46,15 @@ const CoachMarcus: React.FC<Props> = ({ data, userId }) => {
 
   useEffect(() => {
     const loadHistory = async () => {
-      const history = await loadRecentConversations(userId);
+      const [history, summary] = await Promise.all([
+        loadRecentConversations(userId),
+        loadMemorySummary(userId),
+      ]);
       if (history.length > 0) {
         const flat = history.reverse().flat();
         setMessages(prev => [...flat, ...prev]);
       }
+      if (summary) setMemorySummary(summary);
     };
     if (userId) loadHistory();
   }, [userId]);
@@ -96,9 +101,18 @@ const CoachMarcus: React.FC<Props> = ({ data, userId }) => {
     setInput('');
     setIsLoading(true);
 
-    const response = await getCoachMarcusResponse(textToSend, data);
-    setMessages(prev => [...prev, { role: 'bot' as const, text: response || "Something went wrong. Try again, warrior." }]);
-    await saveConversation(userId, [...newMessages, { role: 'bot' as const, text: response || "Something went wrong. Try again, warrior." }]);
+    const response = await getCoachMarcusResponse(textToSend, data, memorySummary || undefined);
+    const botMessage = { role: 'bot' as const, text: response || "Something went wrong. Try again, warrior." };
+    const savedMessages = [...newMessages, botMessage];
+    setMessages(prev => [...prev, botMessage]);
+    const sessionId = await saveConversation(userId, savedMessages);
+    if (sessionId) {
+      fetch('/.netlify/functions/summarise-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, messages: savedMessages, sessionId }),
+      }).catch(() => {});
+    }
     setIsLoading(false);
   };
 
