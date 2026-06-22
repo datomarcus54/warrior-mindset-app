@@ -228,6 +228,7 @@ export interface DailyWorkflow {
 export type SubscriptionTier = 'Warrior' | 'Adept' | 'Legend';
 
 export interface UserData {
+  name?: string;
   tier: SubscriptionTier; // New Tier
   dailyWorkflows: DailyWorkflow[]; // New Journal Data
   lifeWheel: LifeDomain[];

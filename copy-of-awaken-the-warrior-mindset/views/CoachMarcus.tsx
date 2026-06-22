@@ -94,7 +94,7 @@ const CoachMarcus: React.FC<Props> = ({ data, userId }) => {
     setInput('');
     setIsLoading(true);
 
-    const response = await getCoachMarcusResponse(textToSend, data, memorySummary || undefined);
+    const response = await getCoachMarcusResponse(textToSend, data, memorySummary || undefined, data.name || 'Warrior');
     const botMessage = { role: 'bot' as const, text: response || "Something went wrong. Try again, warrior." };
     const savedMessages = [...newMessages, botMessage];
     setMessages(prev => [...prev, botMessage]);

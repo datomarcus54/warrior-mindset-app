@@ -146,12 +146,15 @@ const callChatFunction = async (message: string, systemPrompt: string): Promise<
   return data.response ?? '';
 };
 
-export const getCoachMarcusResponse = async (message: string, data: UserData, memorySummary?: string) => {
+export const getCoachMarcusResponse = async (message: string, data: UserData, memorySummary?: string, userName?: string) => {
   try {
     const context = buildUserContext(data);
     let systemPrompt = context ? COACH_SYSTEM_PROMPT + context : COACH_SYSTEM_PROMPT;
     if (memorySummary) {
       systemPrompt += `\n\nMemory from previous sessions:\n${memorySummary}`;
+    }
+    if (userName) {
+      systemPrompt += `\n\nThe user's name is ${userName}. Address them by name naturally in conversation.`;
     }
     return await callChatFunction(message, systemPrompt);
   } catch (error) {
