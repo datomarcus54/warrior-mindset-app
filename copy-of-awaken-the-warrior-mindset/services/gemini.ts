@@ -38,7 +38,7 @@ const sumMealTotals = (meals: MealAnalysis[]) =>
   );
 
 const buildUserContext = (data: UserData): string => {
-  console.log('[buildUserContext] mealLogs received:', data?.health?.mealLogs?.length, data?.health?.mealLogs);
+  // console.log('[buildUserContext] mealLogs received:', data?.health?.mealLogs?.length, data?.health?.mealLogs);
   const lines: string[] = [];
   const h = data.health;
   const mealLogs = h?.mealLogs ?? [];

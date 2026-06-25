@@ -96,7 +96,7 @@ const CoachMarcus: React.FC<Props> = ({ data, userId }) => {
     setIsLoading(true);
 
     const coachData = await loadCoachContextData(userId, data);
-    console.log('[CoachMarcus] mealLogs count:', coachData?.health?.mealLogs?.length, coachData?.health?.mealLogs);
+    // console.log('[CoachMarcus] mealLogs count:', coachData?.health?.mealLogs?.length, coachData?.health?.mealLogs);
     const response = await getCoachMarcusResponse(textToSend, coachData, memorySummary || undefined, coachData.name || data.name || 'Warrior');
     const botMessage = { role: 'bot' as const, text: response || "Something went wrong. Try again, warrior." };
     const savedMessages = [...newMessages, botMessage];

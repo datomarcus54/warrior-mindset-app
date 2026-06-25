@@ -45,11 +45,11 @@ export async function loadCoachContextData(userId: string, localData: UserData):
   try {
     const cloudData = await loadUserAppState(userId);
     if (cloudData) {
-      console.log('[coachContextService] Fetched app_data.health.mealLogs:', cloudData.health?.mealLogs);
-      console.log('[coachContextService] Fetched app_data (health only):', JSON.stringify(cloudData.health, null, 2));
-      console.log('[coachContextService] Local health.mealLogs before merge:', localData.health?.mealLogs);
+      // console.log('[coachContextService] Fetched app_data.health.mealLogs:', cloudData.health?.mealLogs);
+      // console.log('[coachContextService] Fetched app_data (health only):', JSON.stringify(cloudData.health, null, 2));
+      // console.log('[coachContextService] Local health.mealLogs before merge:', localData.health?.mealLogs);
       merged = mergeCoachUserData(localData, cloudData);
-      console.log('[coachContextService] Merged health.mealLogs after merge:', merged.health?.mealLogs);
+      // console.log('[coachContextService] Merged health.mealLogs after merge:', merged.health?.mealLogs);
     }
   } catch (err) {
     console.warn('[coachContextService] Cloud app state unavailable, using local data:', err);
