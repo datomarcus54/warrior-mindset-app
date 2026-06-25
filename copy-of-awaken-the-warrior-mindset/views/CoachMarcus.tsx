@@ -6,6 +6,7 @@ import { UserData } from '../types';
 import { STARTER_PROMPTS } from '../constants';
 import { getCoachMarcusResponse } from '../services/gemini';
 import { saveConversation, loadMemorySummary } from '../services/coachConversationService';
+import { loadCoachContextData } from '../services/coachContextService';
 
 interface Props {
   data: UserData;
@@ -94,7 +95,9 @@ const CoachMarcus: React.FC<Props> = ({ data, userId }) => {
     setInput('');
     setIsLoading(true);
 
-    const response = await getCoachMarcusResponse(textToSend, data, memorySummary || undefined, data.name || 'Warrior');
+    const coachData = await loadCoachContextData(userId, data);
+    console.log('[CoachMarcus] mealLogs count:', coachData?.health?.mealLogs?.length, coachData?.health?.mealLogs);
+    const response = await getCoachMarcusResponse(textToSend, coachData, memorySummary || undefined, coachData.name || data.name || 'Warrior');
     const botMessage = { role: 'bot' as const, text: response || "Something went wrong. Try again, warrior." };
     const savedMessages = [...newMessages, botMessage];
     setMessages(prev => [...prev, botMessage]);

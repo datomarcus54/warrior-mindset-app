@@ -19,9 +19,32 @@ const section = (heading: string, items: string[], out: string[]) => {
   items.forEach(l => out.push(`  - ${l}`));
 };
 
+/** Match Ageless Living: local calendar date YYYY-MM-DD (en-CA). */
+const localDateStr = (d: Date = new Date()) => d.toLocaleDateString('en-CA');
+
+/** Ageless Living saves meals to health.mealLogs with ISO timestamps. */
+const mealOnLocalDate = (meal: MealAnalysis, dateStr: string) =>
+  new Date(meal.timestamp).toLocaleDateString('en-CA') === dateStr;
+
+const sumMealTotals = (meals: MealAnalysis[]) =>
+  meals.reduce(
+    (acc, m) => ({
+      calories: acc.calories + (m.calories || 0),
+      protein: acc.protein + (m.protein || 0),
+      carbs: acc.carbs + (m.carbs || 0),
+      fats: acc.fats + (m.fats || 0),
+    }),
+    { calories: 0, protein: 0, carbs: 0, fats: 0 }
+  );
+
 const buildUserContext = (data: UserData): string => {
+  console.log('[buildUserContext] mealLogs received:', data?.health?.mealLogs?.length, data?.health?.mealLogs);
   const lines: string[] = [];
   const h = data.health;
+  const mealLogs = h?.mealLogs ?? [];
+  const today = localDateStr();
+  const todayMeals = mealLogs.filter(m => mealOnLocalDate(m, today));
+  const todayTotals = sumMealTotals(todayMeals);
 
   // Body composition
   const body: string[] = [];
@@ -41,6 +64,58 @@ const buildUserContext = (data: UserData): string => {
     }
   }
   section('Body Composition:', body, lines);
+
+  // Vision — Foundation module
+  const vision: string[] = [];
+  if (data.visionText?.trim()) vision.push(`Core vision: ${data.visionText.trim()}`);
+  if (data.vision1Year?.trim()) vision.push(`1-year: ${data.vision1Year.trim()}`);
+  if (data.vision3Year?.trim()) vision.push(`3-year: ${data.vision3Year.trim()}`);
+  if (data.vision5Year?.trim()) vision.push(`5-year: ${data.vision5Year.trim()}`);
+  section('Vision:', vision, lines);
+
+  // Today's Nutrition — health.mealLogs (Ageless Living Nutrition tab)
+  const todayNutrition: string[] = [
+    `Calories: ${todayTotals.calories} kcal`,
+    `Protein: ${todayTotals.protein}g`,
+    `Carbs: ${todayTotals.carbs}g`,
+    `Fats: ${todayTotals.fats}g`,
+    `Meals logged today: ${todayMeals.length}`,
+  ];
+  todayMeals.forEach(m => {
+    if (m.description?.trim()) {
+      todayNutrition.push(
+        `${m.mealType || 'Meal'} — ${m.description.trim()}: ${m.calories} kcal (P ${m.protein}g / C ${m.carbs}g / F ${m.fats}g)`
+      );
+    }
+  });
+  section("Today's Nutrition:", todayNutrition, lines);
+
+  // Recent meals (prior days) for context
+  const recentMeals = [...mealLogs]
+    .filter(m => !mealOnLocalDate(m, today))
+    .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
+    .slice(0, 3);
+  if (recentMeals.length) {
+    const prior: string[] = recentMeals.map(m =>
+      `${new Date(m.timestamp).toLocaleDateString('en-CA')}: ${m.description || 'Meal'} — ${m.calories} kcal`
+    );
+    section('Recent Nutrition (prior days):', prior, lines);
+  }
+
+  // Workouts & hydration — Ageless Living
+  const activity: string[] = [];
+  if (h.zone2MinutesWeekly) activity.push(`Zone 2 cardio this week: ${h.zone2MinutesWeekly} min`);
+  if (h.waterIntakeMl) activity.push(`Water today: ${h.waterIntakeMl} ml`);
+  if (h.fastingStart) activity.push(`Fasting window: ${h.fastingWindowHours}h`);
+  const latestHealthLog = [...(h.dailyLogs || [])]
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .find(l => l.workouts?.length);
+  if (latestHealthLog) {
+    latestHealthLog.workouts.forEach(w =>
+      activity.push(`${latestHealthLog.date} — ${w.category}: ${w.minutes} min, ${w.calories} kcal`)
+    );
+  }
+  section('Activity:', activity, lines);
 
   // Sleep
   const sleep: string[] = [];
@@ -120,6 +195,35 @@ const buildUserContext = (data: UserData): string => {
       const streak = habit.streak ? ` — ${habit.streak} day streak` : ' — no current streak';
       lines.push(`  - ${habit.name}${streak}`);
     });
+  }
+
+  // Relationships — Tribe module
+  if (data.relationships.length) {
+    lines.push('Relationships:');
+    (['Inner Circle', 'Tribe', 'Extended'] as const).forEach(tier => {
+      const members = data.relationships.filter(r => r.tier === tier);
+      if (members.length) lines.push(`  - ${tier}: ${members.map(m => m.name).join(', ')}`);
+    });
+  }
+
+  // Mission Control plan
+  const plan = data.missionPlan;
+  if (plan?.goalTitle) {
+    const mission: string[] = [`Goal: ${plan.goalTitle}`];
+    if (plan.goalDescription?.trim()) mission.push(plan.goalDescription.trim());
+    if (plan.endDate) mission.push(`Target: ${plan.endDate}`);
+    const done = plan.milestones.filter(m => m.status === 'Done').length;
+    if (plan.milestones.length) mission.push(`Progress: ${done}/${plan.milestones.length} milestones done`);
+    const next = plan.milestones.find(m => m.status === 'Pending');
+    if (next) mission.push(`Next up: ${next.milestone} — ${next.kpiTarget}`);
+    section('Mission Control:', mission, lines);
+  }
+
+  // Active challenges
+  const activeChallenges = data.challenges.filter(c => c.stage !== 'Adapt');
+  if (activeChallenges.length) {
+    lines.push('Active Challenges:');
+    activeChallenges.forEach(c => lines.push(`  - [${c.stage}] ${c.description}`));
   }
 
   if (!lines.length) return '';
